@@ -52,7 +52,8 @@ int main() {
 
 	double current_time = 0.0;
 
-	bool click = false;
+	bool click1 = false;
+	bool click2 = false;
 	// Update Loop
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
@@ -62,17 +63,23 @@ int main() {
 		camera.Look(window);
 		camera.UpdateMatrix(windowWidth, windowHeight);
 
-		if (glfwGetKey(window, GLFW_KEY_K) && !click) {
+		if (glfwGetKey(window, GLFW_KEY_K) && !click1) {
 			for (auto& face : planet.faces) {
 				CubeSphere::SubdivideChunk(face.root_chunk);
 			}
-			click = true;
+			click1 = true;
+			click2 = false;
+		}
+		if (glfwGetKey(window, GLFW_KEY_L) && !click2) {
+			for (auto& face : planet.faces) {
+				face.root_chunk->isLeaf = true;
+				CubeSphere::DestroyChunkNodes(face.root_chunk);
+			}
+			click1 = false;
+			click2 = true;
 		}
 
-		//current_time = static_cast<double>(
-		//	std::chrono::duration_cast<std::chrono::milliseconds>(
-		//	std::chrono::high_resolution_clock::now().time_since_epoch()).count()) / 1000.0;
-
+	
 		planet.Update();
 		planet.Render(camera, shader);
 	

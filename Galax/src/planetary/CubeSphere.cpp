@@ -1,6 +1,7 @@
 #include "CubeSphere.h"
 
 
+/// Generation
 
 void ConstructChunk(CubeSphere::Chunk* inChunk, Transform* base_transform) {
 	std::vector<Vertex> vertices;
@@ -65,7 +66,6 @@ void ConstructChunk(CubeSphere::Chunk* inChunk, Transform* base_transform) {
 		}
 	}
 
-	CubeSphere::Face newFace;
 	inChunk->mesh = Mesh(vertices, indices);
 	
 	if (base_transform != nullptr)
@@ -73,8 +73,10 @@ void ConstructChunk(CubeSphere::Chunk* inChunk, Transform* base_transform) {
 }
 
 void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
+	chunk->isLeaf = false;
+
 	glm::vec2 mid = (chunk->minUV + chunk->maxUV) * 0.5f;
-	
+
 	// Top Left
 	chunk->nodes[0] = new CubeSphere::Chunk;
 	auto tl = chunk->nodes[0];
@@ -111,24 +113,32 @@ void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
 	br->radius = chunk->radius;
 	br->rotation = chunk->rotation;
 
-	chunk->isLeaf = false;
 
+	// Construct
 	ConstructChunk(tl, chunk->mesh.transform.get());
 	ConstructChunk(tr, chunk->mesh.transform.get());
 	ConstructChunk(bl, chunk->mesh.transform.get());
 	ConstructChunk(br, chunk->mesh.transform.get());
 
-	tl->mesh.transform->SetParent(chunk->mesh.transform.get());
 	tl->mesh.transform->local_position = glm::vec3(0.0f);
-
-	tr->mesh.transform->SetParent(chunk->mesh.transform.get());
 	tr->mesh.transform->local_position = glm::vec3(0.0f);
-
-	bl->mesh.transform->SetParent(chunk->mesh.transform.get());
 	bl->mesh.transform->local_position = glm::vec3(0.0f);
-
-	br->mesh.transform->SetParent(chunk->mesh.transform.get());
 	br->mesh.transform->local_position = glm::vec3(0.0f);
+}
+
+
+void CubeSphere::RenderChunk(Chunk* chunk, Camera& camera, Shader& shader) {
+	if (!chunk)
+		return;
+
+	if (chunk->isLeaf) {
+		chunk->mesh.Render(camera, shader);
+	}
+	else {
+		for (auto node : chunk->nodes) {
+			RenderChunk(node, camera, shader);
+		}
+	}
 }
 
 // Create all Faces
@@ -179,4 +189,39 @@ std::vector<CubeSphere::Face> CubeSphere::ConstructFaces(float radius, Transform
 	}
 
 	return faces;
+}
+
+
+/// Deletion
+
+void CubeSphere::DestroyChunk(Chunk* inChunk) {
+	if (!inChunk)
+		return;
+
+	for (auto node : inChunk->nodes) {
+		DestroyChunk(node);
+	}
+	
+	inChunk->mesh.transform->SetParent(nullptr);
+	inChunk->mesh.Delete();
+	delete inChunk;
+	inChunk = nullptr;
+}
+
+void CubeSphere::DestroyChunkNodes(Chunk* inChunk) {
+	if (!inChunk)
+		return;
+
+	for (auto node : inChunk->nodes) {
+		DestroyChunk(node);
+	}
+
+	inChunk->nodes[0] = nullptr;
+	inChunk->nodes[1] = nullptr;
+	inChunk->nodes[2] = nullptr;
+	inChunk->nodes[3] = nullptr;
+}
+
+void CubeSphere::DestroyFace(Face& inFace) {
+	DestroyChunk(inFace.root_chunk);
 }

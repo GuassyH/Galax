@@ -17,24 +17,14 @@ namespace Universe {
 	}
 
 	void Planet::Render(Camera& camera, Shader& shader) {
-		int i = 0;
 		for (auto& face : faces) {
-			if (face.root_chunk->isLeaf) {
-				face.root_chunk->mesh.Render(camera, shader);
-			}
-			else {
-				for (auto node : face.root_chunk->nodes) {
-					if (node) {
-						node->mesh.Render(camera, shader);
-					}
-				}
-			}
+			CubeSphere::RenderChunk(face.root_chunk, camera, shader);
 		}
 	}
 
 	void Planet::Delete() {
 		for (auto& face : faces) {
-			face.root_chunk->mesh.Delete();
+			CubeSphere::DestroyFace(face);
 		}
 
 		faces.clear();

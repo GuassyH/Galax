@@ -26,4 +26,9 @@ public:
 
 	static std::vector<Face> ConstructFaces(float radius, Transform* base_transform = nullptr);
 	static void SubdivideChunk(Chunk* chunk);
+	static void RenderChunk(Chunk* chunk, Camera& camera, Shader& shader);
+
+	static void DestroyChunk(Chunk* inChunk); // Destroy given chunk and its children
+	static void DestroyChunkNodes(Chunk* inChunk); // Destroys the given chunks' children, not the given chunk
+	static void DestroyFace(Face& inFace); // Destroy all chunks within the face
 };
