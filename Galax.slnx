@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Galax/Galax.vcxproj" Id="9769289b-5fb4-4426-a7c5-ff19f212145b" />
+</Solution>
