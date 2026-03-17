@@ -2,18 +2,26 @@
 
 
 
-void ConstructPlane(CubeSphere::Face& inFace, float radius) {
+void ConstructChunk(CubeSphere::Chunk* inChunk, Transform* base_transform) {
 	std::vector<Vertex> vertices;
 	std::vector<GLuint> indices;
 
-	for (int x = 0; x <= inFace.resolution; x++) {
-		for (int y = 0; y <= inFace.resolution; y++) {
-			glm::vec3 position = glm::vec3(
-				(static_cast<float>(x) / static_cast<float>(inFace.resolution)) - 0.5f,
-				(static_cast<float>(y) / static_cast<float>(inFace.resolution)) - 0.5f,
-				0.5f);
+	for (int x = 0; x <= inChunk->resolution; x++) {
+		for (int y = 0; y <= inChunk->resolution; y++) {
+			
+			float u = glm::mix(inChunk->minUV.x, inChunk->maxUV.x,
+				(float)x / inChunk->resolution);
 
-			position = inFace.rotation * position;
+			float v = glm::mix(inChunk->minUV.y, inChunk->maxUV.y,
+				(float)y / inChunk->resolution);
+
+			glm::vec3 position = glm::vec3(
+				u - 0.5f,
+				v - 0.5f,
+				0.5f
+			);
+
+			position = inChunk->rotation * position;
 
 			Vertex vert;
 			glm::vec3 p = position * 2.0f; // map from [-0.5,0.5] → [-1,1]
@@ -27,22 +35,23 @@ void ConstructPlane(CubeSphere::Face& inFace, float radius) {
 			spherePos.y = p.y * sqrt(1.0f - (z2 / 2.0f) - (x2 / 2.0f) + (z2 * x2 / 3.0f));
 			spherePos.z = p.z * sqrt(1.0f - (x2 / 2.0f) - (y2 / 2.0f) + (x2 * y2 / 3.0f));
 
-			vert.position = spherePos * radius;
+			vert.position = spherePos * inChunk->radius;
 			vert.normal = glm::normalize(spherePos);
 
-			glm::vec2 coord = glm::vec2((static_cast<float>(x) / static_cast<float>(inFace.resolution)), (static_cast<float>(y) / static_cast<float>(inFace.resolution)));
+			glm::vec2 coord = glm::vec2((static_cast<float>(x) / static_cast<float>(inChunk->resolution)), (static_cast<float>(y) / static_cast<float>(inChunk->resolution)));
 			vert.texCoord = coord;
 
 			vertices.push_back(vert);
 		}
 	}
 
-	for (int x = 0; x < inFace.resolution; x++) {
-		for (int y = 0; y < inFace.resolution; y++) {
-			int i0 = x * (inFace.resolution + 1) + y;
-			int i1 = (x + 1) * (inFace.resolution + 1) + y;
-			int i2 = (x + 1) * (inFace.resolution + 1) + (y + 1);
-			int i3 = x * (inFace.resolution + 1) + (y + 1);
+	// Generate indices
+	for (int x = 0; x < inChunk->resolution; x++) {
+		for (int y = 0; y < inChunk->resolution; y++) {
+			int i0 = x * (inChunk->resolution + 1) + y;
+			int i1 = (x + 1) * (inChunk->resolution + 1) + y;
+			int i2 = (x + 1) * (inChunk->resolution + 1) + (y + 1);
+			int i3 = x * (inChunk->resolution + 1) + (y + 1);
 
 			// First triangle
 			indices.push_back(i0);
@@ -57,9 +66,72 @@ void ConstructPlane(CubeSphere::Face& inFace, float radius) {
 	}
 
 	CubeSphere::Face newFace;
-	inFace.mesh = Mesh(vertices, indices);
+	inChunk->mesh = Mesh(vertices, indices);
+	
+	if (base_transform != nullptr)
+		inChunk->mesh.transform->SetParent(base_transform);
 }
 
+void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
+	glm::vec2 mid = (chunk->minUV + chunk->maxUV) * 0.5f;
+	
+	// Top Left
+	chunk->nodes[0] = new CubeSphere::Chunk;
+	auto tl = chunk->nodes[0];
+	tl->isLeaf = true;
+	tl->minUV = chunk->minUV;
+	tl->maxUV = mid;
+	tl->radius = chunk->radius;
+	tl->rotation = chunk->rotation;
+
+	// Top Right
+	chunk->nodes[1] = new CubeSphere::Chunk;
+	auto tr = chunk->nodes[1];
+	tr->isLeaf = true;
+	tr->minUV = glm::vec2(mid.x, chunk->minUV.y);
+	tr->maxUV = glm::vec2(chunk->maxUV.x, mid.y);
+	tr->radius = chunk->radius;
+	tr->rotation = chunk->rotation;
+
+	// Bottom Left
+	chunk->nodes[2] = new CubeSphere::Chunk;
+	auto bl = chunk->nodes[2];
+	bl->isLeaf = true;
+	bl->minUV = glm::vec2(chunk->minUV.x, mid.y);
+	bl->maxUV = glm::vec2(mid.x, chunk->maxUV.y);
+	bl->radius = chunk->radius;
+	bl->rotation = chunk->rotation;
+
+	// Bottom Right
+	chunk->nodes[3] = new CubeSphere::Chunk;
+	auto br = chunk->nodes[3];
+	br->isLeaf = true;
+	br->minUV = mid;
+	br->maxUV = chunk->maxUV;
+	br->radius = chunk->radius;
+	br->rotation = chunk->rotation;
+
+	chunk->isLeaf = false;
+
+	ConstructChunk(tl, chunk->mesh.transform.get());
+	ConstructChunk(tr, chunk->mesh.transform.get());
+	ConstructChunk(bl, chunk->mesh.transform.get());
+	ConstructChunk(br, chunk->mesh.transform.get());
+
+	tl->mesh.transform->SetParent(chunk->mesh.transform.get());
+	tl->mesh.transform->local_position = glm::vec3(0.0f);
+
+	tr->mesh.transform->SetParent(chunk->mesh.transform.get());
+	tr->mesh.transform->local_position = glm::vec3(0.0f);
+
+	bl->mesh.transform->SetParent(chunk->mesh.transform.get());
+	bl->mesh.transform->local_position = glm::vec3(0.0f);
+
+	br->mesh.transform->SetParent(chunk->mesh.transform.get());
+	br->mesh.transform->local_position = glm::vec3(0.0f);
+}
+
+// Create all Faces
 std::vector<CubeSphere::Face> CubeSphere::ConstructFaces(float radius, Transform* base_transform) {
 	std::vector<Face> faces;
 
@@ -93,11 +165,14 @@ std::vector<CubeSphere::Face> CubeSphere::ConstructFaces(float radius, Transform
 
 		// Construct plane for each face with correct rotation
 		Face newFace; 
-		newFace.rotation = glm::normalize(glm::quat(euler_rad));
-		ConstructPlane(newFace, radius);
+		newFace.root_chunk = new Chunk;
+		newFace.root_chunk->rotation = glm::normalize(glm::quat(euler_rad));
+		newFace.root_chunk->isLeaf = true;
+		newFace.root_chunk->minUV = { 0.0f, 0.0f };
+		newFace.root_chunk->maxUV = { 1.0f, 1.0f };
+		newFace.root_chunk->radius = radius;
 
-		if (base_transform != nullptr)
-			newFace.mesh.transform->SetParent(base_transform);
+		ConstructChunk(newFace.root_chunk, base_transform);
 
 		// Add face to list (move because Face is non-copyable due to unique_ptrs)
 		faces.push_back(std::move(newFace));
