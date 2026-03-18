@@ -76,7 +76,6 @@ void ConstructChunk(CubeSphere::Chunk* inChunk, Transform* base_transform) {
 	inChunk->mesh = Mesh(vertices, indices);
 	
 	if (base_transform != nullptr) {
-		//inChunk->mesh.transform->local_position = base_transform->world_position;
 		inChunk->mesh.transform->SetParent(base_transform, false);
 	}
 }
@@ -152,7 +151,7 @@ void CubeSphere::RenderChunk(Chunk* chunk, Camera& camera, Shader& shader) {
 }
 
 // Create all Faces
-std::vector<CubeSphere::Face> CubeSphere::ConstructFaces(float radius, Transform* base_transform) {
+std::vector<CubeSphere::Face> CubeSphere::ConstructFaces(float radius, int resolution, Transform* base_transform) {
 	std::vector<Face> faces;
 
 	glm::vec3 euler_rad;
@@ -191,6 +190,7 @@ std::vector<CubeSphere::Face> CubeSphere::ConstructFaces(float radius, Transform
 		newFace.root_chunk->minUV = { 0.0f, 0.0f };
 		newFace.root_chunk->maxUV = { 1.0f, 1.0f };
 		newFace.root_chunk->radius = radius;
+		newFace.root_chunk->resolution = resolution;
 
 		ConstructChunk(newFace.root_chunk, base_transform);
 

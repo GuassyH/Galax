@@ -6,8 +6,14 @@ namespace Universe {
 	/// Core
 
 	Planet::Planet() {
+		Generate();
+	}
+
+	void Planet::Generate() {
+		Delete();
+		
 		transform = std::make_unique<Transform>();
-		faces = CubeSphere::ConstructFaces(radius, transform.get());
+		faces = CubeSphere::ConstructFaces(radius, resolution, transform.get());
 	}
 
 	Planet::~Planet() {
@@ -16,6 +22,9 @@ namespace Universe {
 
 	void Planet::Render(Camera& camera, Shader& shader) {
 		for (auto& face : faces) {
+			if (!face.should_render)
+				continue;
+
 			CubeSphere::RenderChunk(face.root_chunk, camera, shader);
 		}
 	}
@@ -44,18 +53,20 @@ namespace Universe {
 		if (!chunk->hasNodes)
 			CubeSphere::SubdivideChunk(chunk);
 
+		// could be optimised
 		for (auto node : chunk->nodes) {
 			if (!node) {
-				GX_ERROR("Planet UpdateLOD: Null Chunk");
+				GX_ERROR("Planet UpdateLOD: Null node");
 				continue;
 			}
 
 			unsigned int targetLOD = 0;
-			float dist = glm::distance(node->origo + transform->world_position, observer_pos);
-			
+			float dist = glm::distance((transform->world_rotation * node->origo) + transform->world_position, observer_pos);
+			float sq = glm::sqrt(static_cast<float>(node->level_of_detail) + 1.0f);
+
 			// i need a better way to check
 			for (int i = 0; i < LODradii.size(); i++) {
-				float range = (LODradii[i] * radius) / (glm::sqrt(node->level_of_detail + 1));
+				float range = (LODradii[i] * radius) / sq;
 				if (dist <= range) 
 					targetLOD = i + 1;
 			}
@@ -68,21 +79,31 @@ namespace Universe {
 				node->isLeaf = false;
 				UpdateLOD(node, observer_pos);
 			}
-			else if (targetLOD < node->level_of_detail) {
-
+			else { // if (targetLOD < node->level_of_detail) 
+				// what to do?
+				continue;
 			}
 		}
 
 		chunk->isLeaf = false;
 	}
 
-	// Should this be face dependant?
+	// Should this be on another thread?
 	void Planet::UpdateAllLODs(glm::vec3 observer_pos) {
 
+		glm::vec3 dir_to_planet = glm::normalize(transform->world_position - observer_pos);
+		float range = LODradii[0] * radius;
+
 		for (auto& face : faces) {
-			// Only update if required
-			float range = LODradii[0] * radius;
-			if (glm::distance(face.root_chunk->origo + transform->world_position, observer_pos) < range) {
+			// Only update if required, simple occlusion culling
+			if (-glm::dot(dir_to_planet, face.root_chunk->rotation * glm::vec3(0.0f, 0.0f, -1.0f)) > 0.4f) {
+				face.should_render = false;
+				continue;
+			}
+
+			face.should_render = true;
+
+			if (glm::distance((transform->world_rotation * face.root_chunk->origo) + transform->world_position, observer_pos) < range) {
 				UpdateLOD(face.root_chunk, observer_pos);
 			}
 			else {

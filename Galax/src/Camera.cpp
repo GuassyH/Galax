@@ -44,11 +44,18 @@ void Camera::Move(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_Q))
 		skywards -= 1.0f;
 
+	float multiplier = 1.0f;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT))
+		multiplier = 3.0f;
+
+	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL))
+		multiplier = 0.3f;
+
 	moveDir = transform->right * horizontal + transform->forward * vertical;
 	moveDir = glm::length(moveDir) != 0 ? glm::normalize(moveDir) : glm::vec3(0);
 	moveDir.y += skywards;
 
-	transform->local_position += moveDir * speed;
+	transform->local_position += moveDir * speed * multiplier;
 
 	moveDir = glm::vec3(0.0f);
 	horizontal = 0.0f;

@@ -48,8 +48,11 @@ int main() {
 	Shader shader("assets/shaders/default.frag", "assets/shaders/default.vert");
 	
 	Universe::Planet planet;
-	// planet.transform->local_position += glm::vec3(0.0f, 0.0f, 0.0f);
-	planet.transform->local_position += glm::vec3(0.0f, 0.0f, -40.0f);
+	planet.radius = 100;
+	planet.resolution = 15;
+	planet.LODradii = { 10.0f, 7.0f, 2.2f, 1.2f, 0.9f };
+	planet.Generate();
+	planet.transform->local_position += glm::vec3(0.0f, 0.0f, -100.0f);
 
 	double current_time = 0.0;
 
