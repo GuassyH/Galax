@@ -43,17 +43,16 @@ int main() {
 	}
 
 	Camera camera = Camera();
-	camera.transform.local_position = glm::vec3(0.0f, 0.0f, 5.0f);
+	camera.transform->local_position = glm::vec3(0.0f, 0.0f, 5.0f);
 
 	Shader shader("assets/shaders/default.frag", "assets/shaders/default.vert");
 	
 	Universe::Planet planet;
-	planet.transform->local_position += glm::vec3(0.0f, 0.0f, -20);
+	// planet.transform->local_position += glm::vec3(0.0f, 0.0f, 0.0f);
+	planet.transform->local_position += glm::vec3(0.0f, 0.0f, -40.0f);
 
 	double current_time = 0.0;
 
-	bool click1 = false;
-	bool click2 = false;
 	// Update Loop
 	while (!glfwWindowShouldClose(window)) {
 		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
@@ -63,24 +62,7 @@ int main() {
 		camera.Look(window);
 		camera.UpdateMatrix(windowWidth, windowHeight);
 
-		if (glfwGetKey(window, GLFW_KEY_K) && !click1) {
-			for (auto& face : planet.faces) {
-				CubeSphere::SubdivideChunk(face.root_chunk);
-			}
-			click1 = true;
-			click2 = false;
-		}
-		if (glfwGetKey(window, GLFW_KEY_L) && !click2) {
-			for (auto& face : planet.faces) {
-				face.root_chunk->isLeaf = true;
-				CubeSphere::DestroyChunkNodes(face.root_chunk);
-			}
-			click1 = false;
-			click2 = true;
-		}
-
-	
-		planet.Update();
+		planet.Update(camera);
 		planet.Render(camera, shader);
 	
 		glfwPollEvents();

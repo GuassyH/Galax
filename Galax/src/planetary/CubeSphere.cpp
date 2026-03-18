@@ -36,6 +36,7 @@ void ConstructChunk(CubeSphere::Chunk* inChunk, Transform* base_transform) {
 			spherePos.y = p.y * sqrt(1.0f - (z2 / 2.0f) - (x2 / 2.0f) + (z2 * x2 / 3.0f));
 			spherePos.z = p.z * sqrt(1.0f - (x2 / 2.0f) - (y2 / 2.0f) + (x2 * y2 / 3.0f));
 
+
 			vert.position = spherePos * inChunk->radius;
 			vert.normal = glm::normalize(spherePos);
 
@@ -45,6 +46,12 @@ void ConstructChunk(CubeSphere::Chunk* inChunk, Transform* base_transform) {
 			vertices.push_back(vert);
 		}
 	}
+	
+	float u = glm::mix(inChunk->minUV.x, inChunk->maxUV.x, 0.5f);
+	float v = glm::mix(inChunk->minUV.y, inChunk->maxUV.y, 0.5f);
+
+	glm::vec3 position = inChunk->rotation * glm::vec3(u - 0.5f, v - 0.5f, 0.5f);
+	inChunk->origo = glm::normalize(position) * inChunk->radius;
 
 	// Generate indices
 	for (int x = 0; x < inChunk->resolution; x++) {
@@ -68,12 +75,15 @@ void ConstructChunk(CubeSphere::Chunk* inChunk, Transform* base_transform) {
 
 	inChunk->mesh = Mesh(vertices, indices);
 	
-	if (base_transform != nullptr)
-		inChunk->mesh.transform->SetParent(base_transform);
+	if (base_transform != nullptr) {
+		//inChunk->mesh.transform->local_position = base_transform->world_position;
+		inChunk->mesh.transform->SetParent(base_transform, false);
+	}
 }
 
 void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
 	chunk->isLeaf = false;
+	chunk->hasNodes = true;
 
 	glm::vec2 mid = (chunk->minUV + chunk->maxUV) * 0.5f;
 
@@ -85,6 +95,7 @@ void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
 	tl->maxUV = mid;
 	tl->radius = chunk->radius;
 	tl->rotation = chunk->rotation;
+	tl->level_of_detail = chunk->level_of_detail + 1;
 
 	// Top Right
 	chunk->nodes[1] = new CubeSphere::Chunk;
@@ -94,6 +105,7 @@ void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
 	tr->maxUV = glm::vec2(chunk->maxUV.x, mid.y);
 	tr->radius = chunk->radius;
 	tr->rotation = chunk->rotation;
+	tr->level_of_detail = chunk->level_of_detail + 1;
 
 	// Bottom Left
 	chunk->nodes[2] = new CubeSphere::Chunk;
@@ -103,6 +115,7 @@ void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
 	bl->maxUV = glm::vec2(mid.x, chunk->maxUV.y);
 	bl->radius = chunk->radius;
 	bl->rotation = chunk->rotation;
+	bl->level_of_detail = chunk->level_of_detail + 1;
 
 	// Bottom Right
 	chunk->nodes[3] = new CubeSphere::Chunk;
@@ -112,6 +125,7 @@ void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
 	br->maxUV = chunk->maxUV;
 	br->radius = chunk->radius;
 	br->rotation = chunk->rotation;
+	br->level_of_detail = chunk->level_of_detail + 1;
 
 
 	// Construct
@@ -119,11 +133,6 @@ void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
 	ConstructChunk(tr, chunk->mesh.transform.get());
 	ConstructChunk(bl, chunk->mesh.transform.get());
 	ConstructChunk(br, chunk->mesh.transform.get());
-
-	tl->mesh.transform->local_position = glm::vec3(0.0f);
-	tr->mesh.transform->local_position = glm::vec3(0.0f);
-	bl->mesh.transform->local_position = glm::vec3(0.0f);
-	br->mesh.transform->local_position = glm::vec3(0.0f);
 }
 
 
@@ -134,9 +143,10 @@ void CubeSphere::RenderChunk(Chunk* chunk, Camera& camera, Shader& shader) {
 	if (chunk->isLeaf) {
 		chunk->mesh.Render(camera, shader);
 	}
-	else {
+	else if (chunk->hasNodes) {
 		for (auto node : chunk->nodes) {
-			RenderChunk(node, camera, shader);
+			if(node)
+				RenderChunk(node, camera, shader);
 		}
 	}
 }

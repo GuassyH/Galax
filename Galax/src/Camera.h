@@ -4,6 +4,7 @@
 #include "Transform.h"
 
 #include <glfw/glfw3.h>
+#include <iostream>
 
 class Camera {
 public:
@@ -24,7 +25,7 @@ public:
 	glm::mat4& GetView() { return view; }
 	glm::mat4& GetProj() { return proj; }
 
-	Transform transform;
+	std::shared_ptr<Transform> transform; // many objects will reference this
 private:
 	glm::mat4 view;
 	glm::mat4 proj;
