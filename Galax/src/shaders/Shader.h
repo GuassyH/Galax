@@ -22,12 +22,21 @@ class Shader {
 public:
 	unsigned int ID = 0;
 
-	Shader(const char* frag_path, const char* vert_path);
-	~Shader() = default;
+	enum ShaderType {
+		Frag,
+		Compute
+	};
 
-	void Compile(const char* fragSrc, const char* vertSrc);
-	void Use();
-	void Delete();
+	ShaderType type;
+
+	Shader() = default;
+	virtual ~Shader() = default;
+
+	virtual void Compile(const char* path_1, const char* path_2) {}
+	virtual void Compile(const char* path_1) {}
+	virtual void Use() = 0;
+	virtual void Delete() = 0;
+	void CheckCompileErrors(unsigned int shader, const std::string& type);
 
 	void SetBool(const std::string& name, bool value) const;
 	void SetInt(const std::string& name, int value) const;
@@ -41,11 +50,4 @@ public:
 	void SetMat2(const std::string& name, const glm::mat2& mat) const;
 	void SetMat3(const std::string& name, const glm::mat3& mat) const;
 	void SetMat4(const std::string& name, const glm::mat4& mat) const;
-
-	std::string GetFragPath() const { return fragment_path; }
-	std::string GetVertPath() const { return vertex_path; }
-protected:
-	std::string fragment_path;
-	std::string vertex_path;
-
 };

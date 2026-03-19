@@ -39,6 +39,12 @@
     <ClCompile Include="src\planetary\Planet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\shaders\FragShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shaders\ComputeShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Log.h">
@@ -74,9 +80,16 @@
     <ClInclude Include="src\planetary\Planet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\shaders\FragShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\shaders\ComputeShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\default.vert" />
     <None Include="assets\shaders\default.frag" />
+    <None Include="assets\shaders\planet.comp" />
   </ItemGroup>
 </Project>

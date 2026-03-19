@@ -6,7 +6,7 @@
 
 #include "Log.h"
 
-void CheckCompileErrors(unsigned int shader, const std::string& type) {
+void Shader::CheckCompileErrors(unsigned int shader, const std::string& type) {
 	int success;
 	char infoLog[1024];
 
@@ -27,49 +27,6 @@ void CheckCompileErrors(unsigned int shader, const std::string& type) {
 		}
 	}
 }
-
-Shader::Shader(const char* frag_path, const char* vert_path) {
-	std::string fragCode = ReadFile(frag_path);
-	std::string vertCode = ReadFile(vert_path);
-
-	const char* vertSource = vertCode.c_str();
-	const char* fragSource = fragCode.c_str();
-
-	fragment_path = std::string(frag_path);
-	vertex_path = std::string(vert_path);
-
-	Compile(fragSource, vertSource);
-}
-
-void Shader::Compile(const char* fragSrc, const char* vertSrc) {
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertSrc, NULL);
-	glCompileShader(vertexShader);
-	CheckCompileErrors(vertexShader, "VERTEX");
-
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragSrc, NULL);
-	glCompileShader(fragmentShader);
-	CheckCompileErrors(fragmentShader, "FRAGMENT");
-
-	ID = glCreateProgram();
-	glAttachShader(ID, vertexShader);
-	glAttachShader(ID, fragmentShader);
-	glLinkProgram(ID);
-	CheckCompileErrors(ID, "PROGRAM");
-
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-}
-
-void Shader::Use() {
-	glUseProgram(ID);
-}
-
-void Shader::Delete() {
-	glDeleteProgram(ID);
-}
-
 
 void Shader::SetBool(const std::string& name, bool value) const {
 	glUniform1i(glGetUniformLocation(ID, name.c_str()), value == true ? 1 : 0);

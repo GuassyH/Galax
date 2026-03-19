@@ -6,6 +6,8 @@
 
 #include <vector>
 
+#include "shaders/ComputeShader.h"
+
 namespace Universe {
 	class Planet {
 	public:
@@ -19,6 +21,8 @@ namespace Universe {
 		void UpdateAllLODs(glm::vec3 observer_pos);
 		void Render(Camera& camera, Shader& shader);
 	
+		void ApplyTerrain(CubeSphere::Chunk* chunk);
+
 		void Delete();
 
 		float radius = 10.0f;
@@ -30,5 +34,8 @@ namespace Universe {
 
 		std::vector<CubeSphere::Face> faces;
 		std::unique_ptr<Transform> transform;
+
+	private:
+		ComputeShader compute;
 	};
 }

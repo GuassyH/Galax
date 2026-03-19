@@ -8,6 +8,7 @@
 
 #include <KHR/khrplatform.h>
 #include <glfw/glfw3.h>
+#include <glfw/glfw3native.h>
 #include <glad/glad.h>
 
 #include "glm/common.hpp"
@@ -19,6 +20,7 @@
 
 #include "Mesh.h"
 #include "shaders/Shader.h"
+#include "shaders/FragShader.h"
 #include "Camera.h"
 
 #include "planetary/Planet.h"
@@ -45,12 +47,13 @@ int main() {
 	Camera camera = Camera();
 	camera.transform->local_position = glm::vec3(0.0f, 0.0f, 5.0f);
 
-	Shader shader("assets/shaders/default.frag", "assets/shaders/default.vert");
+	FragShader shader("assets/shaders/default.frag", "assets/shaders/default.vert");
 	
 	Universe::Planet planet;
-	planet.radius = 100;
+	planet.radius = 10;
 	planet.resolution = 15;
-	planet.LODradii = { 10.0f, 7.0f, 2.2f, 1.2f, 0.9f };
+	planet.LODradii = {10.0f, 7.0f, 2.2f, 1.2f, 0.9f};
+	// planet.LODradii = { 0.0f };
 	planet.Generate();
 	planet.transform->local_position += glm::vec3(0.0f, 0.0f, -100.0f);
 
@@ -118,7 +121,7 @@ int InitRenderer(GLFWwindow*& window, GLFWmonitor*& monitor) {
 	glCullFace(GL_BACK);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 void frame_buffer_size_callback(GLFWwindow* window, int width, int height) {

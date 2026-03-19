@@ -14,6 +14,11 @@ namespace Universe {
 		
 		transform = std::make_unique<Transform>();
 		faces = CubeSphere::ConstructFaces(radius, resolution, transform.get());
+		compute.Compile("assets/shaders/planet.comp");
+
+		for (auto& face : faces) {
+			ApplyTerrain(face.root_chunk);
+		}
 	}
 
 	Planet::~Planet() {
@@ -34,6 +39,8 @@ namespace Universe {
 	void Planet::Update(Camera& camera) {
 		transform->UpdateMatrix();
 		UpdateAllLODs(camera.transform->world_position);
+
+		// temporary
 	}
 	
 
@@ -50,8 +57,12 @@ namespace Universe {
 			return;
 		}
 
-		if (!chunk->hasNodes)
+		if (!chunk->hasNodes) {
 			CubeSphere::SubdivideChunk(chunk);
+			for (auto node : chunk->nodes) {
+				ApplyTerrain(node);
+			}
+		}
 
 		// could be optimised
 		for (auto node : chunk->nodes) {
@@ -111,6 +122,48 @@ namespace Universe {
 				continue;
 			}
 		}
+	}
+
+	/// Terrain
+
+	void Planet::ApplyTerrain(CubeSphere::Chunk* chunk) {
+		// assign buffer
+		GLuint vertBuff;
+		GLsizeiptr vertBuffSize = sizeof(Vertex) * chunk->mesh.vertices.size();
+
+		compute.Use();
+
+		compute.SetInt("resolution", resolution);
+		compute.SetInt("numVerts", chunk->mesh.vertices.size());
+
+		glGenBuffers(1, &vertBuff);
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, vertBuff);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, vertBuffSize, chunk->mesh.vertices.data(), GL_DYNAMIC_DRAW);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, vertBuff); // THIS IS ESSENTIAL
+
+
+		unsigned int workgroupSize = 256; // or 128, 512
+		unsigned int numGroups = (chunk->mesh.vertices.size() + workgroupSize - 1) / workgroupSize;
+		compute.Run(numGroups, 1, 1);
+		
+		glFinish();
+
+		// Read data back
+		Vertex* cpuVerts = chunk->mesh.vertices.data();
+		char* gpuData = (char*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+		if (!gpuData) { /* handle error */ }
+
+		for (size_t i = 0; i < chunk->mesh.vertices.size(); ++i) {
+			std::memcpy(&cpuVerts[i].position, gpuData + (i * 48) + 0, sizeof(cpuVerts[i].position));
+			std::memcpy(&cpuVerts[i].normal, gpuData + (i * 48) + 16, sizeof(cpuVerts[i].normal));
+			std::memcpy(&cpuVerts[i].texCoord, gpuData + (i * 48) + 32, sizeof(cpuVerts[i].texCoord));
+		}
+
+		chunk->mesh.Calculate();
+
+		glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+
+		glDeleteBuffers(1, &vertBuff);
 	}
 
 	/// Delete

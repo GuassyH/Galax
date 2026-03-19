@@ -136,6 +136,8 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\planetary\Planet.cpp" />
+    <ClCompile Include="src\shaders\ComputeShader.cpp" />
+    <ClCompile Include="src\shaders\FragShader.cpp" />
     <ClCompile Include="src\shaders\Shader.cpp" />
     <ClCompile Include="src\planetary\CubeSphere.cpp" />
     <ClCompile Include="vendor\include\glad.c" />
@@ -149,6 +151,8 @@
     <ClInclude Include="src\rendering\VAO.h" />
     <ClInclude Include="src\rendering\VBO.h" />
     <ClInclude Include="src\rendering\Vertex.h" />
+    <ClInclude Include="src\shaders\ComputeShader.h" />
+    <ClInclude Include="src\shaders\FragShader.h" />
     <ClInclude Include="src\shaders\Shader.h" />
     <ClInclude Include="src\planetary\CubeSphere.h" />
     <ClInclude Include="src\Transform.h" />
@@ -156,6 +160,7 @@
   <ItemGroup>
     <None Include="assets\shaders\default.frag" />
     <None Include="assets\shaders\default.vert" />
+    <None Include="assets\shaders\planet.comp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

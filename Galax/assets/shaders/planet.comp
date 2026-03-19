@@ -1,0 +1,41 @@
+#version 460 core
+
+layout(local_size_x = 256) in;
+
+struct Vertex {
+    vec3 position;
+	// float pad1;
+    vec3 normal;
+	// float pad2;
+    vec2 texCoords;
+	float pad[2];
+};
+
+layout(std430, binding = 0) buffer Vertices {
+    Vertex vertices[];
+};
+
+
+uniform int resolution;
+uniform int numVerts;
+
+void main(){
+	uint idx = gl_GlobalInvocationID.x;
+   // uint idy = gl_GlobalInvocationID.y;
+    // uint vertID = (idy * (resolution + 1)) + idx;
+
+	uint vertID = idx;
+	if (vertID >= numVerts)
+		return;
+
+	Vertex vert = vertices[vertID];
+	
+	// Manipulate vertex
+	vert.position += vert.normal * sin(vert.position.y);
+	vert.position += vert.normal * sin(vert.position.x);
+	vert.position += vert.normal * sin(vert.position.z);
+	// vert.position = vec3(0,0,0);
+
+	// assign it back
+	vertices[vertID] = vert;
+}
