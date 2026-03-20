@@ -45,6 +45,9 @@
     <ClCompile Include="src\shaders\ComputeShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\planetary\TerrainGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Log.h">
@@ -86,10 +89,14 @@
     <ClInclude Include="src\shaders\ComputeShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\planetary\TerrainGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\default.vert" />
     <None Include="assets\shaders\default.frag" />
-    <None Include="assets\shaders\planet.comp" />
+    <None Include="assets\shaders\terrain.comp" />
+    <None Include="assets\shaders\normals.comp" />
   </ItemGroup>
 </Project>

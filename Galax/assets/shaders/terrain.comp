@@ -1,0 +1,92 @@
+#version 460 core
+
+layout(local_size_x = 256) in;
+
+//  48 bytes
+struct Vertex {
+    vec3 position;
+    vec3 normal;
+    vec2 texCoords;
+	float pad[2];
+};
+
+layout(std430, binding = 0) buffer Vertices {
+    Vertex vertices[];
+};
+
+//  48 bytes
+struct Crater {
+	vec4 position; // 16
+
+	float craterSteepness; 
+	float craterWidth; 
+	float craterDepth; 
+	float smoothingK; // 16
+
+	float rimSteepness; 
+	float rimWidth; 
+	float size;
+	float pad; // 16
+};
+
+layout(std430, binding = 1) buffer Craters{
+	Crater craters[];
+};
+
+
+
+// Variables
+uniform int resolution;
+uniform int numVerts;
+
+// craters
+uniform int numCraters;
+
+
+
+// exponential
+float smin( float a, float b, float k )
+{
+    k *= 1.0;
+    float r = exp2(-a/k) + exp2(-b/k);
+    return -k*log2(r);
+}
+
+float CraterHeight(float x, Crater crater) {
+	float result = 0.0;
+
+
+	float craterConcave = (crater.craterSteepness * x * x) - (crater.craterSteepness * crater.craterWidth * crater.craterWidth);
+	craterConcave = smin(craterConcave, crater.craterDepth, -crater.smoothingK);
+
+	float safeX = max(x, 0.0001);
+	float rim = (crater.rimSteepness / safeX) - crater.rimSteepness / (crater.rimWidth + crater.craterWidth);;
+
+	rim = smin(rim, 0.0, -crater.smoothingK);
+
+	result = smin(craterConcave, rim, crater.smoothingK);
+	return result;
+}
+
+
+void main(){
+	uint idx = gl_GlobalInvocationID.x;
+
+	uint vertID = idx;
+	if (vertID >= numVerts)
+		return;
+
+	Vertex vert = vertices[vertID];
+	
+	// Manipulate vertex
+	float craterInfluence = 0.0;
+	for (int i = 0; i < numCraters; i++){
+		float dist = distance(vert.position, craters[i].position.xyz);
+		craterInfluence += CraterHeight(dist / craters[i].size, craters[i]);
+	};
+
+	vert.position += vert.normal * craterInfluence;
+
+	// assign it back
+	vertices[vertID] = vert;
+}

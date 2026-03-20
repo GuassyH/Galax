@@ -136,6 +136,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\planetary\Planet.cpp" />
+    <ClCompile Include="src\planetary\TerrainGenerator.cpp" />
     <ClCompile Include="src\shaders\ComputeShader.cpp" />
     <ClCompile Include="src\shaders\FragShader.cpp" />
     <ClCompile Include="src\shaders\Shader.cpp" />
@@ -147,6 +148,7 @@
     <ClInclude Include="src\Log.h" />
     <ClInclude Include="src\Mesh.h" />
     <ClInclude Include="src\planetary\Planet.h" />
+    <ClInclude Include="src\planetary\TerrainGenerator.h" />
     <ClInclude Include="src\rendering\EBO.h" />
     <ClInclude Include="src\rendering\VAO.h" />
     <ClInclude Include="src\rendering\VBO.h" />
@@ -160,7 +162,8 @@
   <ItemGroup>
     <None Include="assets\shaders\default.frag" />
     <None Include="assets\shaders\default.vert" />
-    <None Include="assets\shaders\planet.comp" />
+    <None Include="assets\shaders\normals.comp" />
+    <None Include="assets\shaders\terrain.comp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

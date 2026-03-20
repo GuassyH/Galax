@@ -1,12 +1,13 @@
 #pragma once
 
-#include "CubeSphere.h"
 #include <iostream>
-#include "Transform.h"
-
 #include <vector>
 
+
+#include "CubeSphere.h"
+#include "Transform.h"
 #include "shaders/ComputeShader.h"
+#include "TerrainGenerator.h"
 
 namespace Universe {
 	class Planet {
@@ -21,7 +22,7 @@ namespace Universe {
 		void UpdateAllLODs(glm::vec3 observer_pos);
 		void Render(Camera& camera, Shader& shader);
 	
-		void ApplyTerrain(CubeSphere::Chunk* chunk);
+		TerrainGenerator terrainGenerator;
 
 		void Delete();
 
@@ -36,6 +37,7 @@ namespace Universe {
 		std::unique_ptr<Transform> transform;
 
 	private:
-		ComputeShader compute;
+		ComputeShader terrain_compute;
+		ComputeShader normals_compute;
 	};
 }

@@ -38,10 +38,10 @@ void Camera::Move(GLFWwindow* window) {
 		vertical -= 1.0f;
 
 
-	if (glfwGetKey(window, GLFW_KEY_E))
+	if (glfwGetKey(window, GLFW_KEY_SPACE))
 		skywards += 1.0f;
 
-	if (glfwGetKey(window, GLFW_KEY_Q))
+	if (glfwGetKey(window, GLFW_KEY_C))
 		skywards -= 1.0f;
 
 	float multiplier = 1.0f;
@@ -53,9 +53,15 @@ void Camera::Move(GLFWwindow* window) {
 
 	moveDir = transform->right * horizontal + transform->forward * vertical;
 	moveDir = glm::length(moveDir) != 0 ? glm::normalize(moveDir) : glm::vec3(0);
-	moveDir.y += skywards;
+	moveDir += transform->up * skywards;
 
 	transform->local_position += moveDir * speed * multiplier;
+
+	if (glfwGetKey(window, GLFW_KEY_E))
+		transform->AddRotationAroundAxis(transform->forward, 1.0f, false);
+
+	if (glfwGetKey(window, GLFW_KEY_Q))
+		transform->AddRotationAroundAxis(transform->forward, -1.0f, false);
 
 	moveDir = glm::vec3(0.0f);
 	horizontal = 0.0f;
@@ -86,8 +92,8 @@ void Camera::Look(GLFWwindow* window) {
 	float rotY = deltaX * sensitivity * 100.0f;
 
 	// Apply rotations to Euler angles
-	transform->AddEulerAngles(glm::vec3(rotX, 0.0f, 0.0f)); // pitch
-	transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), -rotY, false); // yaw
+	transform->AddRotationAroundAxis(transform->right, rotX, false); // pitch
+	transform->AddRotationAroundAxis(transform->up, -rotY, false); // yaw
 
 	// Clamp pitch to avoid flipping
 	glm::vec3 euler = transform->GetEulerAngles();

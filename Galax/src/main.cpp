@@ -45,17 +45,23 @@ int main() {
 	}
 
 	Camera camera = Camera();
+	camera.fovDeg = 90.0f;
 	camera.transform->local_position = glm::vec3(0.0f, 0.0f, 5.0f);
 
 	FragShader shader("assets/shaders/default.frag", "assets/shaders/default.vert");
 	
 	Universe::Planet planet;
-	planet.radius = 10;
-	planet.resolution = 15;
-	planet.LODradii = {10.0f, 7.0f, 2.2f, 1.2f, 0.9f};
-	// planet.LODradii = { 0.0f };
+	planet.radius = 100;
+	planet.resolution = 90;
+	planet.LODradii = {10.0f, 7.5f, 5.2f, 2.0f, 0.9f, 0.5f };
+	
+	planet.terrainGenerator.numCraters = 200;
+	planet.terrainGenerator.falloff = 1.0f;
+
 	planet.Generate();
 	planet.transform->local_position += glm::vec3(0.0f, 0.0f, -100.0f);
+
+
 
 	double current_time = 0.0;
 
@@ -121,7 +127,7 @@ int InitRenderer(GLFWwindow*& window, GLFWmonitor*& monitor) {
 	glCullFace(GL_BACK);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 void frame_buffer_size_callback(GLFWwindow* window, int width, int height) {
