@@ -29,10 +29,22 @@ public:
 	ComputeShader terrain_compute;
 	ComputeShader normals_compute;
 
-	// fields
+	/// Fields
+
+	// Craters
 	std::vector<Crater> craters;
 	int numCraters = 0;
-	float falloff = 1.0f; // min 1, heigher means less probable big craters
+	float sizeFalloff = 1.0f; // min 1, heigher means less probable big craters
+	float baseSize = 1.0f; // the MINIMUM size a crater will have
+	float sizeExaggeration = 2.0f;
+
+	// Noise
+	glm::vec3 noiseCentre = glm::vec3(0.0f);
+	int numLayers = 6;
+	float noiseStrength = 1.0f;
+	float noiseBaseFrequency = 0.1f; 
+	float noiseHeightShift = 0.0f;
+
 
 private:
 	GLuint vertBuff = 0;

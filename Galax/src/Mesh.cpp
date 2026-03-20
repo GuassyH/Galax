@@ -24,7 +24,8 @@ bool Mesh::Calculate() {
 
 	vao.LinkAttrib(0, 3, GL_FLOAT, sizeof(Vertex), 0);
 	vao.LinkAttrib(1, 3, GL_FLOAT, sizeof(Vertex), offsetof(Vertex, normal));
-	vao.LinkAttrib(2, 2, GL_FLOAT, sizeof(Vertex), offsetof(Vertex, texCoord));
+	vao.LinkAttrib(2, 4, GL_FLOAT, sizeof(Vertex), offsetof(Vertex, color));
+	vao.LinkAttrib(3, 2, GL_FLOAT, sizeof(Vertex), offsetof(Vertex, texCoord));
 
 	ebo.BindBufferData(sizeof(GLuint) * indices.size(), indices.data());
 
@@ -43,6 +44,7 @@ void Mesh::Render(Camera& camera, Shader& shader) {
 	shader.SetMat4("model", transform->GetMatrix());
 	shader.SetMat4("view", camera.GetView());
 	shader.SetMat4("proj", camera.GetProj());
+	shader.SetVec3("camPos", camera.transform->world_position);
 	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, 0);
 }
 

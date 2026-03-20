@@ -6,6 +6,7 @@ layout(local_size_x = 256) in;
 struct Vertex {
     vec3 position;
     vec3 normal;
+    vec4 color;
     vec2 texCoords;
 	float pad[2];
 };
@@ -37,14 +38,21 @@ layout(std430, binding = 1) buffer Craters{
 
 // Variables
 uniform int resolution;
+uniform float radius;
 uniform int numVerts;
 
 // craters
 uniform int numCraters;
 
+// noise
+uniform vec3 noiseCentre;
+uniform int numLayers;
+uniform float noiseStrength;
+uniform float noiseBaseFrequency;
+uniform float noiseHeightShift;
 
 
-// exponential
+// CRATERS 
 float smin( float a, float b, float k )
 {
     k *= 1.0;
@@ -55,19 +63,94 @@ float smin( float a, float b, float k )
 float CraterHeight(float x, Crater crater) {
 	float result = 0.0;
 
+	float concave = (pow(x / crater.craterWidth, crater.craterSteepness) * crater.craterDepth) - (crater.craterDepth - 1);
+	concave = min(concave, 1);
 
-	float craterConcave = (crater.craterSteepness * x * x) - (crater.craterSteepness * crater.craterWidth * crater.craterWidth);
-	craterConcave = smin(craterConcave, crater.craterDepth, -crater.smoothingK);
+	float rim = pow(1 - ((x - crater.craterWidth) / crater.rimWidth), crater.rimSteepness);
+	rim = max(rim, 0);
 
-	float safeX = max(x, 0.0001);
-	float rim = (crater.rimSteepness / safeX) - crater.rimSteepness / (crater.rimWidth + crater.craterWidth);;
+	result = smin(rim, concave, crater.smoothingK);
 
-	rim = smin(rim, 0.0, -crater.smoothingK);
-
-	result = smin(craterConcave, rim, crater.smoothingK);
 	return result;
 }
 
+
+// BASIC NOISE
+float hash(float n) { return fract(sin(n) * 1e4); }
+float hash(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }
+
+float noise(float x) {
+	float i = floor(x);
+	float f = fract(x);
+	float u = f * f * (3.0 - 2.0 * f);
+	return mix(hash(i), hash(i + 1.0), u);
+}
+
+float noise(vec2 x) {
+	vec2 i = floor(x);
+	vec2 f = fract(x);
+
+	// Four corners in 2D of a tile
+	float a = hash(i);
+	float b = hash(i + vec2(1.0, 0.0));
+	float c = hash(i + vec2(0.0, 1.0));
+	float d = hash(i + vec2(1.0, 1.0));
+
+	vec2 u = f * f * (3.0 - 2.0 * f);
+	return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+}
+
+float noise(vec3 x) {
+	const vec3 step = vec3(110, 241, 171);
+
+	vec3 i = floor(x);
+	vec3 f = fract(x);
+ 
+	
+    float n = dot(i, step);
+
+	vec3 u = f * f * (3.0 - 2.0 * f);
+	return mix(mix(mix( hash(n + dot(step, vec3(0, 0, 0))), hash(n + dot(step, vec3(1, 0, 0))), u.x),
+                   mix( hash(n + dot(step, vec3(0, 1, 0))), hash(n + dot(step, vec3(1, 1, 0))), u.x), u.y),
+               mix(mix( hash(n + dot(step, vec3(0, 0, 1))), hash(n + dot(step, vec3(1, 0, 1))), u.x),
+                   mix( hash(n + dot(step, vec3(0, 1, 1))), hash(n + dot(step, vec3(1, 1, 1))), u.x), u.y), u.z);
+}
+
+
+// MAIN
+
+float CraterInfluence(Vertex vert){
+	float ci = 0.0;
+	for (int i = 0; i < numCraters; i++){
+		float dist = distance(vert.position, craters[i].position.xyz);
+
+		if(dist / craters[i].size <= (craters[i].craterWidth + craters[i].rimWidth)){
+			ci += CraterHeight(dist / craters[i].size, craters[i]);
+		}
+	};
+
+	return ci;
+}
+
+float NoiseInfluence(Vertex vert){
+	float ni = 0.0;
+
+	float noiseFreq = noiseBaseFrequency;
+	float strength = noiseStrength;
+
+	float noiseRemap = 0.0;
+
+	for(int i = 0; i < numLayers; i++){
+		ni += (noise((vec3(vert.position) + (noiseCentre * radius)) * noiseFreq)) * strength;
+		noiseFreq *= 1.5;
+		noiseRemap += strength;
+		strength *= 0.5;
+	}
+
+	ni = (ni + noiseHeightShift) - (noiseRemap / 2) - 1;
+
+	return ni;
+}
 
 void main(){
 	uint idx = gl_GlobalInvocationID.x;
@@ -78,14 +161,20 @@ void main(){
 
 	Vertex vert = vertices[vertID];
 	
-	// Manipulate vertex
-	float craterInfluence = 0.0;
-	for (int i = 0; i < numCraters; i++){
-		float dist = distance(vert.position, craters[i].position.xyz);
-		craterInfluence += CraterHeight(dist / craters[i].size, craters[i]);
-	};
 
-	vert.position += vert.normal * craterInfluence;
+	vert.position += vert.normal * NoiseInfluence(vert);
+	vert.position += vert.normal * CraterInfluence(vert);
+
+	// Colorising
+	float len = length(vert.position);
+	
+	float max_height = radius + (noiseStrength * pow(0.5, numLayers));
+	float col_blend = 1 - (len - max_height);
+
+	vec4 vertCol = mix(vec4(0.8, 0.8, 0.8, 1.0), vec4(0.4, 0.4, 0.4, 1.0), col_blend);
+	vertCol = clamp(vertCol, vec4(0.4, 0.4, 0.4, 1.0), vec4(0.8, 0.8, 0.8, 1.0));
+
+	vert.color = vertCol;
 
 	// assign it back
 	vertices[vertID] = vert;

@@ -92,6 +92,9 @@
     <ClInclude Include="src\planetary\TerrainGenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\GalaxTime.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\default.vert" />

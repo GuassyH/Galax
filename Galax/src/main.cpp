@@ -2,9 +2,10 @@
 
 #include <iostream>
 #include <vector>
-#include <chrono>
+#include <windows.h>
 
 #include "Log.h"
+#include "GalaxTime.h"
 
 #include <KHR/khrplatform.h>
 #include <glfw/glfw3.h>
@@ -24,6 +25,7 @@
 #include "Camera.h"
 
 #include "planetary/Planet.h"
+#include "Time.h"
 
 void frame_buffer_size_callback(GLFWwindow* window, int width, int height);
 int InitRenderer(GLFWwindow*& window, GLFWmonitor*& monitor);
@@ -52,21 +54,26 @@ int main() {
 	
 	Universe::Planet planet;
 	planet.radius = 100;
-	planet.resolution = 90;
-	planet.LODradii = {10.0f, 7.5f, 5.2f, 2.0f, 0.9f, 0.5f };
+	planet.resolution = 150;
+	planet.LODradii = { 10.0f, 7.5f, 5.2f, 2.0f, 0.9f, 0.5f };
 	
 	planet.terrainGenerator.numCraters = 200;
-	planet.terrainGenerator.falloff = 1.0f;
+	planet.terrainGenerator.sizeFalloff = 5.0f;
+	planet.terrainGenerator.baseSize = 0.4f;
+	planet.terrainGenerator.sizeExaggeration = 5.0f;
+
+	planet.terrainGenerator.noiseStrength = 3.0f;
+	planet.terrainGenerator.noiseHeightShift = 1.0f;
 
 	planet.Generate();
-	planet.transform->local_position += glm::vec3(0.0f, 0.0f, -100.0f);
-
-
+	planet.transform->local_position += glm::vec3(0.0f, 0.0f, -200.0f);
 
 	double current_time = 0.0;
 
 	// Update Loop
 	while (!glfwWindowShouldClose(window)) {
+		GalaxTime::get().update();
+
 		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
