@@ -24,7 +24,7 @@
 #include "shaders/FragShader.h"
 #include "Camera.h"
 
-#include "planetary/Planet.h"
+#include "universe/planetary/Planet.h"
 #include "Time.h"
 
 void frame_buffer_size_callback(GLFWwindow* window, int width, int height);
@@ -59,7 +59,7 @@ int main() {
 	
 	planet.terrainGenerator.numCraters = 200;
 	planet.terrainGenerator.sizeFalloff = 5.0f;
-	planet.terrainGenerator.baseSize = 0.4f;
+	planet.terrainGenerator.baseSize = 0.8f;
 	planet.terrainGenerator.sizeExaggeration = 5.0f;
 
 	planet.terrainGenerator.noiseStrength = 3.0f;
@@ -68,8 +68,11 @@ int main() {
 	planet.Generate();
 	planet.transform->local_position += glm::vec3(0.0f, 0.0f, -200.0f);
 
+
 	double current_time = 0.0;
 
+	bool wireframe = false;
+	bool release = false;
 	// Update Loop
 	while (!glfwWindowShouldClose(window)) {
 		GalaxTime::get().update();
@@ -77,13 +80,33 @@ int main() {
 		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		if (glfwGetKey(window, GLFW_KEY_F1)) {
+			if (release) {
+				if (!wireframe) {
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+					wireframe = true;
+				}
+				else {
+					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+					wireframe = false;
+				}
+				release = false;
+			}
+		}
+		else {
+			release = true;
+		}
+
+
 		camera.Move(window);
 		camera.Look(window);
 		camera.UpdateMatrix(windowWidth, windowHeight);
 
 		planet.Update(camera);
+	
 		planet.Render(camera, shader);
 	
+
 		glfwPollEvents();
 		glfwSwapBuffers(window);
 	}
@@ -134,7 +157,6 @@ int InitRenderer(GLFWwindow*& window, GLFWmonitor*& monitor) {
 	glCullFace(GL_BACK);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
-	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 void frame_buffer_size_callback(GLFWwindow* window, int width, int height) {

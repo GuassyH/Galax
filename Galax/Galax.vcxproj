@@ -124,10 +124,14 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Galax\vendor\include;$(SolutionDir)\Galax\src;$(SolutionDir)\Galax\vendor\include\spdlog\include;</AdditionalIncludeDirectories>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glfw3dll.lib;opengl32.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\Galax\vendor\lib\glfw;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -135,12 +139,12 @@
     <ClCompile Include="src\Log.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
-    <ClCompile Include="src\planetary\Planet.cpp" />
-    <ClCompile Include="src\planetary\TerrainGenerator.cpp" />
     <ClCompile Include="src\shaders\ComputeShader.cpp" />
     <ClCompile Include="src\shaders\FragShader.cpp" />
     <ClCompile Include="src\shaders\Shader.cpp" />
-    <ClCompile Include="src\planetary\CubeSphere.cpp" />
+    <ClCompile Include="src\universe\planetary\CubeSphere.cpp" />
+    <ClCompile Include="src\universe\planetary\Planet.cpp" />
+    <ClCompile Include="src\universe\planetary\TerrainGenerator.cpp" />
     <ClCompile Include="vendor\include\glad.c" />
   </ItemGroup>
   <ItemGroup>
@@ -148,8 +152,6 @@
     <ClInclude Include="src\GalaxTime.h" />
     <ClInclude Include="src\Log.h" />
     <ClInclude Include="src\Mesh.h" />
-    <ClInclude Include="src\planetary\Planet.h" />
-    <ClInclude Include="src\planetary\TerrainGenerator.h" />
     <ClInclude Include="src\rendering\EBO.h" />
     <ClInclude Include="src\rendering\VAO.h" />
     <ClInclude Include="src\rendering\VBO.h" />
@@ -157,8 +159,10 @@
     <ClInclude Include="src\shaders\ComputeShader.h" />
     <ClInclude Include="src\shaders\FragShader.h" />
     <ClInclude Include="src\shaders\Shader.h" />
-    <ClInclude Include="src\planetary\CubeSphere.h" />
     <ClInclude Include="src\Transform.h" />
+    <ClInclude Include="src\universe\planetary\CubeSphere.h" />
+    <ClInclude Include="src\universe\planetary\Planet.h" />
+    <ClInclude Include="src\universe\planetary\TerrainGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\default.frag" />

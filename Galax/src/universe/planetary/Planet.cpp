@@ -1,6 +1,5 @@
 #include "Planet.h"
 
-
 namespace Universe {
 
 	/// Core
@@ -65,6 +64,8 @@ namespace Universe {
 			}
 		}
 
+		chunk->isLeaf = false;
+
 		// could be optimised
 		for (auto node : chunk->nodes) {
 			if (!node) {
@@ -86,18 +87,16 @@ namespace Universe {
 
 			if (node->level_of_detail == targetLOD) {
 				node->isLeaf = true;
+				CubeSphere::DestroyChunkNodes(node);
 			}
 			else if (targetLOD > node->level_of_detail) {
-				node->isLeaf = false;
 				UpdateLOD(node, observer_pos);
 			}
 			else { // if (targetLOD < node->level_of_detail) 
-				// what to do?
-				continue;
+				node->isLeaf = false;
+				chunk->isLeaf = true;
 			}
 		}
-
-		chunk->isLeaf = false;
 	}
 
 	// Should this be on another thread?

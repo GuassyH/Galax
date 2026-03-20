@@ -1,6 +1,5 @@
 #include "CubeSphere.h"
 
-
 /// Generation
 
 void ConstructChunk(CubeSphere::Chunk* inChunk, Transform* base_transform) {
@@ -74,15 +73,13 @@ void ConstructChunk(CubeSphere::Chunk* inChunk, Transform* base_transform) {
 	}
 
 	inChunk->mesh = Mesh(vertices, indices);
-	
+
 	if (base_transform != nullptr) {
 		inChunk->mesh.transform->SetParent(base_transform, false);
 	}
 }
 
 void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
-	chunk->isLeaf = false;
-	chunk->hasNodes = true;
 
 	glm::vec2 mid = (chunk->minUV + chunk->maxUV) * 0.5f;
 
@@ -132,6 +129,9 @@ void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
 	ConstructChunk(tr, chunk->mesh.transform.get());
 	ConstructChunk(bl, chunk->mesh.transform.get());
 	ConstructChunk(br, chunk->mesh.transform.get());
+
+	chunk->isLeaf = false;
+	chunk->hasNodes = true;
 }
 
 
@@ -222,6 +222,9 @@ void CubeSphere::DestroyChunkNodes(Chunk* inChunk) {
 	if (!inChunk)
 		return;
 
+	if (!inChunk->hasNodes)
+		return;
+
 	for (auto node : inChunk->nodes) {
 		DestroyChunk(node);
 	}
@@ -230,6 +233,8 @@ void CubeSphere::DestroyChunkNodes(Chunk* inChunk) {
 	inChunk->nodes[1] = nullptr;
 	inChunk->nodes[2] = nullptr;
 	inChunk->nodes[3] = nullptr;
+
+	inChunk->hasNodes = false;
 }
 
 void CubeSphere::DestroyFace(Face& inFace) {
