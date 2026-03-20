@@ -91,6 +91,7 @@ void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
 	tl->maxUV = mid;
 	tl->radius = chunk->radius;
 	tl->rotation = chunk->rotation;
+	tl->resolution = chunk->resolution;
 	tl->level_of_detail = chunk->level_of_detail + 1;
 
 	// Top Right
@@ -101,6 +102,7 @@ void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
 	tr->maxUV = glm::vec2(chunk->maxUV.x, mid.y);
 	tr->radius = chunk->radius;
 	tr->rotation = chunk->rotation;
+	tr->resolution = chunk->resolution;
 	tr->level_of_detail = chunk->level_of_detail + 1;
 
 	// Bottom Left
@@ -111,6 +113,7 @@ void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
 	bl->maxUV = glm::vec2(mid.x, chunk->maxUV.y);
 	bl->radius = chunk->radius;
 	bl->rotation = chunk->rotation;
+	bl->resolution = chunk->resolution;
 	bl->level_of_detail = chunk->level_of_detail + 1;
 
 	// Bottom Right
@@ -121,6 +124,7 @@ void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
 	br->maxUV = chunk->maxUV;
 	br->radius = chunk->radius;
 	br->rotation = chunk->rotation;
+	br->resolution = chunk->resolution;
 	br->level_of_detail = chunk->level_of_detail + 1;
 
 

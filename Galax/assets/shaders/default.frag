@@ -8,10 +8,10 @@ in vec3 crntPos;
 in vec2 texCoord;
 in vec4 vertColor;
 
-float directionalLight(vec3 lightPos){
+float directionalLight(vec3 lightDir){
 	
 	// easy to understand
-	vec3 lightDirection = normalize(lightPos);
+	vec3 lightDirection = normalize(lightDir);
 	
 	// diffuse lighting
 	lightDirection = normalize(lightDirection);
@@ -31,8 +31,6 @@ float directionalLight(vec3 lightPos){
 
 out vec4 fragCol;
 void main(){
-	// fragCol = vec4(texCoord.x, texCoord.y, 0.0, 1.0);
 	fragCol = vertColor;
-	// fragCol *= dot(normalize(vec3(1.0, 0.0, 1.0)), normal);
 	fragCol *= directionalLight(vec3(0.0, 0.0, 1.0));
 }

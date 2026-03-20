@@ -3,9 +3,8 @@
 #include <iostream>
 #include <vector>
 #include <windows.h>
+#include <xmemory>
 
-#include "Log.h"
-#include "GalaxTime.h"
 
 #include <KHR/khrplatform.h>
 #include <glfw/glfw3.h>
@@ -24,6 +23,8 @@
 #include "shaders/FragShader.h"
 #include "Camera.h"
 
+#include "Log.h"
+#include "GalaxTime.h"
 #include "universe/planetary/Planet.h"
 #include "Time.h"
 
@@ -34,6 +35,8 @@ int windowWidth = 1280;
 int windowHeight = 720;
 int monitorWidth;
 int monitorHeight;
+
+std::vector<Universe::Planet> planets;
 
 int main() {
 	Log::Init();
@@ -52,22 +55,23 @@ int main() {
 
 	FragShader shader("assets/shaders/default.frag", "assets/shaders/default.vert");
 	
-	Universe::Planet planet;
-	planet.radius = 100;
-	planet.resolution = 160;
-	planet.LODradii = { 10.0f, 7.5f, 5.2f, 2.0f, 0.9f, 0.5f };
+	Universe::Planet planet_char;
+	planet_char.radius = 100;
+	planet_char.resolution = 64;
+	planet_char.LODradii = { 6.0f, 4.0f, 2.0f, 1.0f };
 	
-	planet.terrainGenerator.numCraters = 200;
-	planet.terrainGenerator.sizeFalloff = 5.0f;
-	planet.terrainGenerator.baseSize = 0.8f;
-	planet.terrainGenerator.sizeExaggeration = 5.0f;
+	planet_char.terrainGenerator.numCraters = 200;
+	planet_char.terrainGenerator.sizeFalloff = 5.0f;
+	planet_char.terrainGenerator.baseSize = 0.8f;
+	planet_char.terrainGenerator.sizeExaggeration = 5.0f;
 
-	planet.terrainGenerator.noiseStrength = 3.0f;
-	planet.terrainGenerator.noiseHeightShift = 1.0f;
+	planet_char.terrainGenerator.noiseStrength = 3.0f;
+	planet_char.terrainGenerator.noiseHeightShift = 1.0f;
 
-	planet.Generate();
-	planet.transform->local_position += glm::vec3(0.0f, 0.0f, -200.0f);
+	planet_char.Generate();
+	planet_char.transform->local_position += glm::vec3(0.0f, 0.0f, -200.0f);
 
+	planets.push_back(planet_char);
 
 	double current_time = 0.0;
 
@@ -102,13 +106,20 @@ int main() {
 		camera.Look(window);
 		camera.UpdateMatrix(windowWidth, windowHeight);
 
-		planet.Update(camera);
-	
-		planet.Render(camera, shader);
+
+		for (auto& planet : planets) {
+			planet.Update(camera);
+			planet.Render(camera, shader);
+		}
+		// planet.transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), 30.0f * GalaxTime::get().deltaTime);
 	
 
 		glfwPollEvents();
 		glfwSwapBuffers(window);
+	}
+
+	for (auto& planet : planets) {
+		planet.Delete();
 	}
 
 	// End

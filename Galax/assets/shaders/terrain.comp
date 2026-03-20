@@ -15,19 +15,20 @@ layout(std430, binding = 0) buffer Vertices {
     Vertex vertices[];
 };
 
-//  48 bytes
+
+uniform float craterDepth;
+uniform float craterSteepness;
+uniform float craterWidth;
+
+uniform float rimSteepness;
+uniform float rimWidth;
+uniform float smoothingK;
+
+//  32 bytes
 struct Crater {
 	vec4 position; // 16
-
-	float craterSteepness; 
-	float craterWidth; 
-	float craterDepth; 
-	float smoothingK; // 16
-
-	float rimSteepness; 
-	float rimWidth; 
 	float size;
-	float pad; // 16
+	float pad[3]; // 16
 };
 
 layout(std430, binding = 1) buffer Craters{
@@ -67,13 +68,13 @@ float smin( float a, float b, float k )
 float CraterHeight(float x, Crater crater) {
 	float result = 0.0;
 
-	float concave = (pow(x / crater.craterWidth, crater.craterSteepness) * crater.craterDepth) - (crater.craterDepth - 1);
+	float concave = (pow(x / craterWidth, craterSteepness) * craterDepth) - (craterDepth - 1);
 	concave = min(concave, 1);
 
-	float rim = pow(1 - ((x - crater.craterWidth) / crater.rimWidth), crater.rimSteepness);
+	float rim = pow(1 - ((x - craterWidth) / rimWidth), rimSteepness);
 	rim = max(rim, 0);
 
-	result = smin(rim, concave, crater.smoothingK);
+	result = smin(rim, concave, smoothingK);
 
 	return result;
 }
@@ -84,7 +85,7 @@ float CraterInfluence(Vertex vert){
 	for (int i = 0; i < numCraters; i++){
 		float dist = distance(vert.position, craters[i].position.xyz);
 
-		if(dist / craters[i].size <= (craters[i].craterWidth + craters[i].rimWidth)){
+		if(dist / craters[i].size <= (craterWidth + rimWidth)){
 			ci += CraterHeight(dist / craters[i].size, craters[i]);
 		}
 	};

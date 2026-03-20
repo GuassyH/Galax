@@ -9,25 +9,17 @@ TerrainGenerator::TerrainGenerator() {
 	glGenBuffers(1, &craterBuff);
 }
 
+
+static thread_local std::mt19937 rng(std::random_device{}());
 // random float between 0 and 1
-static float random() { 
+static std::uniform_real_distribution<float> random(0.0f, 1.0f);
 
-	std::random_device rd;              // seed
-	std::mt19937 gen(rd());             // Mersenne Twister RNG
-	std::uniform_real_distribution<> dis(0.0, 1.0);
-
-	return dis(gen);
-}
 
 static glm::vec3 randomPointOnUnitSphere() {
 	// Random number generators
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_real_distribution<> distTheta(0.0, 2.0 * 3.14159265);
-	std::uniform_real_distribution<> distCosPhi(-1.0, 1.0);
 
-	double theta = distTheta(gen);        // azimuthal angle
-	double cosPhi = distCosPhi(gen);      // cos(polar angle)
+	double theta = random(rng) * 2.0 * 3.14159265;        // azimuthal angle
+	double cosPhi = (random(rng) * 2.0) - 1.0;      // cos(polar angle)
 	double phi = acos(cosPhi);
 
 	double x = sin(phi) * cos(theta);
@@ -38,7 +30,7 @@ static glm::vec3 randomPointOnUnitSphere() {
 }
 
 static float generate_size(float falloff, float exaggeration) {
-	float x = random();
+	float x = random(rng);
 
 	float y = glm::pow(x, falloff) * exaggeration;
 
@@ -52,23 +44,13 @@ void TerrainGenerator::ComputeBuffers(float radius) {
 		Crater crater;
 		
 		crater.position = glm::vec4(randomPointOnUnitSphere(), 0.0f) * radius;
-
 		crater.size = generate_size(sizeFalloff, sizeExaggeration) * baseSize;
-
-		crater.craterDepth = 1.5f;
-		crater.craterSteepness = 2.5f;
-		crater.craterWidth = 4.0f;
-
-		crater.rimSteepness = 2.3f;
-		crater.rimWidth = 4.2f;
-
-		// crater.smoothingK = 0.1f / crater.size;
-		crater.smoothingK = 0.1f;
 
 		craters.push_back(crater);
 	}
 }
 
+// different thread?
 void TerrainGenerator::ApplyTerrain(CubeSphere::Chunk* chunk) {
 
 	// POSITIONS
@@ -79,9 +61,18 @@ void TerrainGenerator::ApplyTerrain(CubeSphere::Chunk* chunk) {
 
 	terrain_compute.SetInt("resolution", chunk->resolution);
 	terrain_compute.SetFloat("radius", chunk->radius);
-
 	terrain_compute.SetInt("numVerts", chunk->mesh.vertices.size());
+
 	terrain_compute.SetInt("numCraters", numCraters);
+	terrain_compute.SetFloat("craterDepth", craterDepth);
+	terrain_compute.SetFloat("craterSteepness", craterSteepness);
+	terrain_compute.SetFloat("craterWidth", craterWidth);
+
+	terrain_compute.SetFloat("rimSteepness", rimSteepness);
+	terrain_compute.SetFloat("rimWidth", rimWidth);
+	terrain_compute.SetFloat("smoothingK", smoothingK);
+
+
 
 	terrain_compute.SetVec3("noiseCentre", noiseCentre);
 	terrain_compute.SetInt("numLayers", numLayers);

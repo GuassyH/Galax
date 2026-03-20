@@ -4,14 +4,10 @@ namespace Universe {
 
 	/// Core
 
-	Planet::Planet() {
-		Generate();
-	}
-
 	void Planet::Generate() {
 		Delete();
 		
-		transform = std::make_unique<Transform>();
+		transform = std::make_shared<Transform>();
 		faces = CubeSphere::ConstructFaces(radius, resolution, transform.get());
 
 		terrainGenerator.ComputeBuffers(radius);
@@ -21,9 +17,6 @@ namespace Universe {
 		}
 	}
 
-	Planet::~Planet() {
-		Delete();
-	}
 
 	void Planet::Render(Camera& camera, Shader& shader) {
 		for (auto& face : faces) {
@@ -99,7 +92,7 @@ namespace Universe {
 
 		for (auto& face : faces) {
 			// Only update if required, simple occlusion culling
-			if (-glm::dot(dir_to_planet, face.root_chunk->rotation * glm::vec3(0.0f, 0.0f, -1.0f)) > 0.4f) {
+			if (-glm::dot(dir_to_planet, transform->world_rotation * face.root_chunk->rotation * glm::vec3(0.0f, 0.0f, -1.0f)) > 0.4f) {
 				face.should_render = false;
 				continue;
 			}

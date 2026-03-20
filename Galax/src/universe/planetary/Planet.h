@@ -13,8 +13,8 @@ namespace Universe {
 	class Planet {
 	public:
 		/// Core
-		Planet();
-		~Planet();
+		Planet() = default;
+		~Planet() = default;
 		void Generate();
 	
 		void Update(Camera& camera);
@@ -34,7 +34,7 @@ namespace Universe {
 		std::vector<float> LODradii = { 4.8f, 3.4f, 2.2f, 1.6f, 1.2f };
 
 		std::vector<CubeSphere::Face> faces;
-		std::unique_ptr<Transform> transform;
+		std::shared_ptr<Transform> transform;
 
 	private:
 		ComputeShader terrain_compute;

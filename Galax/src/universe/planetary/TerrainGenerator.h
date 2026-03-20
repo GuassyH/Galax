@@ -8,16 +8,8 @@ class TerrainGenerator {
 public:
 	struct Crater {
 		glm::vec4 position; // just use xyz
-
-		float craterSteepness;
-		float craterWidth;
-		float craterDepth;
-		float smoothingK; // 16
-
-		float rimSteepness;
-		float rimWidth;
 		float size;
-		float pad1 = 0.0f;
+		float pad1[3];
 	};
 
 	TerrainGenerator();
@@ -36,6 +28,14 @@ public:
 	float sizeFalloff = 1.0f; // min 1, heigher means less probable big craters
 	float baseSize = 1.0f; // the MINIMUM size a crater will have
 	float sizeExaggeration = 2.0f;
+
+	float craterDepth = 1.5f;
+	float craterSteepness = 2.5f;
+	float craterWidth = 4.0f;
+
+	float rimSteepness = 2.3f;
+	float rimWidth = 4.2f;
+	float smoothingK = 0.1f;
 
 	// Noise
 	glm::vec3 noiseCentre = glm::vec3(0.0f);
