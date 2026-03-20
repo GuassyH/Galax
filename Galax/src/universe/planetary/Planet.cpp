@@ -39,18 +39,10 @@ namespace Universe {
 	void Planet::Update(Camera& camera) {
 		transform->UpdateMatrix();
 		UpdateAllLODs(camera.transform->world_position);
-
-		// temporary
 	}
 	
 
 	void Planet::UpdateLOD(CubeSphere::Chunk* chunk, glm::vec3& observer_pos) {
-
-		/// <summary>
-		///	For each node in the chunk, check the suggested LOD
-		/// If the suggested LOD is the nodes LOD, then use that LOD. 
-		/// If the suggested LOD is higher than the nodes LOD, then updated said node
-		/// <summary>
 
 		if (chunk->level_of_detail > LODradii.size()) {
 			chunk->isLeaf = true;

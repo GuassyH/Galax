@@ -167,7 +167,6 @@
   <ItemGroup>
     <None Include="assets\shaders\default.frag" />
     <None Include="assets\shaders\default.vert" />
-    <None Include="assets\shaders\normals.comp" />
     <None Include="assets\shaders\terrain.comp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

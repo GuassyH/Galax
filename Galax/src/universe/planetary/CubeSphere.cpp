@@ -6,8 +6,8 @@ void ConstructChunk(CubeSphere::Chunk* inChunk, Transform* base_transform) {
 	std::vector<Vertex> vertices;
 	std::vector<GLuint> indices;
 
-	for (int x = 0; x <= inChunk->resolution; x++) {
-		for (int y = 0; y <= inChunk->resolution; y++) {
+	for (int x = 0; x < inChunk->resolution + 1; x++) {
+		for (int y = 0; y < inChunk->resolution + 1; y++) {
 			
 			float u = glm::mix(inChunk->minUV.x, inChunk->maxUV.x,
 				(float)x / inChunk->resolution);

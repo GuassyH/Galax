@@ -54,7 +54,7 @@ int main() {
 	
 	Universe::Planet planet;
 	planet.radius = 100;
-	planet.resolution = 150;
+	planet.resolution = 160;
 	planet.LODradii = { 10.0f, 7.5f, 5.2f, 2.0f, 0.9f, 0.5f };
 	
 	planet.terrainGenerator.numCraters = 200;

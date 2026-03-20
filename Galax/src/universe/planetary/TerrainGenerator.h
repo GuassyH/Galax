@@ -27,7 +27,6 @@ public:
 	void ApplyTerrain(CubeSphere::Chunk* chunk);
 
 	ComputeShader terrain_compute;
-	ComputeShader normals_compute;
 
 	/// Fields
 
@@ -51,6 +50,5 @@ public:
 
 private:
 	GLuint vertBuff = 0;
-	GLuint indBuff = 0;
 	GLuint craterBuff = 0;
 };

@@ -4,10 +4,8 @@
 
 TerrainGenerator::TerrainGenerator() {
 	terrain_compute.Compile("assets/shaders/terrain.comp");
-	normals_compute.Compile("assets/shaders/normals.comp");
 
 	glGenBuffers(1, &vertBuff);
-	glGenBuffers(1, &indBuff);
 	glGenBuffers(1, &craterBuff);
 }
 
@@ -106,22 +104,6 @@ void TerrainGenerator::ApplyTerrain(CubeSphere::Chunk* chunk) {
 	unsigned int numGroups = (chunk->mesh.vertices.size() + workgroupSize - 1) / workgroupSize;
 	terrain_compute.Run(numGroups, 1, 1);
 
-	// NORMALS
-
-	normals_compute.Use();
-	normals_compute.SetInt("numTriangles", (chunk->resolution + 1) * (chunk->resolution + 1) * 2);
-	normals_compute.SetInt("numVerts", chunk->mesh.vertices.size());
-
-	GLsizeiptr indBuffSize = sizeof(unsigned int) * chunk->mesh.indices.size();
-
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, vertBuff); // THIS IS ESSENTIAL
-
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, indBuff);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, indBuffSize, chunk->mesh.indices.data(), GL_STATIC_READ);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, indBuff); // THIS IS ESSENTIAL
-
-	normals_compute.Run(numGroups, 1, 1);
-
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, vertBuff);
 
 	// Read data back
@@ -145,11 +127,9 @@ void TerrainGenerator::ApplyTerrain(CubeSphere::Chunk* chunk) {
 
 TerrainGenerator::~TerrainGenerator() {
 	terrain_compute.Delete();
-	normals_compute.Delete();
 
 	craters.clear();
 
 	glDeleteBuffers(1, &vertBuff);
-	glDeleteBuffers(1, &indBuff);
 	glDeleteBuffers(1, &craterBuff);
 }
