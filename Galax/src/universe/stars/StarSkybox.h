@@ -8,9 +8,8 @@ namespace Universe {
 
 	class StarSkybox {
 	public:
-		struct Star {
-			glm::vec4 direction;
-			float pad0[3];
+		struct StarInstance {
+			glm::vec3 position;
 			float size;
 		};
 
@@ -19,19 +18,18 @@ namespace Universe {
 
 		void Generate(int numStars, float starSize, float sizeVariability, float starDistance);
 		void Update(Transform* origin);
-		void Render(Camera& camera, int w, int h); // Instanced
+		void Render(Camera& camera); // Instanced
 
 		std::shared_ptr<Transform> transform;
 
 		int m_numStars = 100;
 		float m_starSize = 1.0f;
 		float m_starDistance = 1000.0f;
-		std::vector<Star> stars;
+		std::vector<StarInstance> instances;
 
 	private:
-		GLuint starBuff = 0;
 		FragShader starShader;
-
+		VBO instanceVBO;
 		Mesh quad;
 	};
 };

@@ -58,10 +58,10 @@ void Camera::Move(GLFWwindow* window) {
 	transform->local_position += moveDir * speed * multiplier * Galax::Time::get().deltaTime;
 
 	if (glfwGetKey(window, GLFW_KEY_E))
-		transform->AddRotationAroundAxis(transform->forward, 1.0f, false);
+		// transform->AddRotationAroundAxis(transform->forward, 1.0f, false);
 
 	if (glfwGetKey(window, GLFW_KEY_Q))
-		transform->AddRotationAroundAxis(transform->forward, -1.0f, false);
+		// transform->AddRotationAroundAxis(transform->forward, -1.0f, false);
 
 	moveDir = glm::vec3(0.0f);
 	horizontal = 0.0f;
@@ -93,7 +93,7 @@ void Camera::Look(GLFWwindow* window) {
 
 	// Apply rotations to Euler angles
 	transform->AddRotationAroundAxis(transform->right, rotX, false); // pitch
-	transform->AddRotationAroundAxis(transform->up, -rotY, false); // yaw
+	transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), -rotY, false); // yaw
 
 	// Clamp pitch to avoid flipping
 	glm::vec3 euler = transform->GetEulerAngles();

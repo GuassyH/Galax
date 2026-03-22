@@ -72,7 +72,7 @@ int main() {
 
 	planet_char.terrainGenerator.surfaceColor = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f);
 	planet_char.terrainGenerator.peakColor = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
-
+	
 	planet_char.Generate();
 	planet_char.transform->local_position += glm::vec3(0.0f, 0.0f, -200.0f);
 
@@ -80,7 +80,7 @@ int main() {
 
 	Universe::StarSkybox stars = Universe::StarSkybox();
 
-	stars.Generate(400, 0.00005f, 0.00005f, camera.farPlane);
+	stars.Generate(800, 5, 2, camera.farPlane);
 
 	double current_time = 0.0;
 
@@ -117,7 +117,7 @@ int main() {
 
 
 		stars.Update(camera.transform.get());
-		stars.Render(camera, windowWidth, windowHeight);
+		stars.Render(camera);
 
 		for (auto& planet : planets) {
 			planet.Update(camera);

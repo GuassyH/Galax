@@ -27,14 +27,11 @@ namespace Universe {
 
 		quad = Mesh(quad_verts, quad_inds);
 
-		glGenBuffers(1, &starBuff);
 	}
 	StarSkybox::~StarSkybox() {
 		transform.reset();
 
 		starShader.Delete();
-
-		glDeleteBuffers(1, &starBuff);
 	}
 
 
@@ -43,50 +40,51 @@ namespace Universe {
 		m_starDistance = starDistance;
 		m_starSize = starSize;
 
-		stars.clear();
-		stars.reserve(numStars);
+		instances.clear();
+		instances.reserve(numStars);
+
+		instanceVBO = VBO();
 
 		for (int i = 0; i < numStars; i++) {
-			Star star;
-			star.direction = glm::vec4(Galax::Random::PointOnUnitSphere(), 0.0f);
+			StarInstance star;
+			star.position = Galax::Random::PointOnUnitSphere() * starDistance;
 			star.size = Galax::Random::Range(m_starSize - (sizeVariability / 2), m_starSize + (sizeVariability / 2));
 
-			stars.push_back(star);
+			instances.push_back(star);
 		}
 
-		GLsizeiptr starBuffSize = sizeof(Star) * stars.size();
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, starBuff);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, starBuffSize, stars.data(), GL_STATIC_DRAW);
+		instanceVBO.Bind();
+		instanceVBO.BindBufferData(instances.size() * sizeof(StarInstance), instances.data());
+
+		quad.vao.Bind();
+		instanceVBO.Bind();
+		quad.vao.LinkAttrib(1, 3, GL_FLOAT, sizeof(StarInstance), 0);
+		quad.vao.LinkAttrib(2, 1, GL_FLOAT, sizeof(StarInstance), offsetof(StarInstance, size));
+
+		glVertexAttribDivisor(1, 1);
+		glVertexAttribDivisor(2, 1);
+	
+		quad.vao.Unbind();
+		instanceVBO.Unbind();
 	}
 
 	void StarSkybox::Update(Transform* origin) {
 
 	}
-	void StarSkybox::Render(Camera& camera, int w, int h) {
+	void StarSkybox::Render(Camera& camera) {
 
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE); // don't write depth
 
 		starShader.Use();
-
-		// Buffers std430
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, starBuff); // THIS IS ESSENTIAL
-
-
-		starShader.SetInt("numStars", m_numStars);
-
-		starShader.SetVec3("camForward", camera.transform->forward);
-		starShader.SetVec3("camRight", camera.transform->right);
-		starShader.SetVec3("camUp", camera.transform->up);
-
-		starShader.SetFloat("FOVdeg", camera.fovDeg);
-
-		starShader.SetInt("windowWidth", w);
-		starShader.SetInt("windowHeight", h);
+	
+		starShader.SetMat4("view", camera.GetView());
+		starShader.SetMat4("proj", camera.GetProj());
+		starShader.SetVec3("origo", camera.transform->world_position);
 
 		// Draw
 		quad.vao.Bind();
-		glDrawElements(GL_TRIANGLES, quad.indices.size(), GL_UNSIGNED_INT, 0);
+		glDrawElementsInstanced(GL_TRIANGLES, quad.indices.size(), GL_UNSIGNED_INT, 0, instances.size());
 
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE); // don't write depth
