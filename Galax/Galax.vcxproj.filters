@@ -51,6 +51,9 @@
     <ClCompile Include="src\universe\stars\StarSkybox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\universe\atmosphere\Atmosphere.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\Log.h">
@@ -104,6 +107,9 @@
     <ClInclude Include="src\universe\stars\StarSkybox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\universe\atmosphere\Atmosphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\default.vert" />
@@ -111,5 +117,7 @@
     <None Include="assets\shaders\terrain.comp" />
     <None Include="assets\shaders\stars.vert" />
     <None Include="assets\shaders\stars.frag" />
+    <None Include="assets\shaders\atmosphere.frag" />
+    <None Include="assets\shaders\atmosphere.vert" />
   </ItemGroup>
 </Project>

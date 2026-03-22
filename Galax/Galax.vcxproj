@@ -142,6 +142,7 @@
     <ClCompile Include="src\shaders\ComputeShader.cpp" />
     <ClCompile Include="src\shaders\FragShader.cpp" />
     <ClCompile Include="src\shaders\Shader.cpp" />
+    <ClCompile Include="src\universe\atmosphere\Atmosphere.cpp" />
     <ClCompile Include="src\universe\planetary\CubeSphere.cpp" />
     <ClCompile Include="src\universe\planetary\Planet.cpp" />
     <ClCompile Include="src\universe\planetary\TerrainGenerator.cpp" />
@@ -162,12 +163,15 @@
     <ClInclude Include="src\shaders\FragShader.h" />
     <ClInclude Include="src\shaders\Shader.h" />
     <ClInclude Include="src\Transform.h" />
+    <ClInclude Include="src\universe\atmosphere\Atmosphere.h" />
     <ClInclude Include="src\universe\planetary\CubeSphere.h" />
     <ClInclude Include="src\universe\planetary\Planet.h" />
     <ClInclude Include="src\universe\planetary\TerrainGenerator.h" />
     <ClInclude Include="src\universe\stars\StarSkybox.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\shaders\atmosphere.frag" />
+    <None Include="assets\shaders\atmosphere.vert" />
     <None Include="assets\shaders\default.frag" />
     <None Include="assets\shaders\default.vert" />
     <None Include="assets\shaders\stars.frag" />

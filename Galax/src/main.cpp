@@ -28,6 +28,7 @@
 
 #include "universe/planetary/Planet.h"
 #include "universe/stars/StarSkybox.h"
+#include "universe/atmosphere/Atmosphere.h"
 
 void frame_buffer_size_callback(GLFWwindow* window, int width, int height);
 int InitRenderer(GLFWwindow*& window, GLFWmonitor*& monitor);
@@ -75,58 +76,56 @@ int main() {
 	
 	planet_char.Generate();
 	planet_char.transform->local_position += glm::vec3(0.0f, 0.0f, -200.0f);
+	planet_char.transform->UpdateMatrix();
 
 	planets.push_back(planet_char);
 
 	Universe::StarSkybox stars = Universe::StarSkybox();
-
 	stars.Generate(800, 5, 2, camera.farPlane);
+
+
+	Universe::AtmosphereConfig planet_char_atmo;
+	planet_char_atmo.centre = planet_char.transform->world_position;
+	planet_char_atmo.planetRadius = planet_char.radius;
+	planet_char_atmo.atmosphereHeight = 15.0f;
+
+	Universe::AtmosphereRenderer atmosRend = Universe::AtmosphereRenderer();
+
+	atmosRend.atmosphere_configs.push_back(planet_char_atmo);
+	atmosRend.UpdateBuffers();
 
 	double current_time = 0.0;
 
-	bool wireframe = false;
-	bool release = false;
 	// Update Loop
 	while (!glfwWindowShouldClose(window)) {
 		Galax::Time::get().update();
 
+		glBindFramebuffer(GL_FRAMEBUFFER, atmosRend.framebuffer);
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
 		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		if (glfwGetKey(window, GLFW_KEY_F1)) {
-			if (release) {
-				if (!wireframe) {
-					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-					wireframe = true;
-				}
-				else {
-					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-					wireframe = false;
-				}
-				release = false;
-			}
-		}
-		else {
-			release = true;
-		}
+		glViewport(0, 0, windowWidth, windowHeight);
 
 
 		camera.Move(window);
 		camera.Look(window);
 		camera.UpdateMatrix(windowWidth, windowHeight);
-
-
-		stars.Update(camera.transform.get());
-		stars.Render(camera);
+		
 
 		for (auto& planet : planets) {
 			planet.Update(camera);
 			planet.Render(camera, shader);
 		}
-	
+		
+		atmosRend.Render(camera, windowWidth, windowHeight);
+		
+		// stars.Update(camera.transform.get());
+		// stars.Render(camera);
 
 		glfwPollEvents();
 		glfwSwapBuffers(window);
+
 	}
 
 	for (auto& planet : planets) {
