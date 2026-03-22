@@ -136,7 +136,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Camera.cpp" />
-    <ClCompile Include="src\Log.cpp" />
+    <ClCompile Include="src\core\Log.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\shaders\ComputeShader.cpp" />
@@ -145,12 +145,14 @@
     <ClCompile Include="src\universe\planetary\CubeSphere.cpp" />
     <ClCompile Include="src\universe\planetary\Planet.cpp" />
     <ClCompile Include="src\universe\planetary\TerrainGenerator.cpp" />
+    <ClCompile Include="src\universe\stars\StarSkybox.cpp" />
     <ClCompile Include="vendor\include\glad.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h" />
-    <ClInclude Include="src\GalaxTime.h" />
-    <ClInclude Include="src\Log.h" />
+    <ClInclude Include="src\core\Time.h" />
+    <ClInclude Include="src\core\Log.h" />
+    <ClInclude Include="src\core\Maths.h" />
     <ClInclude Include="src\Mesh.h" />
     <ClInclude Include="src\rendering\EBO.h" />
     <ClInclude Include="src\rendering\VAO.h" />
@@ -163,10 +165,13 @@
     <ClInclude Include="src\universe\planetary\CubeSphere.h" />
     <ClInclude Include="src\universe\planetary\Planet.h" />
     <ClInclude Include="src\universe\planetary\TerrainGenerator.h" />
+    <ClInclude Include="src\universe\stars\StarSkybox.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\default.frag" />
     <None Include="assets\shaders\default.vert" />
+    <None Include="assets\shaders\stars.frag" />
+    <None Include="assets\shaders\stars.vert" />
     <None Include="assets\shaders\terrain.comp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

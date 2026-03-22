@@ -7,9 +7,10 @@
 class TerrainGenerator {
 public:
 	struct Crater {
-		glm::vec4 position; // just use xyz
-		float size;
-		float pad1[3];
+		glm::vec4 position = glm::vec4(0.0f, 0.0f, 1.0f, 0.0f); // just use xyz
+		float size = 1.0f;
+		float height = 1.0f;
+		float pad1[2];
 	};
 
 	TerrainGenerator();

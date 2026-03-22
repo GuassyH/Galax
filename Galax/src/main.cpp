@@ -23,23 +23,24 @@
 #include "shaders/FragShader.h"
 #include "Camera.h"
 
-#include "Log.h"
-#include "GalaxTime.h"
+#include "core/Log.h"
+#include "core/Time.h"
+
 #include "universe/planetary/Planet.h"
-#include "Time.h"
+#include "universe/stars/StarSkybox.h"
 
 void frame_buffer_size_callback(GLFWwindow* window, int width, int height);
 int InitRenderer(GLFWwindow*& window, GLFWmonitor*& monitor);
 
-int windowWidth = 1280;
-int windowHeight = 720;
+int windowWidth = 1920;
+int windowHeight = 1080;
 int monitorWidth;
 int monitorHeight;
 
 std::vector<Universe::Planet> planets;
 
 int main() {
-	Log::Init();
+	Galax::Log::Init();
 	GX_TRACE("Application Started");
 
 	GLFWwindow* window = nullptr;
@@ -57,7 +58,7 @@ int main() {
 	
 	Universe::Planet planet_char;
 	planet_char.radius = 100;
-	planet_char.resolution = 64;
+	planet_char.resolution = 50;
 	planet_char.LODradii = { 6.0f, 4.0f, 2.0f, 1.0f };
 	
 	planet_char.terrainGenerator.numCraters = 200;
@@ -65,13 +66,21 @@ int main() {
 	planet_char.terrainGenerator.baseSize = 0.8f;
 	planet_char.terrainGenerator.sizeExaggeration = 5.0f;
 
-	planet_char.terrainGenerator.noiseStrength = 3.0f;
-	planet_char.terrainGenerator.noiseHeightShift = 1.0f;
+	planet_char.terrainGenerator.numLayers = 10;
+	planet_char.terrainGenerator.noiseStrength = 2.0f;
+	planet_char.terrainGenerator.noiseHeightShift = 0.0f;
+
+	planet_char.terrainGenerator.surfaceColor = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f);
+	planet_char.terrainGenerator.peakColor = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
 
 	planet_char.Generate();
 	planet_char.transform->local_position += glm::vec3(0.0f, 0.0f, -200.0f);
 
 	planets.push_back(planet_char);
+
+	Universe::StarSkybox stars = Universe::StarSkybox();
+
+	stars.Generate(400, 0.00005f, 0.00005f, camera.farPlane);
 
 	double current_time = 0.0;
 
@@ -79,7 +88,7 @@ int main() {
 	bool release = false;
 	// Update Loop
 	while (!glfwWindowShouldClose(window)) {
-		GalaxTime::get().update();
+		Galax::Time::get().update();
 
 		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -107,11 +116,13 @@ int main() {
 		camera.UpdateMatrix(windowWidth, windowHeight);
 
 
+		stars.Update(camera.transform.get());
+		stars.Render(camera, windowWidth, windowHeight);
+
 		for (auto& planet : planets) {
 			planet.Update(camera);
 			planet.Render(camera, shader);
 		}
-		// planet.transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), 30.0f * GalaxTime::get().deltaTime);
 	
 
 		glfwPollEvents();

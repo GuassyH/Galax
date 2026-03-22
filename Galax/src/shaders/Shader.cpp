@@ -4,7 +4,7 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Log.h"
+#include "core/Log.h"
 
 void Shader::CheckCompileErrors(unsigned int shader, const std::string& type) {
 	int success;

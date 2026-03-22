@@ -1,6 +1,7 @@
 #include "TerrainGenerator.h"
 #include <random>
 #include <cmath>
+#include "core/Maths.h"
 
 TerrainGenerator::TerrainGenerator() {
 	terrain_compute.Compile("assets/shaders/terrain.comp");
@@ -10,30 +11,10 @@ TerrainGenerator::TerrainGenerator() {
 }
 
 
-static thread_local std::mt19937 rng(std::random_device{}());
-// random float between 0 and 1
-static std::uniform_real_distribution<float> random(0.0f, 1.0f);
-
-
-static glm::vec3 randomPointOnUnitSphere() {
-	// Random number generators
-
-	double theta = random(rng) * 2.0 * 3.14159265;        // azimuthal angle
-	double cosPhi = (random(rng) * 2.0) - 1.0;      // cos(polar angle)
-	double phi = acos(cosPhi);
-
-	double x = sin(phi) * cos(theta);
-	double y = sin(phi) * sin(theta);
-	double z = cosPhi;
-
-	return glm::vec3(x, y, z);
-}
 
 static float generate_size(float falloff, float exaggeration) {
-	float x = random(rng);
-
+	float x = Galax::Random::Range(0.0f, 1.0f);
 	float y = glm::pow(x, falloff) * exaggeration;
-
 	return 1 + y;
 }
 
@@ -43,8 +24,9 @@ void TerrainGenerator::ComputeBuffers(float radius) {
 	for (int i = 0; i < numCraters; i++) {
 		Crater crater;
 		
-		crater.position = glm::vec4(randomPointOnUnitSphere(), 0.0f) * radius;
+		crater.position = glm::vec4(Galax::Random::PointOnUnitSphere(), 0.0f) * radius;
 		crater.size = generate_size(sizeFalloff, sizeExaggeration) * baseSize;
+		crater.height = 1.0;
 
 		craters.push_back(crater);
 	}
@@ -72,8 +54,6 @@ void TerrainGenerator::ApplyTerrain(CubeSphere::Chunk* chunk) {
 	terrain_compute.SetFloat("rimWidth", rimWidth);
 	terrain_compute.SetFloat("smoothingK", smoothingK);
 
-
-
 	terrain_compute.SetVec3("noiseCentre", noiseCentre);
 	terrain_compute.SetInt("numLayers", numLayers);
 	terrain_compute.SetFloat("noiseStrength", noiseStrength);
@@ -83,6 +63,7 @@ void TerrainGenerator::ApplyTerrain(CubeSphere::Chunk* chunk) {
 	terrain_compute.SetVec4("peakColor", peakColor);
 	terrain_compute.SetVec4("surfaceColor", surfaceColor);
 
+	// Buffers std430
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, vertBuff);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, vertBuffSize, chunk->mesh.vertices.data(), GL_DYNAMIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, vertBuff); // THIS IS ESSENTIAL

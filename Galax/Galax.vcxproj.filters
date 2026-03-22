@@ -18,7 +18,7 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Log.cpp">
+    <ClCompile Include="src\core\Log.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="vendor\include\glad.c">
@@ -48,9 +48,12 @@
     <ClCompile Include="src\universe\planetary\TerrainGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\universe\stars\StarSkybox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Log.h">
+    <ClInclude Include="src\core\Log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\rendering\VAO.h">
@@ -83,7 +86,7 @@
     <ClInclude Include="src\shaders\ComputeShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\GalaxTime.h">
+    <ClInclude Include="src\core\Time.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\universe\planetary\CubeSphere.h">
@@ -95,10 +98,18 @@
     <ClInclude Include="src\universe\planetary\TerrainGenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\Maths.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\stars\StarSkybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\default.vert" />
     <None Include="assets\shaders\default.frag" />
     <None Include="assets\shaders\terrain.comp" />
+    <None Include="assets\shaders\stars.vert" />
+    <None Include="assets\shaders\stars.frag" />
   </ItemGroup>
 </Project>

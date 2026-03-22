@@ -3,7 +3,7 @@
 
 class FragShader : public Shader {
 public:
-	FragShader();
+	FragShader() = default;
 	FragShader(const char* frag_path, const char* vert_path);
 	~FragShader() = default;
 

@@ -1,5 +1,5 @@
 #include "Camera.h"
-#include "GalaxTime.h"
+#include "core/Time.h"
 
 Camera::Camera() {
 	transform = std::make_shared<Transform>();
@@ -55,7 +55,7 @@ void Camera::Move(GLFWwindow* window) {
 	moveDir = glm::length(moveDir) != 0 ? glm::normalize(moveDir) : glm::vec3(0);
 	moveDir += transform->up * skywards;
 
-	transform->local_position += moveDir * speed * multiplier * GalaxTime::get().deltaTime;
+	transform->local_position += moveDir * speed * multiplier * Galax::Time::get().deltaTime;
 
 	if (glfwGetKey(window, GLFW_KEY_E))
 		transform->AddRotationAroundAxis(transform->forward, 1.0f, false);
