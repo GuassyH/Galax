@@ -54,6 +54,9 @@
     <ClCompile Include="src\universe\atmosphere\Atmosphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\universe\UniverseManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\Log.h">
@@ -110,6 +113,9 @@
     <ClInclude Include="src\universe\atmosphere\Atmosphere.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\universe\UniverseManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\default.vert" />
@@ -119,5 +125,7 @@
     <None Include="assets\shaders\stars.frag" />
     <None Include="assets\shaders\atmosphere.frag" />
     <None Include="assets\shaders\atmosphere.vert" />
+    <None Include="assets\shaders\default_unlit.frag" />
+    <None Include="assets\shaders\default_unlit.vert" />
   </ItemGroup>
 </Project>

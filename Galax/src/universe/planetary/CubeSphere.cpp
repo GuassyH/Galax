@@ -76,6 +76,7 @@ void ConstructChunk(CubeSphere::Chunk* inChunk, Transform* base_transform) {
 
 	if (base_transform != nullptr) {
 		inChunk->mesh.transform->SetParent(base_transform, false);
+		inChunk->mesh.transform->UpdateMatrix();
 	}
 }
 
@@ -133,6 +134,12 @@ void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
 	ConstructChunk(tr, chunk->mesh.transform.get());
 	ConstructChunk(bl, chunk->mesh.transform.get());
 	ConstructChunk(br, chunk->mesh.transform.get());
+
+	// Ensure transforms are updated so child meshes have correct world matrices/positions
+	// This is required because subdivision can happen after the parent's UpdateMatrix call
+	// and newly created children won't have up-to-date world_position until the next frame.
+	if (chunk->mesh.transform)
+		chunk->mesh.transform->UpdateMatrix();
 
 	chunk->isLeaf = false;
 	chunk->hasNodes = true;

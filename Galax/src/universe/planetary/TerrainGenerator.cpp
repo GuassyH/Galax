@@ -11,7 +11,6 @@ TerrainGenerator::TerrainGenerator() {
 }
 
 
-
 static float generate_size(float falloff, float exaggeration) {
 	float x = Galax::Random::Range(0.0f, 1.0f);
 	float y = glm::pow(x, falloff) * exaggeration;
@@ -39,8 +38,9 @@ void TerrainGenerator::ApplyTerrain(CubeSphere::Chunk* chunk) {
 	GLsizeiptr vertBuffSize = sizeof(Vertex) * chunk->mesh.vertices.size();
 	GLsizeiptr craterBuffSize = sizeof(Crater) * numCraters;
 
-	terrain_compute.Use();
+    terrain_compute.Use();
 
+	// Debug: ensure CPU/GPU vertex layout sizes match
 	terrain_compute.SetInt("resolution", chunk->resolution);
 	terrain_compute.SetFloat("radius", chunk->radius);
 	terrain_compute.SetInt("numVerts", chunk->mesh.vertices.size());
@@ -76,18 +76,22 @@ void TerrainGenerator::ApplyTerrain(CubeSphere::Chunk* chunk) {
 	unsigned int numGroups = (chunk->mesh.vertices.size() + workgroupSize - 1) / workgroupSize;
 	terrain_compute.Run(numGroups, 1, 1);
 
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, vertBuff);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, vertBuff);
+
+	// Ensure compute shader writes are visible to buffer mapping
+	glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT | GL_SHADER_STORAGE_BARRIER_BIT);
 
 	// Read data back
 	Vertex* cpuVerts = chunk->mesh.vertices.data();
 	char* gpuData = (char*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-	if (!gpuData) { /* handle error */ }
-
-	for (size_t i = 0; i < chunk->mesh.vertices.size(); ++i) {
-		std::memcpy(&cpuVerts[i].position, gpuData + (i * 64) + 0, sizeof(cpuVerts[i].position));
-		std::memcpy(&cpuVerts[i].normal, gpuData + (i * 64) + 16, sizeof(cpuVerts[i].normal));
-		std::memcpy(&cpuVerts[i].color, gpuData + (i * 64) + 32, sizeof(cpuVerts[i].color));
-		std::memcpy(&cpuVerts[i].texCoord, gpuData + (i * 64) + 48, sizeof(cpuVerts[i].texCoord));
+	if (!gpuData) {
+		GX_ERROR("Terrain ApplyTerrain: glMapBuffer returned null");
+	} else {
+		size_t stride = sizeof(Vertex);
+	
+		for (size_t i = 0; i < chunk->mesh.vertices.size(); ++i) {
+			std::memcpy(&cpuVerts[i], gpuData + (i * stride), stride);
+		}
 	}
 
 

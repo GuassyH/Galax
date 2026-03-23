@@ -18,12 +18,12 @@ namespace Universe {
 	}
 
 
-	void Planet::Render(Camera& camera, Shader& shader) {
+	void Planet::Render(Camera& camera) {
 		for (auto& face : faces) {
 			if (!face.should_render)
 				continue;
 
-			CubeSphere::RenderChunk(face.root_chunk, camera, shader);
+			CubeSphere::RenderChunk(face.root_chunk, camera, planetShader);
 		}
 	}
 
@@ -31,7 +31,9 @@ namespace Universe {
 
 	void Planet::Update(Camera& camera) {
 		transform->UpdateMatrix();
-		UpdateAllLODs(camera.transform->world_position);
+
+		if (!LODradii.empty())
+			UpdateAllLODs(camera.transform->world_position);
 	}
 	
 

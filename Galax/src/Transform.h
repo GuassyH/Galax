@@ -96,31 +96,29 @@ public:
 	glm::mat3 GetRotationMatrix() { return glm::mat3(glm::transpose(glm::inverse(modelMatrix))); }
 
 	void UpdateMatrix() {
-		// Combine with parent matrix
 		glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), local_scale);
 		glm::mat4 rotationMatrix = glm::mat4_cast(local_rotation);
 		glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), local_position);
+
 		glm::mat4 localModelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
 
 		if (parent) {
-			world_position = parent->local_position + local_position;
-			world_scale = local_scale * parent->local_scale;
-			world_rotation = glm::normalize(parent->local_rotation * local_rotation);
 			modelMatrix = parent->GetMatrix() * localModelMatrix;
+
+			world_rotation = glm::normalize(parent->world_rotation * local_rotation);
+			world_position = glm::vec3(modelMatrix * glm::vec4(0, 0, 0, 1));
 		}
 		else {
-			world_position = local_position;
-			world_scale = local_scale;
-			world_rotation = local_rotation;
 			modelMatrix = localModelMatrix;
+
+			world_rotation = local_rotation;
+			world_position = local_position;
 		}
 
-		// forward.y = -forward.y;
 		forward = glm::normalize(world_rotation * glm::vec3(0, 0, -1));
 		up = glm::normalize(world_rotation * glm::vec3(0, 1, 0));
 		right = glm::normalize(world_rotation * glm::vec3(1, 0, 0));
 
-		// NOW update children
 		for (auto child : children)
 			child->UpdateMatrix();
 	}

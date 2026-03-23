@@ -147,6 +147,7 @@
     <ClCompile Include="src\universe\planetary\Planet.cpp" />
     <ClCompile Include="src\universe\planetary\TerrainGenerator.cpp" />
     <ClCompile Include="src\universe\stars\StarSkybox.cpp" />
+    <ClCompile Include="src\universe\UniverseManager.cpp" />
     <ClCompile Include="vendor\include\glad.c" />
   </ItemGroup>
   <ItemGroup>
@@ -168,12 +169,15 @@
     <ClInclude Include="src\universe\planetary\Planet.h" />
     <ClInclude Include="src\universe\planetary\TerrainGenerator.h" />
     <ClInclude Include="src\universe\stars\StarSkybox.h" />
+    <ClInclude Include="src\universe\UniverseManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\atmosphere.frag" />
     <None Include="assets\shaders\atmosphere.vert" />
     <None Include="assets\shaders\default.frag" />
     <None Include="assets\shaders\default.vert" />
+    <None Include="assets\shaders\default_unlit.frag" />
+    <None Include="assets\shaders\default_unlit.vert" />
     <None Include="assets\shaders\stars.frag" />
     <None Include="assets\shaders\stars.vert" />
     <None Include="assets\shaders\terrain.comp" />

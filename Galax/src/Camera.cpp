@@ -46,7 +46,7 @@ void Camera::Move(GLFWwindow* window) {
 
 	float multiplier = 1.0f;
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT))
-		multiplier = 3.0f;
+		multiplier = 10.0f;
 
 	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL))
 		multiplier = 0.3f;

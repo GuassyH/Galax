@@ -26,9 +26,7 @@
 #include "core/Log.h"
 #include "core/Time.h"
 
-#include "universe/planetary/Planet.h"
-#include "universe/stars/StarSkybox.h"
-#include "universe/atmosphere/Atmosphere.h"
+#include "universe/UniverseManager.h"
 
 void frame_buffer_size_callback(GLFWwindow* window, int width, int height);
 int InitRenderer(GLFWwindow*& window, GLFWmonitor*& monitor);
@@ -38,7 +36,6 @@ int windowHeight = 1080;
 int monitorWidth;
 int monitorHeight;
 
-std::vector<Universe::Planet> planets;
 
 int main() {
 	Galax::Log::Init();
@@ -53,11 +50,18 @@ int main() {
 
 	Camera camera = Camera();
 	camera.fovDeg = 90.0f;
-	camera.transform->local_position = glm::vec3(0.0f, 0.0f, 5.0f);
+	camera.nearPlane = 0.1f;
+	camera.farPlane = 10000.0f;
+	camera.transform->local_position = glm::vec3(3000.0f, 0.0f, -3750.0f);
+	camera.transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), 90.0f);
+
 
 	FragShader shader("assets/shaders/default.frag", "assets/shaders/default.vert");
+	FragShader unlit("assets/shaders/default_unlit.frag", "assets/shaders/default_unlit.vert");
 	
-	Universe::Planet planet_char;
+	// Charley
+	Universe::Planet planet_char = Universe::Planet();
+	planet_char.planetShader = shader;
 	planet_char.radius = 100;
 	planet_char.resolution = 50;
 	planet_char.LODradii = { 6.0f, 4.0f, 2.0f, 1.0f };
@@ -66,33 +70,61 @@ int main() {
 	planet_char.terrainGenerator.sizeFalloff = 5.0f;
 	planet_char.terrainGenerator.baseSize = 0.8f;
 	planet_char.terrainGenerator.sizeExaggeration = 5.0f;
+	planet_char.terrainGenerator.smoothingK = 0.1f;
 
 	planet_char.terrainGenerator.numLayers = 10;
 	planet_char.terrainGenerator.noiseStrength = 2.0f;
 	planet_char.terrainGenerator.noiseHeightShift = 0.0f;
 
-	planet_char.terrainGenerator.surfaceColor = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f);
-	planet_char.terrainGenerator.peakColor = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+	// planet_char.terrainGenerator.surfaceColor = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f);
+	planet_char.terrainGenerator.surfaceColor = glm::vec4(0.396f, 0.58f, 0.306f, 1.0f);
+	// planet_char.terrainGenerator.peakColor = glm::vec4(0.58f, 0.51f, 0.306f, 1.0f);
+	planet_char.terrainGenerator.peakColor = glm::vec4(0.569f, 0.498f, 0.286f, 1.0f);
 	
 	planet_char.Generate();
-	planet_char.transform->local_position += glm::vec3(0.0f, 0.0f, -200.0f);
+	planet_char.transform->local_position = glm::vec3(0.0f, 0.0f, -7500.0f);
 	planet_char.transform->UpdateMatrix();
-
-	planets.push_back(planet_char);
-
-	Universe::StarSkybox stars = Universe::StarSkybox();
-	stars.Generate(800, 5, 2, camera.farPlane);
-
 
 	Universe::AtmosphereConfig planet_char_atmo;
 	planet_char_atmo.centre = planet_char.transform->world_position;
 	planet_char_atmo.planetRadius = planet_char.radius;
-	planet_char_atmo.atmosphereHeight = 15.0f;
+	planet_char_atmo.densityFalloff = 5.0f;
+	planet_char_atmo.atmosphereHeight = 40.0f;
+	planet_char_atmo.scatteringCoefficient = 250.0f;
+	planet_char_atmo.wavelengths = glm::vec3(700.0f, 550.0f, 440.0f);
+	planet_char_atmo.scatteringStrength = 0.75f;
+	planet_char_atmo.intensity = 0.8f;
 
-	Universe::AtmosphereRenderer atmosRend = Universe::AtmosphereRenderer();
 
-	atmosRend.atmosphere_configs.push_back(planet_char_atmo);
-	atmosRend.UpdateBuffers();
+	// Sun
+	Universe::Planet sun = Universe::Planet();
+	sun.planetShader = unlit;
+	sun.radius = 250;
+	sun.resolution = 50;
+	sun.LODradii = { };
+
+	sun.terrainGenerator.numCraters = 0;
+
+	sun.terrainGenerator.numLayers = 2;
+	sun.terrainGenerator.noiseStrength = 2.0f;
+	sun.terrainGenerator.noiseHeightShift = 0.0f;
+	sun.terrainGenerator.noiseBaseFrequency = 0.025f;
+
+	sun.terrainGenerator.surfaceColor = glm::vec4(1.0f, 0.8f, 0.3f, 1.0f);
+	sun.terrainGenerator.peakColor = glm::vec4(1.0f, 0.9f, 0.6f, 1.0f);
+
+	sun.Generate();
+	sun.transform->local_position = glm::vec3(0.0f, 0.0f, 0.0f);
+	sun.transform->UpdateMatrix();
+
+
+	// NEED TO FIX, if planet_char is first, the subdivisions break somehow
+	Universe::UniverseManager::Get().Init(camera);
+	Universe::UniverseManager::Get().planets.push_back(sun);
+	Universe::UniverseManager::Get().planets.push_back(planet_char);
+
+	Universe::UniverseManager::Get().atmosphereRenderer->atmosphere_configs.push_back(planet_char_atmo);
+	Universe::UniverseManager::Get().atmosphereRenderer->UpdateBuffers();
 
 	double current_time = 0.0;
 
@@ -100,37 +132,19 @@ int main() {
 	while (!glfwWindowShouldClose(window)) {
 		Galax::Time::get().update();
 
-		glBindFramebuffer(GL_FRAMEBUFFER, atmosRend.framebuffer);
-		glEnable(GL_DEPTH_TEST);
-		glDepthMask(GL_TRUE);
-		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glViewport(0, 0, windowWidth, windowHeight);
-
-
 		camera.Move(window);
 		camera.Look(window);
 		camera.UpdateMatrix(windowWidth, windowHeight);
 		
-
-		for (auto& planet : planets) {
-			planet.Update(camera);
-			planet.Render(camera, shader);
-		}
+		Universe::UniverseManager::Get().Update(camera);
+		Universe::UniverseManager::Get().Render(camera, sun, windowWidth, windowHeight);
 		
-		atmosRend.Render(camera, windowWidth, windowHeight);
-		
-		// stars.Update(camera.transform.get());
-		// stars.Render(camera);
-
 		glfwPollEvents();
 		glfwSwapBuffers(window);
 
 	}
 
-	for (auto& planet : planets) {
-		planet.Delete();
-	}
+	Universe::UniverseManager::Get().Shutdown();
 
 	// End
 	glfwDestroyWindow(window);

@@ -31,6 +31,8 @@ uniform vec3 sunPos;
 
 uniform sampler2D screenTexture;
 uniform sampler2D depthTexture;
+uniform sampler2D starTexture;
+
 uniform vec2 screenResolution;
 
 uniform vec3 camUp;
@@ -138,6 +140,14 @@ float LinearizeDepth(float d,float zNear,float zFar)
 }
 
 
+vec4 GetStarBrightness(float brightness){
+	vec4 result = vec4(0.0);
+	float weighted_brightness = clamp((1 - (brightness * 4)), 0, 1);
+
+	result.rgb = vec3(texture(starTexture, fragCoord).r * weighted_brightness);
+
+	return result;
+}
 
 
 void main(){
@@ -165,12 +175,7 @@ void main(){
 
 		if (dstThrough <= 0.0) continue;
 
-		// World position of the scene pixel
-		// vec3 scenePos = camPos + (rayDir * sceneDepthLinear);
-
 		// Distance from camera along the current ray
-		// float distanceAlongRayToScene = length(scenePos - rayOrigin);
-		// float sceneDepthLinear = LinearizeDepth(texture(depthTexture, fragCoord).r, camNearPlane, camFarPlane);
 		float distanceAlongRayToScene = sceneDepthLinear / dot(rayDir, camForward);
 
 
@@ -184,5 +189,11 @@ void main(){
 		vec3 light = calculateLight(crnt_atmos, atmosphereRadius, entryPoint, rayDir, dstThrough - (epsilon * 2), vec3(fragColor));
 
 		fragColor += vec4(light, 0.0);
+	}
+
+	if(texture(depthTexture, fragCoord).r == 1){
+		// float brightness = dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+		// fragColor += GetStarBrightness(brightness);
+		fragColor += GetStarBrightness(length(fragColor.rgb));
 	}
 } 

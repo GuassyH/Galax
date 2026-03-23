@@ -32,10 +32,6 @@ namespace Universe {
 
 		quad.Delete();
 
-		if (framebuffer) glDeleteFramebuffers(1, &framebuffer);
-		if (screenTexture) glDeleteTextures(1, &screenTexture);
-		if (depthTexture) glDeleteTextures(1, &depthTexture);
-
 		glDeleteBuffers(1, &atmosphereBuffer);
 	}
 
@@ -54,60 +50,28 @@ namespace Universe {
 		glBufferData(GL_SHADER_STORAGE_BUFFER, atmBufferSize, atmosphere_configs.data(), GL_DYNAMIC_COPY);
 	}
 
-	void AtmosphereRenderer::Render(Camera& camera, int w, int h) {
-
-		if (w != last_width || h != last_height) {
-			last_width = w;
-			last_height = h;
-
-			if (framebuffer) glDeleteFramebuffers(1, &framebuffer);
-			if (screenTexture) glDeleteTextures(1, &screenTexture);
-			if (depthTexture) glDeleteTextures(1, &depthTexture);
-
-			glGenFramebuffers(1, &framebuffer);
-			glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-
-			// Screen color texture
-			glGenTextures(1, &screenTexture);
-			glBindTexture(GL_TEXTURE_2D, screenTexture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, h, 0, GL_RGBA, GL_FLOAT, nullptr);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenTexture, 0);
-
-			// Depth texture
-			glGenTextures(1, &depthTexture);
-			glBindTexture(GL_TEXTURE_2D, depthTexture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, w, h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
-
-			// Check framebuffer
-			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-				GX_ERROR("Atmosphere Framebuffer incomplete");
-
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		}
-
+	void AtmosphereRenderer::Render(Camera& camera, Universe::Planet& sun, GLuint screenTex, GLuint starTex, GLuint depthTex, int w, int h) {
 
 		atmosphereShader.Use();
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, atmosphereBuffer);
 		
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, screenTexture);
+		glBindTexture(GL_TEXTURE_2D, screenTex);
 		atmosphereShader.SetInt("screenTexture", 0);
 
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, depthTexture);
+		glBindTexture(GL_TEXTURE_2D, depthTex);
 		atmosphereShader.SetInt("depthTexture", 1);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, starTex);
+		atmosphereShader.SetInt("starTexture", 2);
 
 
 		atmosphereShader.SetInt("numAtmospheres", atmosphere_configs.size());
 
 		atmosphereShader.SetVec3("camPos", camera.transform->world_position);
-		atmosphereShader.SetVec3("sunPos", glm::vec3(0.0f, 0.0f, 1000.0f));
+		atmosphereShader.SetVec3("sunPos", sun.transform->world_position);
 
 		atmosphereShader.SetVec2("screenResolution", glm::vec2(w, h));
 
@@ -125,7 +89,6 @@ namespace Universe {
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		quad.vao.Bind();
 		glDrawElements(GL_TRIANGLES, quad.indices.size(), GL_UNSIGNED_INT, 0);
 

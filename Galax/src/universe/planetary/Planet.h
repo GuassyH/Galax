@@ -7,6 +7,7 @@
 #include "CubeSphere.h"
 #include "Transform.h"
 #include "shaders/ComputeShader.h"
+#include "shaders/FragShader.h"
 #include "TerrainGenerator.h"
 
 namespace Universe {
@@ -20,7 +21,7 @@ namespace Universe {
 		void Update(Camera& camera);
 		void UpdateLOD(CubeSphere::Chunk* chunk, glm::vec3& observer_pos);
 		void UpdateAllLODs(glm::vec3 observer_pos);
-		void Render(Camera& camera, Shader& shader);
+		void Render(Camera& camera);
 	
 		TerrainGenerator terrainGenerator;
 
@@ -36,6 +37,7 @@ namespace Universe {
 		std::vector<CubeSphere::Face> faces;
 		std::shared_ptr<Transform> transform;
 
+		FragShader planetShader;
 	private:
 		ComputeShader terrain_compute;
 		ComputeShader normals_compute;

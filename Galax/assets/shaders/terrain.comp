@@ -2,12 +2,14 @@
 
 layout(local_size_x = 256) in;
 
-//  48 bytes
+//  64 bytes - layout matches C++ `Vertex` (vec3 + pad, vec3 + pad, vec4, vec2, pad[2])
 struct Vertex {
-    vec3 position;
-    vec3 normal;
-    vec4 color;
-    vec2 texCoords;
+	vec3 position;
+	float pad1; // match CPU padding
+	vec3 normal;
+	float pad2; // match CPU padding
+	vec4 color;
+	vec2 texCoords;
 	float pad[2];
 };
 
@@ -87,7 +89,7 @@ float CraterInfluence(Vertex vert){
 	for (int i = 0; i < numCraters; i++){
 		float dist = distance(vert.position, craters[i].position.xyz);
 
-		if(dist / craters[i].size <= (craterWidth + rimWidth)){
+		if(dist / craters[i].size <= (craterWidth + rimWidth) * 1.2){
 			ci += CraterHeight(dist / craters[i].size, craters[i]);
 		}
 	};
