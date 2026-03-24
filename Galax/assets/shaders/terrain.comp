@@ -22,6 +22,8 @@ uniform float craterDepth;
 uniform float craterSteepness;
 uniform float craterWidth;
 
+uniform float craterHeight;
+
 uniform float rimSteepness;
 uniform float rimWidth;
 uniform float smoothingK;
@@ -54,6 +56,7 @@ uniform int numLayers;
 uniform float noiseStrength;
 uniform float noiseBaseFrequency;
 uniform float noiseHeightShift;
+uniform float noiseScale;
 
 // coloring
 uniform vec4 peakColor;
@@ -90,7 +93,7 @@ float CraterInfluence(Vertex vert){
 		float dist = distance(vert.position, craters[i].position.xyz);
 
 		if(dist / craters[i].size <= (craterWidth + rimWidth) * 1.2){
-			ci += CraterHeight(dist / craters[i].size, craters[i]);
+			ci += CraterHeight(dist / craters[i].size, craters[i]) * craterHeight * (dist / craters[i].size);
 		}
 	};
 
@@ -139,25 +142,36 @@ float noise(vec3 x) {
                    mix( hash(n + dot(step, vec3(0, 1, 1))), hash(n + dot(step, vec3(1, 1, 1))), u.x), u.y), u.z);
 }
 
-float NoiseInfluence(Vertex vert){
-	float ni = 0.0;
+float NoiseInfluence(Vertex vert) {
+    // Precompute base position for noise
+    vec3 pos = vec3(vert.position) + (noiseCentre * radius);
+    pos *= noiseScale;
 
-	float noiseFreq = noiseBaseFrequency;
-	float strength = noiseStrength;
+    float ni = 0.0;           // Accumulated noise
+    float noiseFreq = noiseBaseFrequency;
+    float strength = noiseStrength;
+    float totalStrength = 0.0; // For normalization
 
-	float noiseRemap = 0.0;
+    for (int i = 0; i < numLayers; i++) {
+        // Sample noise at current frequency
+        float n = noise(pos * noiseFreq);
 
-	for(int i = 0; i < numLayers; i++){
-		float d = (noise((vec3(vert.position) + (noiseCentre * radius)) * noiseFreq));
-		ni += d * strength;
-		noiseFreq *= 1.5;
-		noiseRemap += strength;
-		strength *= 0.5;
-	}
+        // Accumulate weighted noise
+        ni += n * strength;
 
-	ni += (noiseHeightShift) - (noiseRemap / 2);
+        // Track total amplitude
+        totalStrength += strength;
 
-	return ni;
+        // Prepare for next layer
+        noiseFreq *= 1.5;  // Increase frequency (smaller features)
+        strength *= 0.5;   // Decrease amplitude (finer details contribute less)
+    }
+
+    // Normalize and apply height shift
+    ni = ni - (totalStrength / 2.0) + noiseHeightShift;
+
+    // Ensure non-negative output
+    return ni;
 }
 
 
@@ -171,6 +185,8 @@ vec3 GetPosition(vec3 dir){
 
 	d += NoiseInfluence(v);
 	d += CraterInfluence(v);
+
+	d = max(d, 0.0);
 
 	return (v.position + dir * d);
 };

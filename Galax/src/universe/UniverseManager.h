@@ -26,6 +26,7 @@ namespace Universe {
 
 		void Init(Camera& camera);
 
+		void ResolveGravity();
 		void Update(Player& player);
 		void Render(Camera& camera, Planet* sun, int w, int h);
 
@@ -39,7 +40,6 @@ namespace Universe {
 		GLuint starFBO; // for planets and stuff
 		GLuint starTexture;
 		GLuint starDepth;
-
 
 		int last_width, last_height = 0;
 	};

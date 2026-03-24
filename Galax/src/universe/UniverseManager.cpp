@@ -1,21 +1,25 @@
 #include "UniverseManager.h"
 
-
+#include "core/Time.h"
 
 
 namespace Universe {
+
+	static double G = 0.00007;
 
 	void UniverseManager::Init(Camera& camera) {
 		atmosphereRenderer = std::make_unique<Universe::AtmosphereRenderer>();
 		
 		starSkybox = std::make_unique<Universe::StarSkybox>();
-		starSkybox->Generate(3000, 60, 24, camera.farPlane * 0.8f);
+		starSkybox->Generate(3000, 3, 1, 1000.0f);
 	}
 
 	void UniverseManager::Update(Player& player) {
-
+		
 		for (auto& planet : planets)
 			planet->Update(player.camera);
+
+		ResolveGravity();
 
 		Universe::Planet* closestPlanet = nullptr;
 		float _0_1_val = 0.0f;
@@ -28,6 +32,7 @@ namespace Universe {
 				break;
 			}
 		}
+
 
 		player.AllignToPlanet(closestPlanet, _0_1_val);
 
@@ -91,8 +96,10 @@ namespace Universe {
 		glClearColor(0.01f, 0.01f, 0.01f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		for (auto& planet : planets)
-			planet->Render(camera);
+			planet->Render(camera, sun);
+		// glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		// Write to the atmosphere FBO
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -116,5 +123,38 @@ namespace Universe {
 		if (starDepth) glDeleteTextures(1, &starDepth);
 
 	}
+
+
+
+
+	void UniverseManager::ResolveGravity() {
+		for (int i = 0; i < planets.size(); i++) {
+			for (int j = 0; j < planets.size(); j++) {
+				if (i == j)
+					continue;
+				Planet* thisP = planets[i].get();
+				Planet* otherP = planets[j].get();
+
+				if (!thisP || !otherP)
+					continue;
+
+
+				// F1 = G(m1 * m2) / d^2 = m * a 
+				// a1 = (G(m1 * m2) / d^2) / m1
+				// a1 = G(m2) / d^2
+				float dstSq = glm::distance2(thisP->transform->world_position, otherP->transform->world_position);
+				float acceleration = G * otherP->mass / dstSq;
+
+				glm::vec3 direction = glm::normalize(otherP->transform->world_position - thisP->transform->world_position);
+
+				thisP->physicsBody.velocity += direction * acceleration;
+			}
+		}
+
+		for (auto planet : planets) {
+			planet->transform->local_position += planet->physicsBody.velocity * Galax::Time::get().deltaTime;
+		}
+	}
+
 
 };

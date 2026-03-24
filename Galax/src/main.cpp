@@ -52,7 +52,10 @@ int main() {
 
 	Player player;
 	player.camera.fovDeg = 90.0f;
-	player.transform->local_position = glm::vec3(400.0f, 0.0f, -10000.0f);
+	player.camera.nearPlane = 1.0f;
+	player.camera.farPlane = 100000.0f;
+
+	player.transform->local_position = glm::vec3(1000.0f, 0.0f, -48000.0f);
 	player.transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), 180);
 
 	FragShader shader("assets/shaders/planet.frag", "assets/shaders/planet.vert");
@@ -61,75 +64,71 @@ int main() {
 	// Charley
 	std::shared_ptr<Universe::Planet> planet_char = std::make_shared<Universe::Planet>();
 	planet_char->planetShader = shader;
-	planet_char->radius = 100;
-	planet_char->resolution = 50;
-	planet_char->LODradii = { 6.0f, 4.0f, 2.0f, 1.0f };
+	planet_char->radius = 500;
+	planet_char->resolution = 64;
+	planet_char->LODradii = { 6.0f, 3.0f, 1.0f, 0.8f };
 
 	planet_char->terrainGenerator.numCraters = 100;
 	planet_char->terrainGenerator.sizeFalloff = 3.0f;
-	planet_char->terrainGenerator.baseSize = 1.0f;
-	planet_char->terrainGenerator.sizeExaggeration = 4.0f;
+	planet_char->terrainGenerator.baseSize = 10.0f;
+	planet_char->terrainGenerator.sizeExaggeration = 2.0f;
 	planet_char->terrainGenerator.smoothingK = 0.1f;
+	planet_char->terrainGenerator.craterHeight = 1.0f;
 
-	planet_char->terrainGenerator.numLayers = 10;
-	planet_char->terrainGenerator.noiseStrength = 2.0f;
+	planet_char->terrainGenerator.numLayers = 8;
+	planet_char->terrainGenerator.noiseStrength = 10.0f;
 	planet_char->terrainGenerator.noiseHeightShift = 0.0f;
+	planet_char->terrainGenerator.noiseScale = 0.25f;
 	planet_char->terrainGenerator.surfaceColor = glm::vec4(0.396f, 0.58f, 0.306f, 1.0f);
 	planet_char->terrainGenerator.peakColor = glm::vec4(0.569f, 0.498f, 0.286f, 1.0f);
 
+	planet_char->mass = 1000000000;
+	planet_char->mpr = 12.0; // 12 minutes for one rot
+
 	planet_char->Generate();
-	planet_char->transform->local_position = glm::vec3(0.0f, 0.0f, -10000.0f);
+	planet_char->transform->local_position = glm::vec3(0.0f, 0.0f, -50000.0f);
 	planet_char->transform->UpdateMatrix();
 
+	std::shared_ptr<Universe::Planet> p_2 = std::make_shared<Universe::Planet>();
+	p_2->planetShader = shader;
+	p_2->radius = 50;
+	p_2->resolution = 32;
+	p_2->LODradii = { 6.0f, 3.0f, 1.0f, 0.8f };
+	p_2->mass = 100000;
+	p_2->physicsBody.velocity = glm::vec3(0.0f, 0.0f, -70.0f);
 
-	std::shared_ptr<Universe::Planet> char_moon = std::make_shared<Universe::Planet>();
-	char_moon->planetShader = shader;
-	char_moon->radius = 20;
-	char_moon->resolution = 50;
-	char_moon->LODradii = { 6.0f, 4.0f, 2.0f, 1.0f };
-
-	char_moon->terrainGenerator.numCraters = 20;
-	char_moon->terrainGenerator.sizeFalloff = 5.0f;
-	char_moon->terrainGenerator.baseSize = 0.8f;
-	char_moon->terrainGenerator.sizeExaggeration = 5.0f;
-	char_moon->terrainGenerator.smoothingK = 0.1f;
-
-	char_moon->terrainGenerator.numLayers = 8;
-	char_moon->terrainGenerator.noiseStrength = 2.0f;
-	char_moon->terrainGenerator.noiseHeightShift = 0.0f;
-
-	char_moon->Generate();
-	char_moon->transform->local_position = glm::vec3(500.0f, 0.0f, -9700.0f);
-	char_moon->transform->UpdateMatrix();
-
+	p_2->Generate();
+	p_2->transform->local_position = glm::vec3(2000.0f, 0.0f, -50000.0f);
+	p_2->transform->UpdateMatrix();
 
 	Universe::AtmosphereConfig planet_char_atmo;
 	planet_char_atmo.centre = planet_char->transform->world_position;
 	planet_char_atmo.planetRadius = planet_char->radius;
-	planet_char_atmo.densityFalloff = 5.0f;
-	planet_char_atmo.atmosphereHeight = 40.0f;
+	planet_char_atmo.densityFalloff = 8.0f;
+	planet_char_atmo.atmosphereHeight = 100.0f;
 	planet_char_atmo.scatteringCoefficient = 250.0f;
 	planet_char_atmo.wavelengths = glm::vec3(700.0f, 550.0f, 440.0f);
-	planet_char_atmo.scatteringStrength = 0.75f;
-	planet_char_atmo.intensity = 0.8f;
+	planet_char_atmo.scatteringStrength = 0.7f;
+	planet_char_atmo.intensity = 1.0f;
 
 
 	// Sun
 	std::shared_ptr<Universe::Planet> sun = std::make_shared<Universe::Planet>();
 	sun->planetShader = unlit;
-	sun->radius = 600;
+	sun->radius = 1000;
 	sun->resolution = 50;
 	sun->LODradii = { };
 
 	sun->terrainGenerator.numCraters = 0;
 
 	sun->terrainGenerator.numLayers = 2;
-	sun->terrainGenerator.noiseStrength = 2.0f;
+	sun->terrainGenerator.noiseStrength = 10.0f;
 	sun->terrainGenerator.noiseHeightShift = 0.0f;
 	sun->terrainGenerator.noiseBaseFrequency = 0.025f;
 
 	sun->terrainGenerator.surfaceColor = glm::vec4(1.0f, 0.8f, 0.3f, 1.0f);
 	sun->terrainGenerator.peakColor = glm::vec4(1.0f, 0.9f, 0.6f, 1.0f);
+	sun->mass = 0;
 
 	sun->Generate();
 	sun->transform->local_position = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -139,7 +138,7 @@ int main() {
 	// NEED TO FIX, if planet_char is first, the subdivisions break somehow
 	Universe::UniverseManager::Get().Init(player.camera);
 	Universe::UniverseManager::Get().planets.push_back(sun);
-	Universe::UniverseManager::Get().planets.push_back(char_moon);
+	Universe::UniverseManager::Get().planets.push_back(p_2);
 	Universe::UniverseManager::Get().planets.push_back(planet_char);
 
 	Universe::UniverseManager::Get().atmosphereRenderer->atmosphere_configs.push_back(planet_char_atmo);
@@ -155,15 +154,15 @@ int main() {
 	while (!glfwWindowShouldClose(window)) {
 		Galax::Time::get().update();
 
-		if (!player.transform->HasParent()) {
-			player.transform->UpdateMatrix();
-		}
-
-		player.camera.UpdateMatrix(windowWidth, windowHeight);
-		player.Move(window);
 		player.Look(window);
+		player.Move(window);
+
+		if (!player.transform->HasParent()) 
+			player.transform->UpdateMatrix();
 		
-		planet_char->transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), 1.0f * Galax::Time::get().deltaTime);
+		player.camera.UpdateMatrix(windowWidth, windowHeight);
+
+		
 		Universe::UniverseManager::Get().Update(player);
 		Universe::UniverseManager::Get().Render(player.camera, sun.get(), windowWidth, windowHeight);
 		

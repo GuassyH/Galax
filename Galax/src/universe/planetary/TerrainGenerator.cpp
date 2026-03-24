@@ -49,6 +49,7 @@ void TerrainGenerator::ApplyTerrain(CubeSphere::Chunk* chunk) {
 	terrain_compute.SetFloat("craterDepth", craterDepth);
 	terrain_compute.SetFloat("craterSteepness", craterSteepness);
 	terrain_compute.SetFloat("craterWidth", craterWidth);
+	terrain_compute.SetFloat("craterHeight", craterHeight);
 
 	terrain_compute.SetFloat("rimSteepness", rimSteepness);
 	terrain_compute.SetFloat("rimWidth", rimWidth);
@@ -59,6 +60,7 @@ void TerrainGenerator::ApplyTerrain(CubeSphere::Chunk* chunk) {
 	terrain_compute.SetFloat("noiseStrength", noiseStrength);
 	terrain_compute.SetFloat("noiseBaseFrequency", noiseBaseFrequency);
 	terrain_compute.SetFloat("noiseHeightShift", noiseHeightShift);
+	terrain_compute.SetFloat("noiseScale", noiseScale);
 
 	terrain_compute.SetVec4("peakColor", peakColor);
 	terrain_compute.SetVec4("surfaceColor", surfaceColor);

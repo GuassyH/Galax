@@ -42,7 +42,7 @@ void Player::Move(GLFWwindow* window) {
 
 	float multiplier = 1.0f;
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT))
-		multiplier = 10.0f;
+		multiplier = 25.0f;
 
 	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL))
 		multiplier = 0.3f;
@@ -92,6 +92,7 @@ void Player::Look(GLFWwindow* window) {
 
 		glm::mat3 rot(right, up, -forward);
 		this->transform->SetWorldRotation(glm::quat_cast(rot));
+		this->transform->UpdateMatrix();
 	}
 
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) != GLFW_PRESS) {

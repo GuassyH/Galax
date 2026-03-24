@@ -36,6 +36,7 @@ public:
 	float rimSteepness = 2.3f; // Default 2.3
 	float rimWidth = 4.2f; // Default 4.2
 	float smoothingK = 0.1f; // Default 0.1
+	float craterHeight = 1.0;
 
 	// Noise
 	glm::vec3 noiseCentre = glm::vec3(0.0f);
@@ -43,6 +44,7 @@ public:
 	float noiseStrength = 1.0f; // Default 1
 	float noiseBaseFrequency = 0.1f;  // Default 0.1
 	float noiseHeightShift = 0.0f; // Default 0
+	float noiseScale = 1.0f; // bigger value is like zooming in the noise
 
 	// Colors
 	glm::vec4 peakColor = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);

@@ -1,4 +1,5 @@
 #include "Planet.h"
+#include "core/Time.h"
 
 namespace Universe {
 
@@ -18,18 +19,29 @@ namespace Universe {
 	}
 
 
-	void Planet::Render(Camera& camera) {
+	void Planet::Render(Camera& camera, Planet* sun) {
 		for (auto& face : faces) {
 			if (!face.should_render)
 				continue;
 
-			CubeSphere::RenderChunk(face.root_chunk, camera, planetShader);
+			CubeSphere::RenderChunk(face.root_chunk, sun->transform.get(), camera, planetShader);
 		}
 	}
 
 	/// Update
 
 	void Planet::Update(Camera& camera) {
+		// how many minutes (mpr) per rotation
+		// how many seconds (mpr / 60.0) per rotation
+		// spr = mpr / 60.0
+		// 
+
+		if (mpr != 0.0f) {
+			float spr = mpr * 60.0f;
+			float angle_deg = (360.0f / spr) * Galax::Time::get().deltaTime;
+			transform->AddRotationAroundAxis(rotation_axis, angle_deg, false);
+		}
+
 		transform->UpdateMatrix();
 
 		if (!LODradii.empty())

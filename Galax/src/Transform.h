@@ -8,6 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 struct Transform {
 public:
@@ -43,12 +44,11 @@ public:
 
 	// THE RETRANSFORM IS WRONG
 	Transform* SetParent(Transform* new_parent, bool change_translate = true) {
-		// If same parent, nothing to do
+        // If same parent, nothing to do
 		if (parent == new_parent)
 			return parent;
 		if (IsDescendant(new_parent, this))
 			return parent;
-
 
 		// Remove from old parent's children list
 		if (parent) {
@@ -56,12 +56,10 @@ public:
 			siblings.erase(std::remove(siblings.begin(), siblings.end(), this), siblings.end());
 		}
 
-		// Recalculate position and stuff
-		if (parent && change_translate) {
-			local_scale *= parent->world_scale;
-			local_position += parent->world_position;
-			local_rotation = parent->world_rotation * local_rotation;
-		}
+		// If we should preserve world transform, compute current world matrix
+		glm::mat4 worldModel = modelMatrix; // assume modelMatrix is up-to-date
+		// If it's not up-to-date, try to update this branch only
+		// Note: caller should ensure transforms are updated before reparenting when possible
 
 		// Assign new parent
 		parent = new_parent;
@@ -71,13 +69,40 @@ public:
 			parent->children.push_back(this);
 
 			if (change_translate) {
-				// Recalculate position and stuff
-				local_scale.x /= parent->world_scale.x != 0 ? parent->world_scale.x : 1.0f;
-				local_scale.y /= parent->world_scale.y != 0 ? parent->world_scale.y : 1.0f;
-				local_scale.z /= parent->world_scale.z != 0 ? parent->world_scale.z : 1.0f;
+				// Compute local matrix relative to new parent
+				glm::mat4 parentWorld = parent->GetMatrix();
+				glm::mat4 localModel = glm::inverse(parentWorld) * worldModel;
 
-				local_position -= parent->world_position;
-				local_rotation = glm::inverse(parent->world_rotation) * local_rotation;
+				// Decompose localModel into T, R, S
+				// Translation
+				local_position = glm::vec3(localModel[3]);
+				// Scale
+				local_scale.x = glm::length(glm::vec3(localModel[0]));
+				local_scale.y = glm::length(glm::vec3(localModel[1]));
+				local_scale.z = glm::length(glm::vec3(localModel[2]));
+				// Rotation
+				glm::mat3 rotMat(
+					glm::vec3(localModel[0]) / (local_scale.x != 0.0f ? local_scale.x : 1.0f),
+					glm::vec3(localModel[1]) / (local_scale.y != 0.0f ? local_scale.y : 1.0f),
+					glm::vec3(localModel[2]) / (local_scale.z != 0.0f ? local_scale.z : 1.0f)
+				);
+				local_rotation = glm::normalize(glm::quat_cast(rotMat));
+			}
+		}
+		else {
+			// No parent: keep world transform as local
+			if (change_translate) {
+				glm::mat4 localModel = worldModel;
+				local_position = glm::vec3(localModel[3]);
+				local_scale.x = glm::length(glm::vec3(localModel[0]));
+				local_scale.y = glm::length(glm::vec3(localModel[1]));
+				local_scale.z = glm::length(glm::vec3(localModel[2]));
+				glm::mat3 rotMat(
+					glm::vec3(localModel[0]) / (local_scale.x != 0.0f ? local_scale.x : 1.0f),
+					glm::vec3(localModel[1]) / (local_scale.y != 0.0f ? local_scale.y : 1.0f),
+					glm::vec3(localModel[2]) / (local_scale.z != 0.0f ? local_scale.z : 1.0f)
+				);
+				local_rotation = glm::normalize(glm::quat_cast(rotMat));
 			}
 		}
 

@@ -111,8 +111,9 @@ vec3 calculateLight(Atmosphere atmosphere, float atmosphereRadius, vec3 rayOrigi
 	float stepSize = dstThrough / (numInScatteringPoints - 1);
 	float viewRayOpticalDepth = 0.0;
 
+	vec3 dirToSun = normalize(sunPos - atmosphere.centre);
+	
 	for(int i = 0; i < numInScatteringPoints; i++){
-		vec3 dirToSun = normalize(sunPos - inScatterPoint);
 		
 		float sunRayLength = raySphere(atmosphere.centre, atmosphereRadius, inScatterPoint, dirToSun).y;
 		float sunRayOpticalDepth = opticalDepth(atmosphere, atmosphereRadius, inScatterPoint, dirToSun, sunRayLength);

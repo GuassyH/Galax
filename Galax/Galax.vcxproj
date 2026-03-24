@@ -167,6 +167,7 @@
     <ClInclude Include="src\shaders\Shader.h" />
     <ClInclude Include="src\Transform.h" />
     <ClInclude Include="src\universe\atmosphere\Atmosphere.h" />
+    <ClInclude Include="src\universe\PhysicsBody.h" />
     <ClInclude Include="src\universe\planetary\CubeSphere.h" />
     <ClInclude Include="src\universe\planetary\Planet.h" />
     <ClInclude Include="src\universe\planetary\TerrainGenerator.h" />
