@@ -151,6 +151,14 @@ void CubeSphere::RenderChunk(Chunk* chunk, Camera& camera, Shader& shader) {
 		return;
 
 	if (chunk->isLeaf) {
+		shader.Use();
+		shader.SetMat4("model", chunk->mesh.transform->GetMatrix());
+		shader.SetMat4("view", camera.GetView());
+		shader.SetMat4("proj", camera.GetProj());
+		shader.SetVec3("camPos", camera.transform->world_position);
+		shader.SetVec3("sunDir", glm::normalize(chunk->mesh.transform->world_position - glm::vec3(0.0f)));
+		shader.SetVec3("centre", chunk->mesh.transform->world_position);
+
 		chunk->mesh.Render(camera, shader);
 	}
 	else if (chunk->hasNodes) {

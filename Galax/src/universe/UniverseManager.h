@@ -4,6 +4,7 @@
 #include "planetary/Planet.h"
 #include "stars/StarSkybox.h"
 #include "atmosphere/Atmosphere.h"
+#include "Player.h"
 
 namespace Universe {
 	class UniverseManager {
@@ -25,7 +26,7 @@ namespace Universe {
 
 		void Init(Camera& camera);
 
-		void Update(Camera& camera);
+		void Update(Player& player);
 		void Render(Camera& camera, Planet& sun, int w, int h);
 
 		void Shutdown();

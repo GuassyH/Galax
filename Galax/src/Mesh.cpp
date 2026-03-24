@@ -39,13 +39,6 @@ bool Mesh::Calculate() {
 // Transform matrix must be updated first, with planets its done automatically
 void Mesh::Render(Camera& camera, Shader& shader) { 
 	vao.Bind();
-	shader.Use();
-	shader.SetMat4("model", transform->GetMatrix());
-	shader.SetMat4("view", camera.GetView());
-	shader.SetMat4("proj", camera.GetProj());
-	shader.SetVec3("camPos", camera.transform->world_position);
-	shader.SetVec3("sunDir", glm::normalize(transform->world_position - glm::vec3(0.0f)));
-
 	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, 0);
 }
 

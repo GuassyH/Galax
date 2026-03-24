@@ -19,9 +19,6 @@ public:
 	float nearPlane = 0.1f;
 	float farPlane = 1000.0f;
 
-	float speed = 100.0f;
-	float sensitivity = 0.002f;
-
 
 	glm::mat4& GetView() { return view; }
 	glm::mat4& GetProj() { return proj; }

@@ -139,6 +139,7 @@
     <ClCompile Include="src\core\Log.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
+    <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\shaders\ComputeShader.cpp" />
     <ClCompile Include="src\shaders\FragShader.cpp" />
     <ClCompile Include="src\shaders\Shader.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="src\core\Log.h" />
     <ClInclude Include="src\core\Maths.h" />
     <ClInclude Include="src\Mesh.h" />
+    <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\rendering\EBO.h" />
     <ClInclude Include="src\rendering\VAO.h" />
     <ClInclude Include="src\rendering\VBO.h" />
@@ -178,6 +180,8 @@
     <None Include="assets\shaders\default.vert" />
     <None Include="assets\shaders\default_unlit.frag" />
     <None Include="assets\shaders\default_unlit.vert" />
+    <None Include="assets\shaders\planet.frag" />
+    <None Include="assets\shaders\planet.vert" />
     <None Include="assets\shaders\stars.frag" />
     <None Include="assets\shaders\stars.vert" />
     <None Include="assets\shaders\terrain.comp" />

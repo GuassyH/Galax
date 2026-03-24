@@ -22,6 +22,7 @@
 #include "shaders/Shader.h"
 #include "shaders/FragShader.h"
 #include "Camera.h"
+#include "Player.h"
 
 #include "core/Log.h"
 #include "core/Time.h"
@@ -48,15 +49,11 @@ int main() {
 		return -1;
 	}
 
-	Camera camera = Camera();
-	camera.fovDeg = 90.0f;
-	camera.nearPlane = 0.1f;
-	camera.farPlane = 10000.0f;
-	camera.transform->local_position = glm::vec3(3000.0f, 0.0f, -3750.0f);
-	camera.transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), 90.0f);
+	Player player;
+	player.transform->local_position = glm::vec3(200.0f, 0.0f, -10000.0f);
+	player.transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), 180);
 
-
-	FragShader shader("assets/shaders/default.frag", "assets/shaders/default.vert");
+	FragShader shader("assets/shaders/planet.frag", "assets/shaders/planet.vert");
 	FragShader unlit("assets/shaders/default_unlit.frag", "assets/shaders/default_unlit.vert");
 	
 	// Charley
@@ -66,24 +63,44 @@ int main() {
 	planet_char.resolution = 50;
 	planet_char.LODradii = { 6.0f, 4.0f, 2.0f, 1.0f };
 	
-	planet_char.terrainGenerator.numCraters = 200;
-	planet_char.terrainGenerator.sizeFalloff = 5.0f;
-	planet_char.terrainGenerator.baseSize = 0.8f;
-	planet_char.terrainGenerator.sizeExaggeration = 5.0f;
+	planet_char.terrainGenerator.numCraters = 100;
+	planet_char.terrainGenerator.sizeFalloff = 3.0f;
+	planet_char.terrainGenerator.baseSize = 1.0f;
+	planet_char.terrainGenerator.sizeExaggeration = 4.0f;
 	planet_char.terrainGenerator.smoothingK = 0.1f;
 
 	planet_char.terrainGenerator.numLayers = 10;
 	planet_char.terrainGenerator.noiseStrength = 2.0f;
 	planet_char.terrainGenerator.noiseHeightShift = 0.0f;
 
-	// planet_char.terrainGenerator.surfaceColor = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f);
 	planet_char.terrainGenerator.surfaceColor = glm::vec4(0.396f, 0.58f, 0.306f, 1.0f);
-	// planet_char.terrainGenerator.peakColor = glm::vec4(0.58f, 0.51f, 0.306f, 1.0f);
 	planet_char.terrainGenerator.peakColor = glm::vec4(0.569f, 0.498f, 0.286f, 1.0f);
 	
 	planet_char.Generate();
-	planet_char.transform->local_position = glm::vec3(0.0f, 0.0f, -7500.0f);
+	planet_char.transform->local_position = glm::vec3(0.0f, 0.0f, -10000.0f);
 	planet_char.transform->UpdateMatrix();
+
+
+	Universe::Planet char_moon = Universe::Planet();
+	char_moon.planetShader = shader;
+	char_moon.radius = 20;
+	char_moon.resolution = 50;
+	char_moon.LODradii = { 6.0f, 4.0f, 2.0f, 1.0f };
+
+	char_moon.terrainGenerator.numCraters = 20;
+	char_moon.terrainGenerator.sizeFalloff = 5.0f;
+	char_moon.terrainGenerator.baseSize = 0.8f;
+	char_moon.terrainGenerator.sizeExaggeration = 5.0f;
+	char_moon.terrainGenerator.smoothingK = 0.1f;
+
+	char_moon.terrainGenerator.numLayers = 8;
+	char_moon.terrainGenerator.noiseStrength = 2.0f;
+	char_moon.terrainGenerator.noiseHeightShift = 0.0f;
+
+	char_moon.Generate();
+	char_moon.transform->local_position = glm::vec3(500.0f, 0.0f, -9700.0f);
+	char_moon.transform->UpdateMatrix();
+
 
 	Universe::AtmosphereConfig planet_char_atmo;
 	planet_char_atmo.centre = planet_char.transform->world_position;
@@ -99,7 +116,7 @@ int main() {
 	// Sun
 	Universe::Planet sun = Universe::Planet();
 	sun.planetShader = unlit;
-	sun.radius = 250;
+	sun.radius = 600;
 	sun.resolution = 50;
 	sun.LODradii = { };
 
@@ -119,8 +136,9 @@ int main() {
 
 
 	// NEED TO FIX, if planet_char is first, the subdivisions break somehow
-	Universe::UniverseManager::Get().Init(camera);
+	Universe::UniverseManager::Get().Init(player.camera);
 	Universe::UniverseManager::Get().planets.push_back(sun);
+	Universe::UniverseManager::Get().planets.push_back(char_moon);
 	Universe::UniverseManager::Get().planets.push_back(planet_char);
 
 	Universe::UniverseManager::Get().atmosphereRenderer->atmosphere_configs.push_back(planet_char_atmo);
@@ -132,12 +150,13 @@ int main() {
 	while (!glfwWindowShouldClose(window)) {
 		Galax::Time::get().update();
 
-		camera.Move(window);
-		camera.Look(window);
-		camera.UpdateMatrix(windowWidth, windowHeight);
+		player.transform->UpdateMatrix();
+		player.camera.UpdateMatrix(windowWidth, windowHeight);
+		player.Move(window);
+		player.Look(window);
 		
-		Universe::UniverseManager::Get().Update(camera);
-		Universe::UniverseManager::Get().Render(camera, sun, windowWidth, windowHeight);
+		Universe::UniverseManager::Get().Update(player);
+		Universe::UniverseManager::Get().Render(player.camera, sun, windowWidth, windowHeight);
 		
 		glfwPollEvents();
 		glfwSwapBuffers(window);

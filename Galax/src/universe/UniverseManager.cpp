@@ -9,39 +9,27 @@ namespace Universe {
 		atmosphereRenderer = std::make_unique<Universe::AtmosphereRenderer>();
 		
 		starSkybox = std::make_unique<Universe::StarSkybox>();
-		starSkybox->Generate(3000, 20, 8, camera.farPlane * 0.8f);
+		starSkybox->Generate(3000, 60, 24, camera.farPlane * 0.8f);
 	}
 
-	void UniverseManager::Update(Camera& camera) {
+	void UniverseManager::Update(Player& player) {
 
-		for (auto& planet : planets) 
-			planet.Update(camera);
+		for (auto& planet : planets)
+			planet.Update(player.camera);
+
+		Universe::Planet* closestPlanet = nullptr;
+
 
 		for (auto& planet : planets) {
-			if (glm::distance(camera.transform->world_position, planet.transform->world_position) < planet.radius * 2) {
-				// set camera up
-				glm::vec3 up = glm::normalize(
-					camera.transform->world_position - planet.transform->world_position
-				);
-
-				// Keep forward but make it tangent
-				glm::vec3 forward = camera.transform->forward;
-				forward = glm::normalize(forward - up * glm::dot(forward, up));
-
-				// Rebuild basis
-				glm::vec3 right = glm::normalize(glm::cross(forward, up));
-				forward = glm::normalize(glm::cross(up, right));
-
-				// Convert to rotation
-				glm::mat3 rot(right, up, -forward);
+			if (glm::distance(player.transform->world_position, planet.transform->world_position) < planet.radius * 2) {
+				closestPlanet = &planet;
 				break;
-			}
-			else {
-
 			}
 		}
 
-		starSkybox->Update(camera.transform.get());
+		player.SetParentPlanet(closestPlanet);
+
+		starSkybox->Update(player.transform.get());
 	}
 
 	void CreateBuffers(GLuint* framebuffer, GLuint* screentex, GLuint* depthtex, int w, int h) {
@@ -101,7 +89,7 @@ namespace Universe {
 		glClearColor(0.01f, 0.01f, 0.01f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		for (auto& planet : planets) 
+		for (auto& planet : planets)
 			planet.Render(camera);
 
 		// Write to the atmosphere FBO
