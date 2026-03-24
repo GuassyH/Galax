@@ -12,10 +12,11 @@ Camera::~Camera() {
 }
 
 void Camera::UpdateMatrix(unsigned int windowWidth, unsigned int windowHeight) {
-	transform->UpdateMatrix();
 
-	proj = glm::perspective(glm::radians(fovDeg), (float)windowWidth / (float)windowHeight, nearPlane, farPlane);
-	view = glm::lookAt(transform->world_position, transform->world_position + transform->forward, transform->up);
+	if (windowHeight != 0) {
+		proj = glm::perspective(glm::radians(fovDeg), (float)windowWidth / (float)windowHeight, nearPlane, farPlane);
+		view = glm::lookAt(transform->world_position, transform->world_position + transform->forward, transform->up);
+	}
 }
 
 

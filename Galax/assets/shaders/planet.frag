@@ -15,7 +15,7 @@ float directionalLight(){
 	// diffuse lighting
 	vec3 lightDirection = -normalize(sunDir);
 	vec3 n = normalize(normal);
-	float diffuse = max(dot(n, lightDirection), 0.01);
+	float diffuse = max(dot(n, lightDirection), 0.1);
 
 	// specular lighting
 	float specularLight = 0.50;

@@ -31,6 +31,7 @@
 
 void frame_buffer_size_callback(GLFWwindow* window, int width, int height);
 int InitRenderer(GLFWwindow*& window, GLFWmonitor*& monitor);
+void SetFullscreen(GLFWwindow* window, bool fullscreen);
 
 int windowWidth = 1920;
 int windowHeight = 1080;
@@ -50,61 +51,61 @@ int main() {
 	}
 
 	Player player;
-	player.transform->local_position = glm::vec3(200.0f, 0.0f, -10000.0f);
+	player.camera.fovDeg = 90.0f;
+	player.transform->local_position = glm::vec3(400.0f, 0.0f, -10000.0f);
 	player.transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), 180);
 
 	FragShader shader("assets/shaders/planet.frag", "assets/shaders/planet.vert");
 	FragShader unlit("assets/shaders/default_unlit.frag", "assets/shaders/default_unlit.vert");
 	
 	// Charley
-	Universe::Planet planet_char = Universe::Planet();
-	planet_char.planetShader = shader;
-	planet_char.radius = 100;
-	planet_char.resolution = 50;
-	planet_char.LODradii = { 6.0f, 4.0f, 2.0f, 1.0f };
-	
-	planet_char.terrainGenerator.numCraters = 100;
-	planet_char.terrainGenerator.sizeFalloff = 3.0f;
-	planet_char.terrainGenerator.baseSize = 1.0f;
-	planet_char.terrainGenerator.sizeExaggeration = 4.0f;
-	planet_char.terrainGenerator.smoothingK = 0.1f;
+	std::shared_ptr<Universe::Planet> planet_char = std::make_shared<Universe::Planet>();
+	planet_char->planetShader = shader;
+	planet_char->radius = 100;
+	planet_char->resolution = 50;
+	planet_char->LODradii = { 6.0f, 4.0f, 2.0f, 1.0f };
 
-	planet_char.terrainGenerator.numLayers = 10;
-	planet_char.terrainGenerator.noiseStrength = 2.0f;
-	planet_char.terrainGenerator.noiseHeightShift = 0.0f;
+	planet_char->terrainGenerator.numCraters = 100;
+	planet_char->terrainGenerator.sizeFalloff = 3.0f;
+	planet_char->terrainGenerator.baseSize = 1.0f;
+	planet_char->terrainGenerator.sizeExaggeration = 4.0f;
+	planet_char->terrainGenerator.smoothingK = 0.1f;
 
-	planet_char.terrainGenerator.surfaceColor = glm::vec4(0.396f, 0.58f, 0.306f, 1.0f);
-	planet_char.terrainGenerator.peakColor = glm::vec4(0.569f, 0.498f, 0.286f, 1.0f);
-	
-	planet_char.Generate();
-	planet_char.transform->local_position = glm::vec3(0.0f, 0.0f, -10000.0f);
-	planet_char.transform->UpdateMatrix();
+	planet_char->terrainGenerator.numLayers = 10;
+	planet_char->terrainGenerator.noiseStrength = 2.0f;
+	planet_char->terrainGenerator.noiseHeightShift = 0.0f;
+	planet_char->terrainGenerator.surfaceColor = glm::vec4(0.396f, 0.58f, 0.306f, 1.0f);
+	planet_char->terrainGenerator.peakColor = glm::vec4(0.569f, 0.498f, 0.286f, 1.0f);
+
+	planet_char->Generate();
+	planet_char->transform->local_position = glm::vec3(0.0f, 0.0f, -10000.0f);
+	planet_char->transform->UpdateMatrix();
 
 
-	Universe::Planet char_moon = Universe::Planet();
-	char_moon.planetShader = shader;
-	char_moon.radius = 20;
-	char_moon.resolution = 50;
-	char_moon.LODradii = { 6.0f, 4.0f, 2.0f, 1.0f };
+	std::shared_ptr<Universe::Planet> char_moon = std::make_shared<Universe::Planet>();
+	char_moon->planetShader = shader;
+	char_moon->radius = 20;
+	char_moon->resolution = 50;
+	char_moon->LODradii = { 6.0f, 4.0f, 2.0f, 1.0f };
 
-	char_moon.terrainGenerator.numCraters = 20;
-	char_moon.terrainGenerator.sizeFalloff = 5.0f;
-	char_moon.terrainGenerator.baseSize = 0.8f;
-	char_moon.terrainGenerator.sizeExaggeration = 5.0f;
-	char_moon.terrainGenerator.smoothingK = 0.1f;
+	char_moon->terrainGenerator.numCraters = 20;
+	char_moon->terrainGenerator.sizeFalloff = 5.0f;
+	char_moon->terrainGenerator.baseSize = 0.8f;
+	char_moon->terrainGenerator.sizeExaggeration = 5.0f;
+	char_moon->terrainGenerator.smoothingK = 0.1f;
 
-	char_moon.terrainGenerator.numLayers = 8;
-	char_moon.terrainGenerator.noiseStrength = 2.0f;
-	char_moon.terrainGenerator.noiseHeightShift = 0.0f;
+	char_moon->terrainGenerator.numLayers = 8;
+	char_moon->terrainGenerator.noiseStrength = 2.0f;
+	char_moon->terrainGenerator.noiseHeightShift = 0.0f;
 
-	char_moon.Generate();
-	char_moon.transform->local_position = glm::vec3(500.0f, 0.0f, -9700.0f);
-	char_moon.transform->UpdateMatrix();
+	char_moon->Generate();
+	char_moon->transform->local_position = glm::vec3(500.0f, 0.0f, -9700.0f);
+	char_moon->transform->UpdateMatrix();
 
 
 	Universe::AtmosphereConfig planet_char_atmo;
-	planet_char_atmo.centre = planet_char.transform->world_position;
-	planet_char_atmo.planetRadius = planet_char.radius;
+	planet_char_atmo.centre = planet_char->transform->world_position;
+	planet_char_atmo.planetRadius = planet_char->radius;
 	planet_char_atmo.densityFalloff = 5.0f;
 	planet_char_atmo.atmosphereHeight = 40.0f;
 	planet_char_atmo.scatteringCoefficient = 250.0f;
@@ -114,25 +115,25 @@ int main() {
 
 
 	// Sun
-	Universe::Planet sun = Universe::Planet();
-	sun.planetShader = unlit;
-	sun.radius = 600;
-	sun.resolution = 50;
-	sun.LODradii = { };
+	std::shared_ptr<Universe::Planet> sun = std::make_shared<Universe::Planet>();
+	sun->planetShader = unlit;
+	sun->radius = 600;
+	sun->resolution = 50;
+	sun->LODradii = { };
 
-	sun.terrainGenerator.numCraters = 0;
+	sun->terrainGenerator.numCraters = 0;
 
-	sun.terrainGenerator.numLayers = 2;
-	sun.terrainGenerator.noiseStrength = 2.0f;
-	sun.terrainGenerator.noiseHeightShift = 0.0f;
-	sun.terrainGenerator.noiseBaseFrequency = 0.025f;
+	sun->terrainGenerator.numLayers = 2;
+	sun->terrainGenerator.noiseStrength = 2.0f;
+	sun->terrainGenerator.noiseHeightShift = 0.0f;
+	sun->terrainGenerator.noiseBaseFrequency = 0.025f;
 
-	sun.terrainGenerator.surfaceColor = glm::vec4(1.0f, 0.8f, 0.3f, 1.0f);
-	sun.terrainGenerator.peakColor = glm::vec4(1.0f, 0.9f, 0.6f, 1.0f);
+	sun->terrainGenerator.surfaceColor = glm::vec4(1.0f, 0.8f, 0.3f, 1.0f);
+	sun->terrainGenerator.peakColor = glm::vec4(1.0f, 0.9f, 0.6f, 1.0f);
 
-	sun.Generate();
-	sun.transform->local_position = glm::vec3(0.0f, 0.0f, 0.0f);
-	sun.transform->UpdateMatrix();
+	sun->Generate();
+	sun->transform->local_position = glm::vec3(0.0f, 0.0f, 0.0f);
+	sun->transform->UpdateMatrix();
 
 
 	// NEED TO FIX, if planet_char is first, the subdivisions break somehow
@@ -146,21 +147,31 @@ int main() {
 
 	double current_time = 0.0;
 
+	bool isFullscreen = false;
+	bool isF11 = false;
+
+	SetFullscreen(window, true);
 	// Update Loop
 	while (!glfwWindowShouldClose(window)) {
 		Galax::Time::get().update();
 
-		player.transform->UpdateMatrix();
+		if (!player.transform->HasParent()) {
+			player.transform->UpdateMatrix();
+		}
+
 		player.camera.UpdateMatrix(windowWidth, windowHeight);
 		player.Move(window);
 		player.Look(window);
 		
+		planet_char->transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), 1.0f * Galax::Time::get().deltaTime);
 		Universe::UniverseManager::Get().Update(player);
-		Universe::UniverseManager::Get().Render(player.camera, sun, windowWidth, windowHeight);
+		Universe::UniverseManager::Get().Render(player.camera, sun.get(), windowWidth, windowHeight);
 		
 		glfwPollEvents();
 		glfwSwapBuffers(window);
 
+		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+			glfwSetWindowShouldClose(window, true);
 	}
 
 	Universe::UniverseManager::Get().Shutdown();
@@ -211,6 +222,25 @@ int InitRenderer(GLFWwindow*& window, GLFWmonitor*& monitor) {
 	glCullFace(GL_BACK);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
+}
+
+// Nabbed code from other source... NOT MY FULLSCREEN CODE
+void SetFullscreen(GLFWwindow* window, bool fullscreen) {
+	static int windowedX, windowedY, windowedW, windowedH;
+
+	if (fullscreen) {
+		// Save windowed position/size
+		glfwGetWindowPos(window, &windowedX, &windowedY);
+		glfwGetWindowSize(window, &windowedW, &windowedH);
+
+		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+		glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+	}
+	else {
+		glfwSetWindowMonitor(window, nullptr, windowedX, windowedY, windowedW, windowedH, 0);
+	}
 }
 
 void frame_buffer_size_callback(GLFWwindow* window, int width, int height) {

@@ -22,12 +22,12 @@ namespace Universe {
 
 		std::unique_ptr<AtmosphereRenderer> atmosphereRenderer;
 		std::unique_ptr<StarSkybox> starSkybox;
-		std::vector<Planet> planets;
+		std::vector<std::shared_ptr<Planet>> planets;
 
 		void Init(Camera& camera);
 
 		void Update(Player& player);
-		void Render(Camera& camera, Planet& sun, int w, int h);
+		void Render(Camera& camera, Planet* sun, int w, int h);
 
 		void Shutdown();
 

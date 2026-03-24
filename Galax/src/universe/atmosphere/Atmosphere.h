@@ -40,7 +40,7 @@ namespace Universe {
 		int numOpticalDepthPoints = 8;
 
 		void UpdateBuffers();
-		void Render(Camera& camera, Universe::Planet& sun, GLuint screenTex, GLuint starTex, GLuint depthTex, int w, int h);
+		void Render(Camera& camera, Universe::Planet* sun, GLuint screenTex, GLuint starTex, GLuint depthTex, int w, int h);
 
 		std::vector<AtmosphereConfig> atmosphere_configs;
 		

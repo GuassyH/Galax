@@ -16,7 +16,7 @@ public:
 	void Move(GLFWwindow* window);
 	void Look(GLFWwindow* window);
 
-	void SetParentPlanet(Universe::Planet* planet);
+	void AllignToPlanet(Universe::Planet* planet, float _0_1_val);
 
 
 	std::shared_ptr<Transform> transform;

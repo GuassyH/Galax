@@ -50,7 +50,7 @@ namespace Universe {
 		glBufferData(GL_SHADER_STORAGE_BUFFER, atmBufferSize, atmosphere_configs.data(), GL_DYNAMIC_COPY);
 	}
 
-	void AtmosphereRenderer::Render(Camera& camera, Universe::Planet& sun, GLuint screenTex, GLuint starTex, GLuint depthTex, int w, int h) {
+	void AtmosphereRenderer::Render(Camera& camera, Universe::Planet* sun, GLuint screenTex, GLuint starTex, GLuint depthTex, int w, int h) {
 
 		atmosphereShader.Use();
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, atmosphereBuffer);
@@ -71,7 +71,7 @@ namespace Universe {
 		atmosphereShader.SetInt("numAtmospheres", atmosphere_configs.size());
 
 		atmosphereShader.SetVec3("camPos", camera.transform->world_position);
-		atmosphereShader.SetVec3("sunPos", sun.transform->world_position);
+		atmosphereShader.SetVec3("sunPos", sun->transform->world_position);
 
 		atmosphereShader.SetVec2("screenResolution", glm::vec2(w, h));
 

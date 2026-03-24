@@ -156,6 +156,27 @@ public:
 		else
 			local_rotation = glm::normalize(delta * local_rotation); // world space
 	}
+
+	void SetWorldRotation(const glm::quat& desired_world_rotation) {
+		if (parent) {
+			local_rotation = glm::normalize(
+				glm::inverse(parent->world_rotation) * desired_world_rotation
+			);
+		}
+		else {
+			local_rotation = glm::normalize(desired_world_rotation);
+		}
+	}
+
+	void SetWorldPosition(const glm::vec3& pos) {
+		if (parent) {
+			local_position = pos - parent->world_position; // simplified
+		}
+		else {
+			local_position = pos;
+		}
+	}
+
 	Transform() = default;
 
 private:

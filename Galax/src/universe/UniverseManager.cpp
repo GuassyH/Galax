@@ -15,19 +15,21 @@ namespace Universe {
 	void UniverseManager::Update(Player& player) {
 
 		for (auto& planet : planets)
-			planet.Update(player.camera);
+			planet->Update(player.camera);
 
 		Universe::Planet* closestPlanet = nullptr;
-
+		float _0_1_val = 0.0f;
 
 		for (auto& planet : planets) {
-			if (glm::distance(player.transform->world_position, planet.transform->world_position) < planet.radius * 2) {
-				closestPlanet = &planet;
+			float distance = glm::distance(player.transform->world_position, planet->transform->world_position);
+			if (distance < planet->radius * 2) {
+				closestPlanet = planet.get();
+				_0_1_val = distance / (planet->radius * 2.0f);
 				break;
 			}
 		}
 
-		player.SetParentPlanet(closestPlanet);
+		player.AllignToPlanet(closestPlanet, _0_1_val);
 
 		starSkybox->Update(player.transform.get());
 	}
@@ -63,7 +65,7 @@ namespace Universe {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void UniverseManager::Render(Camera& camera, Planet& sun, int w, int h) {
+	void UniverseManager::Render(Camera& camera, Planet* sun, int w, int h) {
 
 		if (w != last_width || h != last_height) {
 			CreateBuffers(&baseFBO, &baseTexture, &baseDepth, w, h);
@@ -90,7 +92,7 @@ namespace Universe {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		for (auto& planet : planets)
-			planet.Render(camera);
+			planet->Render(camera);
 
 		// Write to the atmosphere FBO
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -101,7 +103,7 @@ namespace Universe {
 
 	void UniverseManager::Shutdown() {
 		for (auto& planet : planets) {
-			planet.Delete();
+			planet->Delete();
 		}
 
 		if (baseFBO) glDeleteFramebuffers(1, &baseFBO);
