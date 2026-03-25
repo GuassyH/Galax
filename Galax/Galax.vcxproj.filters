@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Resource Files\assets">
+      <UniqueIdentifier>{10be255f-6e91-4555-8971-44020213c886}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\assets\shaders">
+      <UniqueIdentifier>{01e750e0-145d-44a5-bed6-81c7c5be60e6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -58,6 +64,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universe\ocean\Ocean.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -125,18 +134,43 @@
     <ClInclude Include="src\universe\PhysicsBody.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\universe\ocean\Ocean.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\shaders\default.vert" />
-    <None Include="assets\shaders\default.frag" />
-    <None Include="assets\shaders\terrain.comp" />
-    <None Include="assets\shaders\stars.vert" />
-    <None Include="assets\shaders\stars.frag" />
-    <None Include="assets\shaders\atmosphere.frag" />
-    <None Include="assets\shaders\atmosphere.vert" />
-    <None Include="assets\shaders\default_unlit.frag" />
-    <None Include="assets\shaders\default_unlit.vert" />
-    <None Include="assets\shaders\planet.frag" />
-    <None Include="assets\shaders\planet.vert" />
+    <None Include="assets\shaders\atmosphere.frag">
+      <Filter>Resource Files\assets\shaders</Filter>
+    </None>
+    <None Include="assets\shaders\atmosphere.vert">
+      <Filter>Resource Files\assets\shaders</Filter>
+    </None>
+    <None Include="assets\shaders\default.frag">
+      <Filter>Resource Files\assets\shaders</Filter>
+    </None>
+    <None Include="assets\shaders\default.vert">
+      <Filter>Resource Files\assets\shaders</Filter>
+    </None>
+    <None Include="assets\shaders\default_unlit.frag">
+      <Filter>Resource Files\assets\shaders</Filter>
+    </None>
+    <None Include="assets\shaders\default_unlit.vert">
+      <Filter>Resource Files\assets\shaders</Filter>
+    </None>
+    <None Include="assets\shaders\planet.frag">
+      <Filter>Resource Files\assets\shaders</Filter>
+    </None>
+    <None Include="assets\shaders\planet.vert">
+      <Filter>Resource Files\assets\shaders</Filter>
+    </None>
+    <None Include="assets\shaders\stars.frag">
+      <Filter>Resource Files\assets\shaders</Filter>
+    </None>
+    <None Include="assets\shaders\stars.vert">
+      <Filter>Resource Files\assets\shaders</Filter>
+    </None>
+    <None Include="assets\shaders\terrain.comp">
+      <Filter>Resource Files\assets\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

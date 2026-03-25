@@ -77,13 +77,13 @@ int main() {
 
 	planet_char->terrainGenerator.numLayers = 8;
 	planet_char->terrainGenerator.noiseStrength = 10.0f;
-	planet_char->terrainGenerator.noiseHeightShift = 0.0f;
-	planet_char->terrainGenerator.noiseScale = 0.25f;
+	planet_char->terrainGenerator.noiseHeightShift = -0.5f;
+	planet_char->terrainGenerator.noiseScale = 0.2f;
 	planet_char->terrainGenerator.surfaceColor = glm::vec4(0.396f, 0.58f, 0.306f, 1.0f);
 	planet_char->terrainGenerator.peakColor = glm::vec4(0.569f, 0.498f, 0.286f, 1.0f);
 
 	planet_char->mass = 1000000000;
-	planet_char->mpr = 12.0; // 12 minutes for one rot
+	planet_char->mpr = 24.0; // 12 minutes for one rot
 
 	planet_char->Generate();
 	planet_char->transform->local_position = glm::vec3(0.0f, 0.0f, -50000.0f);
@@ -95,21 +95,21 @@ int main() {
 	p_2->resolution = 32;
 	p_2->LODradii = { 6.0f, 3.0f, 1.0f, 0.8f };
 	p_2->mass = 100000;
-	p_2->physicsBody.velocity = glm::vec3(0.0f, 0.0f, -70.0f);
+	p_2->physicsBody.velocity = glm::vec3(0.0f, 0.0f, -40.0f);
 
 	p_2->Generate();
-	p_2->transform->local_position = glm::vec3(2000.0f, 0.0f, -50000.0f);
+	p_2->transform->local_position = glm::vec3(4000.0f, 0.0f, -50000.0f);
 	p_2->transform->UpdateMatrix();
 
-	Universe::AtmosphereConfig planet_char_atmo;
-	planet_char_atmo.centre = planet_char->transform->world_position;
-	planet_char_atmo.planetRadius = planet_char->radius;
-	planet_char_atmo.densityFalloff = 8.0f;
-	planet_char_atmo.atmosphereHeight = 100.0f;
-	planet_char_atmo.scatteringCoefficient = 250.0f;
-	planet_char_atmo.wavelengths = glm::vec3(700.0f, 550.0f, 440.0f);
-	planet_char_atmo.scatteringStrength = 0.7f;
-	planet_char_atmo.intensity = 1.0f;
+	planet_char->atmosphere_config.centre = planet_char->transform->world_position;
+	planet_char->atmosphere_config.planetRadius = planet_char->radius;
+	planet_char->atmosphere_config.densityFalloff = 8.0f;
+	planet_char->atmosphere_config.atmosphereHeight = 100.0f;
+	planet_char->atmosphere_config.scatteringCoefficient = 250.0f;
+	planet_char->atmosphere_config.wavelengths = glm::vec3(700.0f, 550.0f, 440.0f);
+	planet_char->atmosphere_config.scatteringStrength = 0.7f;
+	planet_char->atmosphere_config.intensity = 0.9f;
+	planet_char->atmosphere_config.UpdateScatteringCoefficients();
 
 
 	// Sun
@@ -141,8 +141,6 @@ int main() {
 	Universe::UniverseManager::Get().planets.push_back(p_2);
 	Universe::UniverseManager::Get().planets.push_back(planet_char);
 
-	Universe::UniverseManager::Get().atmosphereRenderer->atmosphere_configs.push_back(planet_char_atmo);
-	Universe::UniverseManager::Get().atmosphereRenderer->UpdateBuffers();
 
 	double current_time = 0.0;
 

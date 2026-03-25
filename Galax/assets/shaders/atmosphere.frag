@@ -1,30 +1,23 @@
 #version 460 core
 
 
-struct Atmosphere {
-	float planetRadius;
-	float atmosphereHeight;
-	float intensity;
-	float densityFalloff;
+// Atmosphere
+uniform float planetRadius;
+uniform float atmosphereHeight;
+uniform float intensity;
+uniform float densityFalloff;
 
-	vec3 centre;
-	vec3 wavelengths;
-	vec3 scatteringCoefficients;
+uniform vec3 centre;
+uniform vec3 wavelengths;
+uniform vec3 scatteringCoefficients;
 
-	float scatteringCoefficient;
-	float scatteringStrength;
-	float pad4[2];
-};
+uniform float scatteringStrength;
 
-layout (std430, binding = 0) buffer Atmospheres {
-	Atmosphere atmospheres[];
-};
 
 
 in vec2 fragCoord;
 out vec4 fragColor;
 
-uniform int numAtmospheres;
 
 uniform vec3 camPos;
 uniform vec3 sunPos;
@@ -73,12 +66,12 @@ vec2 raySphere (vec3 sphereCentre, float sphereRadius, vec3 rayOrigin, vec3 rayD
 
 
 
-float densityAtPoint(Atmosphere atmosphere, float atmosphereRadius, vec3 samplePoint){
-	float heightAbove = distance(samplePoint, atmosphere.centre) - atmosphere.planetRadius;
-	float height01 = heightAbove / (atmosphereRadius - atmosphere.planetRadius);
+float densityAtPoint(float atmosphereRadius, vec3 samplePoint){
+	float heightAbove = distance(samplePoint, centre) - planetRadius;
+	float height01 = heightAbove / (atmosphereRadius - planetRadius);
 	height01 = clamp(height01, 0.0, 1.0);
 
-	float localDensity = exp(-height01 * atmosphere.densityFalloff) * (1 - height01);
+	float localDensity = exp(-height01 * densityFalloff) * (1 - height01);
 
 	return localDensity;
 }
@@ -87,13 +80,13 @@ float densityAtPoint(Atmosphere atmosphere, float atmosphereRadius, vec3 sampleP
 
 
 // Light coming from the sun to the point
-float opticalDepth(Atmosphere atmosphere, float atmosphereRadius, vec3 rayOrigin, vec3 rayDir, float sunRayLength){
+float opticalDepth(float atmosphereRadius, vec3 rayOrigin, vec3 rayDir, float sunRayLength){
 	vec3 densitySamplePoint = rayOrigin;
 	float stepSize = sunRayLength / (numOpticalDepthPoints - 1);
 	float opticalDepth = 0;
 
 	for(int i = 0; i < numOpticalDepthPoints; i++){
-		float localDensity = densityAtPoint(atmosphere, atmosphereRadius, densitySamplePoint);
+		float localDensity = densityAtPoint(atmosphereRadius, densitySamplePoint);
 		opticalDepth += localDensity * stepSize;
 		densitySamplePoint += rayDir * stepSize;
 	}
@@ -103,7 +96,7 @@ float opticalDepth(Atmosphere atmosphere, float atmosphereRadius, vec3 rayOrigin
 
 
 // Light coming from the points along the ray
-vec3 calculateLight(Atmosphere atmosphere, float atmosphereRadius, vec3 rayOrigin, vec3 rayDir, float dstThrough, vec3 originalCol){
+vec3 calculateLight(float atmosphereRadius, vec3 rayOrigin, vec3 rayDir, float dstThrough, vec3 originalCol){
 
 	vec3 inScatterPoint = rayOrigin;
 	vec3 inScatteredLight = vec3(0.0);
@@ -111,21 +104,21 @@ vec3 calculateLight(Atmosphere atmosphere, float atmosphereRadius, vec3 rayOrigi
 	float stepSize = dstThrough / (numInScatteringPoints - 1);
 	float viewRayOpticalDepth = 0.0;
 
-	vec3 dirToSun = normalize(sunPos - atmosphere.centre);
+	vec3 dirToSun = normalize(sunPos - centre);
 	
 	for(int i = 0; i < numInScatteringPoints; i++){
 		
-		float sunRayLength = raySphere(atmosphere.centre, atmosphereRadius, inScatterPoint, dirToSun).y;
-		float sunRayOpticalDepth = opticalDepth(atmosphere, atmosphereRadius, inScatterPoint, dirToSun, sunRayLength);
-		viewRayOpticalDepth = opticalDepth(atmosphere, atmosphereRadius, inScatterPoint, -rayDir, stepSize * i);
-		vec3 transmittance = exp(-(sunRayOpticalDepth + viewRayOpticalDepth) * atmosphere.scatteringCoefficients);
-		float localDensity = densityAtPoint(atmosphere, atmosphereRadius, inScatterPoint);
+		float sunRayLength = raySphere(centre, atmosphereRadius, inScatterPoint, dirToSun).y;
+		float sunRayOpticalDepth = opticalDepth(atmosphereRadius, inScatterPoint, dirToSun, sunRayLength);
+		viewRayOpticalDepth = opticalDepth(atmosphereRadius, inScatterPoint, -rayDir, stepSize * i);
+		vec3 transmittance = exp(-(sunRayOpticalDepth + viewRayOpticalDepth) * scatteringCoefficients);
+		float localDensity = densityAtPoint(atmosphereRadius, inScatterPoint);
 
-		inScatteredLight += localDensity * transmittance * atmosphere.scatteringCoefficients * stepSize;
+		inScatteredLight += localDensity * transmittance * scatteringCoefficients * stepSize;
 		inScatterPoint += rayDir * stepSize;
 	}
 
-	inScatteredLight *= atmosphere.intensity;
+	inScatteredLight *= intensity;
 	float originalColTransmittance = exp(-viewRayOpticalDepth);
 
 	// return originalCol * originalColTransmittance + inScatteredLight;
@@ -165,31 +158,28 @@ void main(){
 
 	float sceneDepthLinear = LinearizeDepth(texture(depthTexture, fragCoord).r, camNearPlane, camFarPlane);
 
-	for (int i = 0; i < numAtmospheres; i++){
-		Atmosphere crnt_atmos = atmospheres[i];
+		
+	float atmosphereRadius = planetRadius + atmosphereHeight;
 
-		float atmosphereRadius = crnt_atmos.planetRadius + crnt_atmos.atmosphereHeight;
+	vec2 intersect = raySphere(centre, atmosphereRadius, rayOrigin, rayDir); 
+	float dstTo = intersect.x;
+	float dstThrough = intersect.y;
 
-		vec2 intersect = raySphere(crnt_atmos.centre, atmosphereRadius, rayOrigin, rayDir); 
-		float dstTo = intersect.x;
-		float dstThrough = intersect.y;
-
-		if (dstThrough <= 0.0) continue;
+	if (dstThrough > 0.0) {
 
 		// Distance from camera along the current ray
 		float distanceAlongRayToScene = sceneDepthLinear / dot(rayDir, camForward);
 
-
 		// Clamp dstThrough to not exceed the scene
 		dstThrough = min(dstThrough, distanceAlongRayToScene - dstTo);
 
-		if(dstThrough <= 0.0) { continue; }
+		if(dstThrough > 0.0) {
+			const float epsilon = 0.001;
+			vec3 entryPoint = rayOrigin + (rayDir * (dstTo + epsilon));
+			vec3 light = calculateLight(atmosphereRadius, entryPoint, rayDir, dstThrough - (epsilon * 2), vec3(fragColor));
 
-		const float epsilon = 0.001;
-		vec3 entryPoint = rayOrigin + (rayDir * (dstTo + epsilon));
-		vec3 light = calculateLight(crnt_atmos, atmosphereRadius, entryPoint, rayDir, dstThrough - (epsilon * 2), vec3(fragColor));
-
-		fragColor += vec4(light, 0.0);
+			fragColor += vec4(light, 0.0);
+		}
 	}
 
 	if(texture(depthTexture, fragCoord).r == 1){

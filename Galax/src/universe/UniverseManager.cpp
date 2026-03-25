@@ -11,7 +11,7 @@ namespace Universe {
 		atmosphereRenderer = std::make_unique<Universe::AtmosphereRenderer>();
 		
 		starSkybox = std::make_unique<Universe::StarSkybox>();
-		starSkybox->Generate(3000, 3, 1, 1000.0f);
+		starSkybox->Generate(3000, 3, 1.5F, 1000.0f);
 	}
 
 	void UniverseManager::Update(Player& player) {
@@ -104,7 +104,11 @@ namespace Universe {
 		// Write to the atmosphere FBO
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT);
-		atmosphereRenderer->Render(camera, sun, baseTexture, starTexture, baseDepth, w, h);
+
+		for (auto& planet : planets)
+			atmosphereRenderer->Render(camera, sun, planet->transform.get(), planet->atmosphere_config, baseTexture, starTexture, baseDepth, w, h);
+			
+
 		
 	}
 

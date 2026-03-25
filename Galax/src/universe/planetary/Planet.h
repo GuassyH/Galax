@@ -10,6 +10,8 @@
 #include "shaders/FragShader.h"
 #include "TerrainGenerator.h"
 
+#include "universe/atmosphere/Atmosphere.h"
+
 namespace Universe {
 	class Planet {
 	public:
@@ -51,6 +53,8 @@ namespace Universe {
 		glm::vec3 rotation_axis = glm::vec3(0.0f, 1.0f, 0.0f);
 		PhysicsBody physicsBody;
 
+
+		AtmosphereConfig atmosphere_config;
 	private:
 		ComputeShader terrain_compute;
 		ComputeShader normals_compute;

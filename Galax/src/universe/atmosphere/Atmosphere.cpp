@@ -1,5 +1,5 @@
 #include "Atmosphere.h"
-
+#include "universe/planetary/Planet.h"
 #include "core/Log.h"
 
 namespace Universe {
@@ -23,37 +23,19 @@ namespace Universe {
 		atmosphereShader.Compile("assets/shaders/atmosphere.frag", "assets/shaders/atmosphere.vert");
 
 		quad = Mesh(quad_verts, quad_inds);
-
-		glGenBuffers(1, &atmosphereBuffer);
 	}
 
 	AtmosphereRenderer::~AtmosphereRenderer() {
 		atmosphereShader.Delete();
 
 		quad.Delete();
-
-		glDeleteBuffers(1, &atmosphereBuffer);
 	}
 
-	void AtmosphereRenderer::UpdateBuffers() {
+	
 
-		for (auto& config : atmosphere_configs) {
-			float scatterR = glm::pow(config.scatteringCoefficient / config.wavelengths.x, 4) * config.scatteringStrength;
-			float scatterG = glm::pow(config.scatteringCoefficient / config.wavelengths.y, 4) * config.scatteringStrength;
-			float scatterB = glm::pow(config.scatteringCoefficient / config.wavelengths.z, 4) * config.scatteringStrength;
-
-			config.scatteringCoefficients = glm::vec3(scatterR, scatterG, scatterB);
-		}
-
-		GLsizeiptr atmBufferSize = sizeof(AtmosphereConfig) * atmosphere_configs.size();
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, atmosphereBuffer);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, atmBufferSize, atmosphere_configs.data(), GL_DYNAMIC_COPY);
-	}
-
-	void AtmosphereRenderer::Render(Camera& camera, Universe::Planet* sun, GLuint screenTex, GLuint starTex, GLuint depthTex, int w, int h) {
+	void AtmosphereRenderer::Render(Camera& camera, Universe::Planet* sun, Transform* planet, AtmosphereConfig& atmos_config, GLuint screenTex, GLuint starTex, GLuint depthTex, int w, int h) {
 
 		atmosphereShader.Use();
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, atmosphereBuffer);
 		
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, screenTex);
@@ -68,8 +50,16 @@ namespace Universe {
 		atmosphereShader.SetInt("starTexture", 2);
 
 
-		atmosphereShader.SetInt("numAtmospheres", atmosphere_configs.size());
+		atmosphereShader.SetFloat("planetRadius", atmos_config.planetRadius);
+		atmosphereShader.SetFloat("atmosphereHeight", atmos_config.atmosphereHeight);
+		atmosphereShader.SetFloat("intensity", atmos_config.intensity);
+		atmosphereShader.SetFloat("densityFalloff", atmos_config.densityFalloff);
+		atmosphereShader.SetVec3("centre", planet->world_position);
+		atmosphereShader.SetVec3("wavelengths", atmos_config.wavelengths);
+		atmosphereShader.SetVec3("scatteringCoefficients", atmos_config.scatteringCoefficients);
+		atmosphereShader.SetFloat("scatteringStrength", atmos_config.scatteringStrength);
 
+		//
 		atmosphereShader.SetVec3("camPos", camera.transform->world_position);
 		atmosphereShader.SetVec3("sunPos", sun->transform->world_position);
 

@@ -31,10 +31,10 @@ namespace Universe {
 	/// Update
 
 	void Planet::Update(Camera& camera) {
-		// how many minutes (mpr) per rotation
-		// how many seconds (mpr / 60.0) per rotation
+		// how many minutes per rotation (mpr)
+		// how many seconds per rotation (mpr / 60.0)
 		// spr = mpr / 60.0
-		// 
+		// angles to move = (360 / seconds per rotation) * deltatime
 
 		if (mpr != 0.0f) {
 			float spr = mpr * 60.0f;

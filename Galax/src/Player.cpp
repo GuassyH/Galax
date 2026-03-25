@@ -92,7 +92,6 @@ void Player::Look(GLFWwindow* window) {
 
 		glm::mat3 rot(right, up, -forward);
 		this->transform->SetWorldRotation(glm::quat_cast(rot));
-		this->transform->UpdateMatrix();
 	}
 
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) != GLFW_PRESS) {

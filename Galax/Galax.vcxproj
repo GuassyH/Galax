@@ -144,6 +144,7 @@
     <ClCompile Include="src\shaders\FragShader.cpp" />
     <ClCompile Include="src\shaders\Shader.cpp" />
     <ClCompile Include="src\universe\atmosphere\Atmosphere.cpp" />
+    <ClCompile Include="src\universe\ocean\Ocean.cpp" />
     <ClCompile Include="src\universe\planetary\CubeSphere.cpp" />
     <ClCompile Include="src\universe\planetary\Planet.cpp" />
     <ClCompile Include="src\universe\planetary\TerrainGenerator.cpp" />
@@ -167,6 +168,7 @@
     <ClInclude Include="src\shaders\Shader.h" />
     <ClInclude Include="src\Transform.h" />
     <ClInclude Include="src\universe\atmosphere\Atmosphere.h" />
+    <ClInclude Include="src\universe\ocean\Ocean.h" />
     <ClInclude Include="src\universe\PhysicsBody.h" />
     <ClInclude Include="src\universe\planetary\CubeSphere.h" />
     <ClInclude Include="src\universe\planetary\Planet.h" />
