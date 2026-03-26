@@ -15,7 +15,7 @@ uniform float scatteringStrength;
 
 
 
-in vec2 fragCoord;
+in vec2 texCoord;
 out vec4 fragColor;
 
 
@@ -138,17 +138,17 @@ vec4 GetStarBrightness(float brightness){
 	vec4 result = vec4(0.0);
 	float weighted_brightness = clamp((1 - (brightness * 4)), 0, 1);
 
-	result.rgb = vec3(texture(starTexture, fragCoord).r * weighted_brightness);
+	result.rgb = vec3(texture(starTexture, texCoord).r * weighted_brightness);
 
 	return result;
 }
 
 
 void main(){
-	fragColor = texture(screenTexture, fragCoord);
+	fragColor = texture(screenTexture, texCoord);
 
 	// Get Raydir
-	vec2 rayCoord = fragCoord * 2.0 - 1.0;
+	vec2 rayCoord = texCoord * 2.0 - 1.0;
 
 	float fov = radians(FOVdeg); // adjust as needed
 	float aspect = screenResolution.x / screenResolution.y;
@@ -158,7 +158,7 @@ void main(){
 	vec3 rayOrigin = camPos;
 
 	// Get Ray depths
-	float sceneDepthLinear = LinearizeDepth(texture(depthTexture, fragCoord).r, camNearPlane, camFarPlane);
+	float sceneDepthLinear = LinearizeDepth(texture(depthTexture, texCoord).r, camNearPlane, camFarPlane);
 
 
 	float atmosphereRadius = planetRadius + atmosphereHeight;
@@ -186,7 +186,7 @@ void main(){
 	}
 
 	// Dim stars
-	if(texture(depthTexture, fragCoord).r == 1 ){
+	if(texture(depthTexture, texCoord).r == 1 ){
 		fragColor += GetStarBrightness(length(fragColor.rgb));
 	}
 

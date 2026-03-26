@@ -2,8 +2,8 @@
 #include "core/Time.h"
 
 Player::Player() {
-	camera.fovDeg = 90.0f;
-	camera.nearPlane = 0.3f;
+  camera.fovDeg = 90.0f; 
+    camera.nearPlane = 0.3f; 
 	camera.farPlane = 30000.0f;
 	
 	transform = std::make_shared<Transform>();
@@ -79,26 +79,15 @@ double last_mouseX = 0.0;
 double last_mouseY = 0.0;
 void Player::Look(GLFWwindow* window) {
 
-	if (parent_planet) {
-		glm::vec3 up = glm::normalize(transform->world_position - parent_planet->transform->world_position);
-
-		// Keep forward but make it tangent
-		glm::vec3 forward = camera.transform->forward;
-		forward = glm::normalize(forward - up * glm::dot(forward, up));
-
-		// Rebuild basis
-		glm::vec3 right = glm::normalize(glm::cross(forward, up));
-		forward = glm::normalize(glm::cross(up, right));
-
-		glm::mat3 rot(right, up, -forward);
-		this->transform->SetWorldRotation(glm::quat_cast(rot));
-	}
-
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) != GLFW_PRESS) {
 		// Reset last mouse position when not looking to prevent jumps
 		glfwGetCursorPos(window, &last_mouseX, &last_mouseY);
 		return;
 	}
+
+	// Ensure transform matrices are up-to-date so world-space axes reflect any
+	// parent (planet) rotation that may have happened earlier this frame.
+	if (transform) transform->UpdateMatrix();
 
 	double mouseX;
 	double mouseY;
@@ -135,12 +124,9 @@ void Player::Look(GLFWwindow* window) {
 
 // Allign to planet, also makes sure you have to be closer to the planet to 
 // get alligned to it than unalligned to stop edge-cases
-void Player::AllignToPlanet(Universe::Planet* planet, float _0_1_val) {
-	if (parent_planet == planet) 
-		return;
-	
-
-	if (planet == nullptr) {
+void Player::AllignToPlanet(Universe::Planet* planet, float _0_1_val) {	
+	// If the planet is changed to nullptr
+	if (parent_planet != planet && planet == nullptr) {
 		parent_planet = nullptr;
 		transform->SetParent(nullptr, true);
 
@@ -155,19 +141,33 @@ void Player::AllignToPlanet(Universe::Planet* planet, float _0_1_val) {
 		forward = glm::normalize(glm::cross(up, right));
 
 		glm::mat3 rot(right, up, -forward);
-		this->transform->local_rotation = glm::quat_cast(rot);
+		transform->local_rotation = glm::quat_cast(rot);
 		
-		this->transform->UpdateMatrix();
+		transform->UpdateMatrix();
 		camera.transform->SetEulerAngles(glm::vec3(0.0));
 
 		return;
 	}
+	else if (parent_planet != planet && planet != nullptr){
+		if (_0_1_val <= 0.9f) {
+			parent_planet = planet;
+			transform->SetParent(parent_planet->transform.get(), true);
+		}
+	}
 
-	// if parent_planet != planet
-	if (_0_1_val <= 0.9f) {
-		parent_planet = planet;
-		transform->SetParent(parent_planet->transform.get(), true);
+	if (parent_planet) {
+		glm::vec3 up = glm::normalize(transform->world_position - parent_planet->transform->world_position);
+
+		// Keep forward but make it tangent
+		glm::vec3 forward = camera.transform->forward;
+		forward = glm::normalize(forward - up * glm::dot(forward, up));
+
+		// Rebuild basis
+		glm::vec3 right = glm::normalize(glm::cross(forward, up));
+		forward = glm::normalize(glm::cross(up, right));
+
+		glm::mat3 rot(right, up, -forward);
+		this->transform->SetWorldRotation(glm::quat_cast(rot));
 		transform->UpdateMatrix();
 	}
-	
 }

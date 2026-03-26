@@ -195,7 +195,7 @@ public:
 
 	void SetWorldPosition(const glm::vec3& pos) {
 		if (parent) {
-			local_position = pos - parent->world_position; // simplified
+			local_position = glm::inverse(parent->world_rotation) * (pos - parent->world_position);
 		}
 		else {
 			local_position = pos;

@@ -83,7 +83,7 @@ int main() {
 	planet_char->terrainGenerator.peakColor = glm::vec4(0.569f, 0.498f, 0.286f, 1.0f);
 
 	planet_char->mass = 1000000000;
-	planet_char->mpr = 0.0; // 12 minutes for one rot
+	planet_char->mpr = 12.0; // 12 minutes for one rot
 
 	planet_char->Generate();
 	planet_char->transform->local_position = glm::vec3(0.0f, 0.0f, -50000.0f);
@@ -145,12 +145,12 @@ int main() {
 	Universe::UniverseManager::Get().planets.push_back(planet_char);
 
 
-	double current_time = 0.0;
-
 	bool isFullscreen = false;
 	bool isF11 = false;
 
-	// SetFullscreen(window, true);
+	SetFullscreen(window, true);
+	player.transform->UpdateMatrix();
+	
 	// Update Loop
 	while (!glfwWindowShouldClose(window)) {
 		Galax::Time::get().update();

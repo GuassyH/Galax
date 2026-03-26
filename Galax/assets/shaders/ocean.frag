@@ -125,18 +125,18 @@ void main(){
 	vec3 entryPoint = rayOrigin + (rayDir * (dstTo + epsilon*2));
 
 	// colorise
-
 	// fragColor.rgb += calculateLight(entryPoint, rayDir, dstThrough + (epsilon * 2), fragColor.rgb);
+	// TEMP
 	float alpha = clamp(dstThrough / 10.0, 0, 1);
-	float normal = dot(normalize(entryPoint - centre), -normalize(entryPoint - sunPos));
+	float normal = max(dot(normalize(entryPoint - centre), -normalize(entryPoint - sunPos)), 0.1);
 
 	if(dstThrough < 0.2)
 		fragColor.rgb = vec3(1.0) * normal;
 	else
-		fragColor.rgb = mix(fragColor.rgb,  vec3(0.0, 0.2, 0.6) * normal, alpha);
+		fragColor.rgb = mix(fragColor.rgb,  vec3(0.0, 0.2, 0.5) * normal, alpha);
 
 	// Set the depth DONT TOUCH!!!!
 	vec3 viewSpacePos = entryPoint - camPos;
 	float camDepth = dot(viewSpacePos, camForward);
-	gl_FragDepth = DepthBufferFromLinear(camDepth + epsilon, camNearPlane, camFarPlane);
+	gl_FragDepth = DepthBufferFromLinear(max(camDepth, 0), camNearPlane, camFarPlane);
 } 

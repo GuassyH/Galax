@@ -22,12 +22,9 @@ namespace Universe {
 		for (auto& planet : planets)
 			planet->Update(player.camera);
 
-		ResolveGravity();
-
-		player.transform->UpdateMatrix();
-
 		Universe::Planet* closestPlanet = nullptr;
 		float _0_1_val = 0.0f;
+
 
 		for (auto& planet : planets) {
 			float distance = glm::distance(player.transform->world_position, planet->transform->world_position);
@@ -38,15 +35,16 @@ namespace Universe {
 			}
 		}
 
-
 		player.AllignToPlanet(closestPlanet, _0_1_val);
 
-		player.Move(window);
+		ResolveGravity();
+
 		player.Look(window);
+		player.Move(window);
 
 		player.transform->UpdateMatrix();
 		player.camera.UpdateMatrix(w, h);
-		// GX_TRACE("Camera FWD: {}x {}y {}z", player.camera.transform->forward.x, player.camera.transform->forward.y, player.camera.transform->forward.z);
+
 
 		starSkybox->Update(player.transform.get());
 	}
@@ -94,7 +92,7 @@ namespace Universe {
 			last_width = w;
 			last_height = h;
 		}
-			
+		
 
 		// Render stars
 		glBindFramebuffer(GL_FRAMEBUFFER, starFBO);
@@ -170,6 +168,7 @@ namespace Universe {
 			for (int j = 0; j < planets.size(); j++) {
 				if (i == j)
 					continue;
+
 				Planet* thisP = planets[i].get();
 				Planet* otherP = planets[j].get();
 
