@@ -22,7 +22,7 @@ namespace Universe {
 		OceanRenderer();
 		~OceanRenderer();
 
-		void Render(Camera& camera, Universe::Planet* sun, Transform* planet, OceanConfig& ocean_config, GLuint depthTexCopy, int w, int h);
+		void Render(Camera& camera, Universe::Planet* sun, Transform* planet, OceanConfig& ocean_config, GLuint colorTex, GLuint depthTex, int w, int h);
 
 	private:
 		Mesh quad;

@@ -41,8 +41,6 @@ namespace Universe {
 		GLuint starTexture;
 		GLuint starDepth;
 
-		GLuint oceanDepthCopy;
-
 		int last_width, last_height = 0;
 	};
 }

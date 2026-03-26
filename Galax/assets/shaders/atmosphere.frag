@@ -146,6 +146,7 @@ vec4 GetStarBrightness(float brightness){
 
 void main(){
 	fragColor = texture(screenTexture, fragCoord);
+	return;
 
 	// Get Raydir
 	vec2 rayCoord = fragCoord * 2.0 - 1.0;
@@ -182,6 +183,7 @@ void main(){
 
 			fragColor += vec4(light, 0.0);
 		}
+
 	}
 
 	// Dim stars

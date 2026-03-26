@@ -28,12 +28,16 @@ namespace Universe {
 		quad.Delete();
 	}
 
-	void OceanRenderer::Render(Camera& camera, Universe::Planet* sun, Transform* planet, OceanConfig& ocean_config, GLuint depthTexCopy, int w, int h) {
+	void OceanRenderer::Render(Camera& camera, Universe::Planet* sun, Transform* planet, OceanConfig& ocean_config, GLuint colorTex, GLuint depthTex, int w, int h) {
 		oceanShader.Use();
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, depthTexCopy);
+		glBindTexture(GL_TEXTURE_2D, depthTex);
 		oceanShader.SetInt("depthTexure", 0);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, colorTex);
+		oceanShader.SetInt("screenTexture", colorTex);
 
 		oceanShader.SetFloat("oceanRadius", ocean_config.radius);
 		oceanShader.SetFloat("densityFalloff", ocean_config.densityFalloff);

@@ -2,7 +2,7 @@
 
 
 uniform sampler2D depthTexture;
-
+uniform sampler2D screenTexture;
 
 uniform float oceanRadius;
 uniform float densityFalloff;
@@ -65,7 +65,7 @@ float DepthBufferFromLinear(float zLinear, float zNear, float zFar) {
 
 
 void main(){
-	fragColor = vec4(0.0);
+	fragColor = texture(screenTexture, texCoord);
 
 	vec2 rayCoord = texCoord * 2.0 - 1.0;
 
@@ -99,9 +99,17 @@ void main(){
 	const float epsilon = 0.001;
 	vec3 entryPoint = rayOrigin + (rayDir * (dstTo + epsilon));
 
-	fragColor += vec4(vec3(dstThrough), 0.0);
-			
-	gl_FragDepth = DepthBufferFromLinear(length(rayOrigin - entryPoint), camNearPlane, camFarPlane);
-		
+	// coloise
+	vec3 oceanColor = vec3(0.2, 0.2, 1.0);
+	float normal_multiplier = dot(normalize(sunPos - entryPoint), normalize(entryPoint - centre));
 
+	// fragColor.rgb = oceanColor * normal_multiplier; 
+	fragColor.rgb = oceanColor; 
+	// fragColor = vec4(1.0);
+
+
+	vec3 viewSpacePos = entryPoint - camPos;
+	float camDepth = dot(rayDir, camForward);
+	gl_FragDepth = DepthBufferFromLinear(length(viewSpacePos), camNearPlane, camFarPlane);
+	// Set the depth
 } 

@@ -7,6 +7,7 @@ namespace Universe {
 
 	static double G = 0.00007;
 
+
 	void UniverseManager::Init(Camera& camera) {
 		atmosphereRenderer = std::make_unique<Universe::AtmosphereRenderer>();
 		oceanRenderer = std::make_unique<Universe::OceanRenderer>();
@@ -14,16 +15,6 @@ namespace Universe {
 		starSkybox = std::make_unique<Universe::StarSkybox>();
 		starSkybox->Generate(3000, 3, 1.5F, 1000.0f);
 
-		glGenTextures(1, &oceanDepthCopy);
-		glBindTexture(GL_TEXTURE_2D, oceanDepthCopy);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, 1, 1, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr);
-
-		// Set sampling parameters
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	}
 
 	void UniverseManager::Update(Player& player, GLFWwindow* window, int w, int h) {
@@ -98,21 +89,6 @@ namespace Universe {
 			CreateBuffers(&baseFBO, &baseTexture, &baseDepth, w, h);
 			CreateBuffers(&starFBO, &starTexture, &starDepth, w, h);
 
-			if (oceanDepthCopy) {
-				glDeleteTextures(1, &oceanDepthCopy);
-
-				glGenTextures(1, &oceanDepthCopy);
-				glBindTexture(GL_TEXTURE_2D, oceanDepthCopy);
-
-				// Use a depth-compatible internal format
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, w, h, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, nullptr);
-
-				// Set sampling parameters
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			}
 
 			last_width = w;
 			last_height = h;
@@ -123,6 +99,7 @@ namespace Universe {
 		glBindFramebuffer(GL_FRAMEBUFFER, starFBO);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDepthMask(GL_FALSE);
 		glViewport(0, 0, w, h);
 
 		starSkybox->Render(camera);
@@ -131,23 +108,21 @@ namespace Universe {
 		glBindFramebuffer(GL_FRAMEBUFFER, baseFBO);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
+		glDepthFunc(GL_LESS);
 
 		for (auto& planet : planets)
 			planet->Render(camera, sun);
 
-		glDisable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
-
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, baseFBO);
-		glBindTexture(GL_TEXTURE_2D, oceanDepthCopy); // a texture you created
-		glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h);
-
 		// Render oceans
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+		glDepthFunc(GL_ALWAYS);
+	
 		for (auto& planet : planets)
-			if (planet->hasOcean) oceanRenderer->Render(camera, sun, planet->transform.get(), planet->ocean_config, oceanDepthCopy, w, h);
-
+			if (planet->hasOcean) oceanRenderer->Render(camera, sun, planet->transform.get(), planet->ocean_config, baseTexture, baseDepth, w, h);
 
 		// Write to the atmosphere FBO
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -179,7 +154,6 @@ namespace Universe {
 		if (starTexture) glDeleteTextures(1, &starTexture);
 		if (starDepth) glDeleteTextures(1, &starDepth);
 
-		if (oceanDepthCopy) glDeleteTextures(1, &oceanDepthCopy);
 	}
 
 
