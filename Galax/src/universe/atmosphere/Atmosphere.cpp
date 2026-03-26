@@ -33,7 +33,7 @@ namespace Universe {
 
 	
 
-	void AtmosphereRenderer::Render(Camera& camera, Universe::Planet* sun, Transform* planet, AtmosphereConfig& atmos_config, GLuint screenTex, GLuint starTex, GLuint depthTex, int w, int h) {
+	void AtmosphereRenderer::Render(Camera& camera, Universe::Planet* sun, Transform* planet, AtmosphereConfig& atmos_config, GLuint screenTex, GLuint depthTex, GLuint starTex, int w, int h) {
 
 		atmosphereShader.Use();
 		
@@ -50,6 +50,7 @@ namespace Universe {
 		atmosphereShader.SetInt("starTexture", 2);
 
 
+
 		atmosphereShader.SetFloat("planetRadius", atmos_config.planetRadius);
 		atmosphereShader.SetFloat("atmosphereHeight", atmos_config.atmosphereHeight);
 		atmosphereShader.SetFloat("intensity", atmos_config.intensity);
@@ -59,7 +60,6 @@ namespace Universe {
 		atmosphereShader.SetVec3("scatteringCoefficients", atmos_config.scatteringCoefficients);
 		atmosphereShader.SetFloat("scatteringStrength", atmos_config.scatteringStrength);
 
-		//
 		atmosphereShader.SetVec3("camPos", camera.transform->world_position);
 		atmosphereShader.SetVec3("sunPos", sun->transform->world_position);
 
@@ -76,17 +76,12 @@ namespace Universe {
 		atmosphereShader.SetInt("numInScatteringPoints", numInScatteringPoints);
 		atmosphereShader.SetInt("numOpticalDepthPoints", numOpticalDepthPoints);
 
-		glDisable(GL_DEPTH_TEST);
-		glDepthMask(GL_FALSE);
 
 		quad.vao.Bind();
 		glDrawElements(GL_TRIANGLES, quad.indices.size(), GL_UNSIGNED_INT, 0);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, 0);
-
-		glDepthMask(GL_TRUE);
-		glEnable(GL_DEPTH_TEST);
 
 	}
 }

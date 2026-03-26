@@ -172,5 +172,7 @@
     <None Include="assets\shaders\terrain.comp">
       <Filter>Resource Files\assets\shaders</Filter>
     </None>
+    <None Include="assets\shaders\ocean.frag" />
+    <None Include="assets\shaders\ocean.vert" />
   </ItemGroup>
 </Project>

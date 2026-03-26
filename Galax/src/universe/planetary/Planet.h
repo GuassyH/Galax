@@ -11,6 +11,7 @@
 #include "TerrainGenerator.h"
 
 #include "universe/atmosphere/Atmosphere.h"
+#include "universe/ocean/Ocean.h"
 
 namespace Universe {
 	class Planet {
@@ -53,8 +54,11 @@ namespace Universe {
 		glm::vec3 rotation_axis = glm::vec3(0.0f, 1.0f, 0.0f);
 		PhysicsBody physicsBody;
 
-
+		bool hasAtmosphere = false;
 		AtmosphereConfig atmosphere_config;
+
+		bool hasOcean = false;
+		OceanConfig ocean_config;
 	private:
 		ComputeShader terrain_compute;
 		ComputeShader normals_compute;

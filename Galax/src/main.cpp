@@ -68,7 +68,7 @@ int main() {
 	planet_char->resolution = 64;
 	planet_char->LODradii = { 6.0f, 3.0f, 1.0f, 0.8f };
 
-	planet_char->terrainGenerator.numCraters = 100;
+	planet_char->terrainGenerator.numCraters = 0;
 	planet_char->terrainGenerator.sizeFalloff = 3.0f;
 	planet_char->terrainGenerator.baseSize = 10.0f;
 	planet_char->terrainGenerator.sizeExaggeration = 2.0f;
@@ -76,18 +76,32 @@ int main() {
 	planet_char->terrainGenerator.craterHeight = 1.0f;
 
 	planet_char->terrainGenerator.numLayers = 8;
-	planet_char->terrainGenerator.noiseStrength = 10.0f;
-	planet_char->terrainGenerator.noiseHeightShift = -0.5f;
-	planet_char->terrainGenerator.noiseScale = 0.2f;
+	planet_char->terrainGenerator.noiseStrength = 20.0f;
+	planet_char->terrainGenerator.noiseHeightShift = -1.0f;
+	planet_char->terrainGenerator.noiseScale = 0.1f;
 	planet_char->terrainGenerator.surfaceColor = glm::vec4(0.396f, 0.58f, 0.306f, 1.0f);
 	planet_char->terrainGenerator.peakColor = glm::vec4(0.569f, 0.498f, 0.286f, 1.0f);
 
 	planet_char->mass = 1000000000;
-	planet_char->mpr = 24.0; // 12 minutes for one rot
+	planet_char->mpr = 0.0; // 12 minutes for one rot
 
 	planet_char->Generate();
 	planet_char->transform->local_position = glm::vec3(0.0f, 0.0f, -50000.0f);
 	planet_char->transform->UpdateMatrix();
+
+	planet_char->atmosphere_config.planetRadius = planet_char->radius;
+	planet_char->atmosphere_config.densityFalloff = 8.0f;
+	planet_char->atmosphere_config.atmosphereHeight = 100.0f;
+	planet_char->atmosphere_config.scatteringCoefficient = 250.0f;
+	planet_char->atmosphere_config.wavelengths = glm::vec3(700.0f, 550.0f, 440.0f);
+	planet_char->atmosphere_config.scatteringStrength = 0.7f;
+	planet_char->atmosphere_config.intensity = 0.9f;
+	planet_char->atmosphere_config.UpdateScatteringCoefficients();
+	planet_char->hasAtmosphere = true;
+
+	planet_char->ocean_config.radius = planet_char->radius;
+	planet_char->ocean_config.densityFalloff = 1.0f;
+	planet_char->hasOcean = true;
 
 	std::shared_ptr<Universe::Planet> p_2 = std::make_shared<Universe::Planet>();
 	p_2->planetShader = shader;
@@ -100,17 +114,6 @@ int main() {
 	p_2->Generate();
 	p_2->transform->local_position = glm::vec3(4000.0f, 0.0f, -50000.0f);
 	p_2->transform->UpdateMatrix();
-
-	planet_char->atmosphere_config.centre = planet_char->transform->world_position;
-	planet_char->atmosphere_config.planetRadius = planet_char->radius;
-	planet_char->atmosphere_config.densityFalloff = 8.0f;
-	planet_char->atmosphere_config.atmosphereHeight = 100.0f;
-	planet_char->atmosphere_config.scatteringCoefficient = 250.0f;
-	planet_char->atmosphere_config.wavelengths = glm::vec3(700.0f, 550.0f, 440.0f);
-	planet_char->atmosphere_config.scatteringStrength = 0.7f;
-	planet_char->atmosphere_config.intensity = 0.9f;
-	planet_char->atmosphere_config.UpdateScatteringCoefficients();
-
 
 	// Sun
 	std::shared_ptr<Universe::Planet> sun = std::make_shared<Universe::Planet>();
@@ -147,21 +150,12 @@ int main() {
 	bool isFullscreen = false;
 	bool isF11 = false;
 
-	SetFullscreen(window, true);
+	// SetFullscreen(window, true);
 	// Update Loop
 	while (!glfwWindowShouldClose(window)) {
 		Galax::Time::get().update();
-
-		player.Look(window);
-		player.Move(window);
-
-		if (!player.transform->HasParent()) 
-			player.transform->UpdateMatrix();
 		
-		player.camera.UpdateMatrix(windowWidth, windowHeight);
-
-		
-		Universe::UniverseManager::Get().Update(player);
+		Universe::UniverseManager::Get().Update(player, window, windowWidth, windowHeight);
 		Universe::UniverseManager::Get().Render(player.camera, sun.get(), windowWidth, windowHeight);
 		
 		glfwPollEvents();

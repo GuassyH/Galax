@@ -42,6 +42,7 @@ uniform int numInScatteringPoints;
 uniform int numOpticalDepthPoints;
 
 
+// Check if a ray intersects with a sphere
 vec2 raySphere (vec3 sphereCentre, float sphereRadius, vec3 rayOrigin, vec3 rayDir) {
     vec3 offset = rayOrigin - sphereCentre;
     const float a = 1; // set to dot(rayDir, rayDir) if rayDir might be unnormalized
@@ -64,8 +65,7 @@ vec2 raySphere (vec3 sphereCentre, float sphereRadius, vec3 rayOrigin, vec3 rayD
 }
 
 
-
-
+// Check what the density at a point would be
 float densityAtPoint(float atmosphereRadius, vec3 samplePoint){
 	float heightAbove = distance(samplePoint, centre) - planetRadius;
 	float height01 = heightAbove / (atmosphereRadius - planetRadius);
@@ -126,7 +126,7 @@ vec3 calculateLight(float atmosphereRadius, vec3 rayOrigin, vec3 rayDir, float d
 }
 
 
-
+// Convert from OpenGL depth to length zNear->zFar
 float LinearizeDepth(float d,float zNear,float zFar)
 {
     float z_n = 2.0 * d - 1.0;
@@ -147,6 +147,7 @@ vec4 GetStarBrightness(float brightness){
 void main(){
 	fragColor = texture(screenTexture, fragCoord);
 
+	// Get Raydir
 	vec2 rayCoord = fragCoord * 2.0 - 1.0;
 
 	float fov = radians(FOVdeg); // adjust as needed
@@ -156,17 +157,18 @@ void main(){
 	vec3 rayDir = normalize(	camForward + rayCoord.x * aspect * scale * camRight + rayCoord.y * scale * camUp	);
 	vec3 rayOrigin = camPos;
 
+	// Get Ray depths
 	float sceneDepthLinear = LinearizeDepth(texture(depthTexture, fragCoord).r, camNearPlane, camFarPlane);
 
-		
+
 	float atmosphereRadius = planetRadius + atmosphereHeight;
 
 	vec2 intersect = raySphere(centre, atmosphereRadius, rayOrigin, rayDir); 
 	float dstTo = intersect.x;
 	float dstThrough = intersect.y;
 
+	// If the ray intersects 
 	if (dstThrough > 0.0) {
-
 		// Distance from camera along the current ray
 		float distanceAlongRayToScene = sceneDepthLinear / dot(rayDir, camForward);
 
@@ -182,9 +184,9 @@ void main(){
 		}
 	}
 
-	if(texture(depthTexture, fragCoord).r == 1){
-		// float brightness = dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
-		// fragColor += GetStarBrightness(brightness);
+	// Dim stars
+	if(texture(depthTexture, fragCoord).r == 1 ){
 		fragColor += GetStarBrightness(length(fragColor.rgb));
 	}
+
 } 

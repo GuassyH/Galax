@@ -183,6 +183,8 @@
     <None Include="assets\shaders\default.vert" />
     <None Include="assets\shaders\default_unlit.frag" />
     <None Include="assets\shaders\default_unlit.vert" />
+    <None Include="assets\shaders\ocean.frag" />
+    <None Include="assets\shaders\ocean.vert" />
     <None Include="assets\shaders\planet.frag" />
     <None Include="assets\shaders\planet.vert" />
     <None Include="assets\shaders\stars.frag" />

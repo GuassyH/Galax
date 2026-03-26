@@ -7,12 +7,14 @@
 #include "Camera.h"
 #include "shaders/FragShader.h"
 #include "Mesh.h"
-#include "universe/planetary/Planet.h"
 
 namespace Universe {
 
+	class Planet;
+
 	struct OceanConfig {
-		glm::vec3 centre;
+		float radius = 1.0f;
+		float densityFalloff = 2.0f;
 	};
 
 	class OceanRenderer {
@@ -20,15 +22,11 @@ namespace Universe {
 		OceanRenderer();
 		~OceanRenderer();
 
-		std::vector<OceanConfig> ocean_configs;
+		void Render(Camera& camera, Universe::Planet* sun, Transform* planet, OceanConfig& ocean_config, GLuint depthTexCopy, int w, int h);
 
 	private:
 		Mesh quad;
 
-		int last_width = 0;
-		int last_height = 0;
-
-		GLuint oceanBuffer;
 		FragShader oceanShader;
 	};
 

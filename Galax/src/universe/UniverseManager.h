@@ -19,15 +19,15 @@ namespace Universe {
 			return instance;
 		}
 
-
 		std::unique_ptr<AtmosphereRenderer> atmosphereRenderer;
+		std::unique_ptr<OceanRenderer> oceanRenderer;
 		std::unique_ptr<StarSkybox> starSkybox;
 		std::vector<std::shared_ptr<Planet>> planets;
 
 		void Init(Camera& camera);
 
 		void ResolveGravity();
-		void Update(Player& player);
+		void Update(Player& player, GLFWwindow* window, int w, int h);
 		void Render(Camera& camera, Planet* sun, int w, int h);
 
 		void Shutdown();
@@ -40,6 +40,8 @@ namespace Universe {
 		GLuint starFBO; // for planets and stuff
 		GLuint starTexture;
 		GLuint starDepth;
+
+		GLuint oceanDepthCopy;
 
 		int last_width, last_height = 0;
 	};

@@ -20,7 +20,6 @@ namespace Universe {
 		float intensity = 1.0f; // Default 1.0
 		float densityFalloff = 5.0f; // Default 5.0
 
-		glm::vec3 centre = glm::vec3(0.0f);
 		glm::vec3 wavelengths = glm::vec3(700.0f, 550.0f, 440.0f); // Default 700, 550, 440
 		glm::vec3 scatteringCoefficients; // SET AUTOMATICALLY
 
@@ -45,13 +44,10 @@ namespace Universe {
 		int numInScatteringPoints = 8;
 		int numOpticalDepthPoints = 8;
 
-		void Render(Camera& camera, Universe::Planet* sun, Transform* planet, AtmosphereConfig& atmos_config, GLuint screenTex, GLuint starTex, GLuint depthTex, int w, int h);
+		void Render(Camera& camera, Universe::Planet* sun, Transform* planet, AtmosphereConfig& atmos_config, GLuint screenTex, GLuint depthTex, GLuint starTex, int w, int h);
 
 	private:
 		Mesh quad;
-
-		int last_width = 0;
-		int last_height = 0;
 
 		FragShader atmosphereShader;
 	};

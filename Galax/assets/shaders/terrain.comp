@@ -186,7 +186,7 @@ vec3 GetPosition(vec3 dir){
 	d += NoiseInfluence(v);
 	d += CraterInfluence(v);
 
-	d = max(d, 0.0);
+	// d = max(d, 0.0);
 
 	return (v.position + dir * d);
 };
