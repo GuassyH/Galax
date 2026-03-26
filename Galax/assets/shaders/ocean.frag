@@ -23,16 +23,17 @@ uniform mat4 projMat;
 uniform vec2 screenResolution;
 
 
-
 in vec2 texCoord;
 out vec4 fragColor;
 
 
-vec2 raySphere (vec3 sphereCentre, float sphereRadius, vec3 rayOrigin, vec3 rayDir) {
+
+// TAKEN FROM THE ATMOSPHERE SHADER
+vec2 raySphere (vec3 sphereCentre, vec3 rayOrigin, vec3 rayDir) {
     vec3 offset = rayOrigin - sphereCentre;
     const float a = 1; // set to dot(rayDir, rayDir) if rayDir might be unnormalized
     float b = 2 * dot (offset, rayDir);
-    float c = dot (offset, offset) - sphereRadius * sphereRadius;
+    float c = dot (offset, offset) - oceanRadius * oceanRadius;
 
     float discriminant = b * b - 4 * a * c;
 
@@ -49,24 +50,45 @@ vec2 raySphere (vec3 sphereCentre, float sphereRadius, vec3 rayOrigin, vec3 rayD
     return vec2(0,0);
 }
 
+// Check what the density at a point would be
+float densityAtPoint(vec3 samplePoint){
+	float heightAbove = distance(samplePoint, centre);
+	float height01 = heightAbove / oceanRadius;
+	height01 = clamp(height01, 0.0, 1.0);
+
+	float localDensity = exp(-height01 * densityFalloff) * (1 - height01);
+
+	return localDensity;
+}
+
+// Not implemented
+vec3 calculateLight(vec3 rayOrigin, vec3 rayDir, float dstThrough, vec3 originalCol) {
+	vec3 light = vec3(0.0);
 
 
+	return light;
+};
+
+
+
+
+
+// Get depth from OpenGL depth
 float LinearizeDepth(float d,float zNear,float zFar)
 {
     float z_n = 2.0 * d - 1.0;
     return 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear));
 }
 
+// Get OpenGL depth from linear
 float DepthBufferFromLinear(float zLinear, float zNear, float zFar) { 
 	float z_n = (zLinear * (zFar + zNear) - 2.0 * zNear * zFar) / (zLinear * (zFar - zNear)); 
 	return 0.5 * (z_n + 1.0); 
 }
 
 
-
 void main(){
 	fragColor = texture(screenTexture, texCoord);
-
 
 	vec2 rayCoord = texCoord * 2.0 - 1.0;
 
@@ -80,7 +102,7 @@ void main(){
 	// Get the depth of the scene at the point
 	float sceneDepthLinear = LinearizeDepth(texture(depthTexture, texCoord).r, camNearPlane, camFarPlane);
 
-	vec2 intersect = raySphere(centre, oceanRadius, rayOrigin, rayDir); 
+	vec2 intersect = raySphere(centre, rayOrigin, rayDir); 
 	float dstTo = intersect.x;
 	float dstThrough = intersect.y;
 
@@ -95,21 +117,26 @@ void main(){
 	dstThrough = min(dstThrough, distanceAlongRayToScene - dstTo);
 
 
+	// ACTUAL CALCS
 	if (dstThrough <= 0.0)
 		discard;
 
 	const float epsilon = 0.001;
-	vec3 entryPoint = rayOrigin + (rayDir * (dstTo + epsilon));
+	vec3 entryPoint = rayOrigin + (rayDir * (dstTo + epsilon*2));
 
-	// coloise
-	vec3 oceanColor = vec3(0.2, 0.2, 1.0);
-	float alpha = clamp(dstThrough, 0, 1);
-	float normal_multiplier = dot(normalize(sunPos - entryPoint), normalize(entryPoint - centre));
+	// colorise
 
-	fragColor.rgb = mix(fragColor.rgb, oceanColor  * normal_multiplier, alpha); 
+	// fragColor.rgb += calculateLight(entryPoint, rayDir, dstThrough + (epsilon * 2), fragColor.rgb);
+	float alpha = clamp(dstThrough / 10.0, 0, 1);
+	float normal = dot(normalize(entryPoint - centre), -normalize(entryPoint - sunPos));
 
+	if(dstThrough < 0.2)
+		fragColor.rgb = vec3(1.0) * normal;
+	else
+		fragColor.rgb = mix(fragColor.rgb,  vec3(0.0, 0.2, 0.6) * normal, alpha);
+
+	// Set the depth DONT TOUCH!!!!
 	vec3 viewSpacePos = entryPoint - camPos;
-	float camDepth = dot(rayDir, camForward);
-	gl_FragDepth = DepthBufferFromLinear(camDepth, camNearPlane, camFarPlane);
-	// Set the depth
+	float camDepth = dot(viewSpacePos, camForward);
+	gl_FragDepth = DepthBufferFromLinear(camDepth + epsilon, camNearPlane, camFarPlane);
 } 

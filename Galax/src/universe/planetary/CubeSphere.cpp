@@ -158,6 +158,7 @@ void CubeSphere::RenderChunk(Chunk* chunk, Transform* sun, Camera& camera, Shade
 		shader.SetVec3("camPos", camera.transform->world_position);
 		shader.SetVec3("sunDir", glm::normalize(chunk->mesh.transform->world_position - sun->world_position));
 		shader.SetVec3("centre", chunk->mesh.transform->world_position);
+		shader.SetFloat("radius", chunk->radius);
 
 		chunk->mesh.Render(camera, shader);
 	}

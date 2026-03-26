@@ -4,6 +4,7 @@
 uniform vec3 camPos;
 uniform vec3 sunDir;
 uniform vec3 centre;
+uniform float radius;
 
 in vec3 normal;
 in vec3 crntPos;
@@ -41,5 +42,8 @@ void main(){
 	}
 
 	fragCol = color;
+	if(distance(crntPos, centre) <= radius * 1.005)
+		fragCol.rgb = vec3(0.7, 0.6, 0.2);
+
 	fragCol *= directionalLight();
 }

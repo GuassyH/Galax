@@ -113,7 +113,7 @@ namespace Universe {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Do test depth and do write if the depth is less
+		// Do test depth and do write if the depth is less, ENABLE, TRUE, LESS
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 		glDepthFunc(GL_LESS);
@@ -121,10 +121,10 @@ namespace Universe {
 		for (auto& planet : planets)
 			planet->Render(camera, sun);
 
-		// Do test depth, do, always, write depth
+		// Do test depth, do, always, write depth DONT TOUCH!!!, ENABLE, TRUE, LESS
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
-		glDepthFunc(GL_ALWAYS);
+		glDepthFunc(GL_LESS);
 	
 		for (auto& planet : planets)
 			if (planet->hasOcean) oceanRenderer->Render(camera, sun, planet->transform.get(), planet->ocean_config, baseTexture, baseDepth, w, h);
@@ -134,11 +134,10 @@ namespace Universe {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Do not test depth, do not write depth
+		// Do not test depth, do not write depth DONT TOUCH!!! DISABLE, FALSE
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE);
 
-		// I NEED TO CHECK IF IT HAS OCEAN
 		for (auto& planet : planets)
 			if(planet->hasAtmosphere) atmosphereRenderer->Render(camera, sun, planet->transform.get(), planet->atmosphere_config, baseTexture, baseDepth, starTexture, w, h);
 			

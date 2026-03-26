@@ -76,8 +76,8 @@ int main() {
 	planet_char->terrainGenerator.craterHeight = 1.0f;
 
 	planet_char->terrainGenerator.numLayers = 8;
-	planet_char->terrainGenerator.noiseStrength = 20.0f;
-	planet_char->terrainGenerator.noiseHeightShift = -1.0f;
+	planet_char->terrainGenerator.noiseStrength = 40.0f;
+	planet_char->terrainGenerator.noiseHeightShift = -2.0f;
 	planet_char->terrainGenerator.noiseScale = 0.1f;
 	planet_char->terrainGenerator.surfaceColor = glm::vec4(0.396f, 0.58f, 0.306f, 1.0f);
 	planet_char->terrainGenerator.peakColor = glm::vec4(0.569f, 0.498f, 0.286f, 1.0f);
@@ -91,10 +91,10 @@ int main() {
 
 	planet_char->atmosphere_config.planetRadius = planet_char->radius;
 	planet_char->atmosphere_config.densityFalloff = 8.0f;
-	planet_char->atmosphere_config.atmosphereHeight = 100.0f;
-	planet_char->atmosphere_config.scatteringCoefficient = 250.0f;
+	planet_char->atmosphere_config.atmosphereHeight = 200.0f;
+	planet_char->atmosphere_config.scatteringCoefficient = 200.0f;
 	planet_char->atmosphere_config.wavelengths = glm::vec3(700.0f, 550.0f, 440.0f);
-	planet_char->atmosphere_config.scatteringStrength = 0.7f;
+	planet_char->atmosphere_config.scatteringStrength = 0.5f;
 	planet_char->atmosphere_config.intensity = 0.9f;
 	planet_char->atmosphere_config.UpdateScatteringCoefficients();
 	planet_char->hasAtmosphere = true;
