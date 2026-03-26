@@ -67,6 +67,7 @@ float DepthBufferFromLinear(float zLinear, float zNear, float zFar) {
 void main(){
 	fragColor = texture(screenTexture, texCoord);
 
+
 	vec2 rayCoord = texCoord * 2.0 - 1.0;
 
 	float fov = radians(FOVdeg); // adjust as needed
@@ -76,6 +77,7 @@ void main(){
 	vec3 rayDir = normalize(	camForward + rayCoord.x * aspect * scale * camRight + rayCoord.y * scale * camUp	);
 	vec3 rayOrigin = camPos;
 
+	// Get the depth of the scene at the point
 	float sceneDepthLinear = LinearizeDepth(texture(depthTexture, texCoord).r, camNearPlane, camFarPlane);
 
 	vec2 intersect = raySphere(centre, oceanRadius, rayOrigin, rayDir); 
@@ -101,15 +103,13 @@ void main(){
 
 	// coloise
 	vec3 oceanColor = vec3(0.2, 0.2, 1.0);
+	float alpha = clamp(dstThrough, 0, 1);
 	float normal_multiplier = dot(normalize(sunPos - entryPoint), normalize(entryPoint - centre));
 
-	// fragColor.rgb = oceanColor * normal_multiplier; 
-	fragColor.rgb = oceanColor; 
-	// fragColor = vec4(1.0);
-
+	fragColor.rgb = mix(fragColor.rgb, oceanColor  * normal_multiplier, alpha); 
 
 	vec3 viewSpacePos = entryPoint - camPos;
 	float camDepth = dot(rayDir, camForward);
-	gl_FragDepth = DepthBufferFromLinear(length(viewSpacePos), camNearPlane, camFarPlane);
+	gl_FragDepth = DepthBufferFromLinear(camDepth, camNearPlane, camFarPlane);
 	// Set the depth
 } 

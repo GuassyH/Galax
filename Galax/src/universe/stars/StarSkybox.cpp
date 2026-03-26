@@ -73,7 +73,6 @@ namespace Universe {
 	}
 	void StarSkybox::Render(Camera& camera) {
 
-		glDepthMask(GL_FALSE); // don't write depth
 
 		starShader.Use();
 
@@ -85,7 +84,6 @@ namespace Universe {
 		quad.vao.Bind();
 		glDrawElementsInstanced(GL_TRIANGLES, quad.indices.size(), GL_UNSIGNED_INT, 0, instances.size());
 
-		glDepthMask(GL_TRUE); // don't write depth
 	}
 
 }

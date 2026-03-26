@@ -85,6 +85,7 @@ namespace Universe {
 
 	void UniverseManager::Render(Camera& camera, Planet* sun, int w, int h) {
 
+		// if the resolution has changed remake the framebuffers and textures
 		if (w != last_width || h != last_height) {
 			CreateBuffers(&baseFBO, &baseTexture, &baseDepth, w, h);
 			CreateBuffers(&starFBO, &starTexture, &starDepth, w, h);
@@ -99,8 +100,11 @@ namespace Universe {
 		glBindFramebuffer(GL_FRAMEBUFFER, starFBO);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDepthMask(GL_FALSE);
 		glViewport(0, 0, w, h);
+
+		// Dont test the depth, but allow writing
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
 
 		starSkybox->Render(camera);
 
@@ -109,6 +113,7 @@ namespace Universe {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		// Do test depth and do write if the depth is less
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 		glDepthFunc(GL_LESS);
@@ -116,7 +121,7 @@ namespace Universe {
 		for (auto& planet : planets)
 			planet->Render(camera, sun);
 
-		// Render oceans
+		// Do test depth, do, always, write depth
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 		glDepthFunc(GL_ALWAYS);
@@ -128,6 +133,8 @@ namespace Universe {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// Do not test depth, do not write depth
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE);
 
