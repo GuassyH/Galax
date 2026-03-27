@@ -26,6 +26,7 @@
 
 #include "core/Log.h"
 #include "core/Time.h"
+#include "core/Input.h"
 
 #include "universe/UniverseManager.h"
 
@@ -83,7 +84,7 @@ int main() {
 	planet_char->terrainGenerator.peakColor = glm::vec4(0.569f, 0.498f, 0.286f, 1.0f);
 
 	planet_char->mass = 1000000000;
-	planet_char->mpr = 12.0; // 12 minutes for one rot
+	planet_char->mpr = 0.0; // 12 minutes for one rot
 
 	planet_char->Generate();
 	planet_char->transform->local_position = glm::vec3(0.0f, 0.0f, -50000.0f);
@@ -155,13 +156,13 @@ int main() {
 	while (!glfwWindowShouldClose(window)) {
 		Galax::Time::get().update();
 		
-		Universe::UniverseManager::Get().Update(player, window, windowWidth, windowHeight);
-		Universe::UniverseManager::Get().Render(player.camera, sun.get(), windowWidth, windowHeight);
+		Universe::UniverseManager::Get().Update(player);
+		Universe::UniverseManager::Get().Render(player.camera, sun.get());
 		
 		glfwPollEvents();
 		glfwSwapBuffers(window);
 
-		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		if (Galax::Input::IsKeyPressed(GLFW_KEY_ESCAPE)) 
 			glfwSetWindowShouldClose(window, true);
 	}
 
@@ -209,6 +210,32 @@ int InitRenderer(GLFWwindow*& window, GLFWmonitor*& monitor) {
 	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 	monitorWidth = mode->width;
 	monitorHeight = mode->height;
+
+
+	// Set Callbacks
+	// Set all the callbacks: ie, when resizing send a WindowResizeEvent to the EventHandler
+	glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+		if (action == GLFW_PRESS)
+			GX_ADD_KEY_PRESSED(key);
+		else if (action == GLFW_RELEASE)
+			GX_ADD_KEY_RELEASED(key);
+		});
+	glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
+		if (action == GLFW_PRESS)
+			GX_ADD_MOUSE_BUTTON_PRESSED(button);
+		else if (action == GLFW_RELEASE)
+			GX_ADD_MOUSE_BUTTON_RELEASED(button);
+		});
+	glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xpos, double ypos) {
+		if (window) Galax::InputManager::Get().mousePosition = glm::vec2(xpos, ypos);
+		});
+	glfwSetScrollCallback(window, [](GLFWwindow* window, double xoffset, double yoffset) {
+		if (window) Galax::InputManager::Get().scrollOffset = glm::vec2(xoffset, yoffset);
+		});
+	glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int width, int height) {
+		if (window) Galax::InputManager::Get().windowSize = glm::vec2(width, height);
+		});
+
 
 	glCullFace(GL_BACK);
 	glEnable(GL_CULL_FACE);

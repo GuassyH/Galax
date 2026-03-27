@@ -2,6 +2,8 @@
 #include "universe/planetary/Planet.h"
 #include "core/Log.h"
 
+#include "core/Input.h"
+
 namespace Universe {
 
 	static std::vector<Vertex> quad_verts = {
@@ -33,7 +35,8 @@ namespace Universe {
 
 	
 
-	void AtmosphereRenderer::Render(Camera& camera, Universe::Planet* sun, Transform* planet, AtmosphereConfig& atmos_config, GLuint screenTex, GLuint depthTex, GLuint starTex, int w, int h) {
+	void AtmosphereRenderer::Render(Camera& camera, Universe::Planet* sun, Transform* planet, AtmosphereConfig& atmos_config, GLuint screenTex, GLuint depthTex, GLuint starTex) {
+		glm::vec2 window_size = Galax::InputManager::Get().windowSize;
 
 		atmosphereShader.Use();
 		
@@ -63,7 +66,7 @@ namespace Universe {
 		atmosphereShader.SetVec3("camPos", camera.transform->world_position);
 		atmosphereShader.SetVec3("sunPos", sun->transform->world_position);
 
-		atmosphereShader.SetVec2("screenResolution", glm::vec2(w, h));
+		atmosphereShader.SetVec2("screenResolution", glm::vec2(window_size.x, window_size.y));
 
 		atmosphereShader.SetVec3("camUp", camera.transform->up);
 		atmosphereShader.SetVec3("camForward", camera.transform->forward);

@@ -1,5 +1,6 @@
 #include "Player.h"
 #include "core/Time.h"
+#include "core/Input.h"
 
 Player::Player() {
   camera.fovDeg = 90.0f; 
@@ -20,31 +21,31 @@ float horizontal = 0.0f;
 float vertical = 0.0f;
 float skywards = 0.0f;
 glm::vec3 moveDir = glm::vec3(0.0f);
-void Player::Move(GLFWwindow* window) {
+void Player::Move() {
 
-	if (glfwGetKey(window, GLFW_KEY_D))
+	if (Galax::Input::IsKeyPressed(GLFW_KEY_D))
 		horizontal += 1.0f;
 
-	if (glfwGetKey(window, GLFW_KEY_A))
+	if (Galax::Input::IsKeyPressed(GLFW_KEY_A))
 		horizontal -= 1.0f;
 
-	if (glfwGetKey(window, GLFW_KEY_W))
+	if (Galax::Input::IsKeyPressed(GLFW_KEY_W))
 		vertical += 1.0f;
 
-	if (glfwGetKey(window, GLFW_KEY_S))
+	if (Galax::Input::IsKeyPressed(GLFW_KEY_S))
 		vertical -= 1.0f;
 
-	if (glfwGetKey(window, GLFW_KEY_SPACE))
+	if (Galax::Input::IsKeyPressed(GLFW_KEY_SPACE))
 		skywards += 1.0f;
 
-	if (glfwGetKey(window, GLFW_KEY_C))
+	if (Galax::Input::IsKeyPressed(GLFW_KEY_C))
 		skywards -= 1.0f;
 
 	float multiplier = 1.0f;
-	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT))
+	if (Galax::Input::IsKeyPressed(GLFW_KEY_LEFT_SHIFT))
 		multiplier = 25.0f;
 
-	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL))
+	if (Galax::Input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL))
 		multiplier = 0.3f;
 
 
@@ -77,11 +78,12 @@ void Player::Move(GLFWwindow* window) {
 
 double last_mouseX = 0.0;
 double last_mouseY = 0.0;
-void Player::Look(GLFWwindow* window) {
+void Player::Look() {
+	glm::vec2 mouse_pos = Galax::Input::GetMousePosition();
 
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) != GLFW_PRESS) {
-		// Reset last mouse position when not looking to prevent jumps
-		glfwGetCursorPos(window, &last_mouseX, &last_mouseY);
+	if (Galax::Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT) != GLFW_PRESS) {
+		last_mouseX = mouse_pos.x;
+		last_mouseY = mouse_pos.y;
 		return;
 	}
 
@@ -89,9 +91,9 @@ void Player::Look(GLFWwindow* window) {
 	// parent (planet) rotation that may have happened earlier this frame.
 	if (transform) transform->UpdateMatrix();
 
-	double mouseX;
-	double mouseY;
-	glfwGetCursorPos(window, &mouseX, &mouseY);
+	double mouseX = mouse_pos.x;
+	double mouseY = mouse_pos.y;
+	
 
 	// Should be clamped to window size
 

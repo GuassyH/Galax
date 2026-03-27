@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include "core/Time.h"
+#include "core/Input.h"
 
 Camera::Camera() {
 	transform = std::make_shared<Transform>();
@@ -11,9 +12,11 @@ Camera::~Camera() {
 
 }
 
-void Camera::UpdateMatrix(unsigned int windowWidth, unsigned int windowHeight) {
-	if (windowHeight != 0) {
-		proj = glm::perspective(glm::radians(fovDeg), (float)windowWidth / (float)windowHeight, nearPlane, farPlane);
+void Camera::UpdateMatrix() {
+	glm::vec2 window_size = Galax::InputManager::Get().windowSize;
+
+	if (window_size.y != 0) {
+		proj = glm::perspective(glm::radians(fovDeg), (float)window_size.x / (float)window_size.y, nearPlane, farPlane);
 		view = glm::lookAt(transform->world_position, transform->world_position + transform->forward, transform->up);
 	}
 }

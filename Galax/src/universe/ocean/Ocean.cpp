@@ -1,6 +1,8 @@
 #include "Ocean.h"
 #include "universe/planetary/Planet.h"
 
+#include "core/Input.h"
+
 namespace Universe {
 
 	static std::vector<Vertex> quad_verts = {
@@ -28,8 +30,10 @@ namespace Universe {
 		quad.Delete();
 	}
 
-	void OceanRenderer::Render(Camera& camera, Universe::Planet* sun, Transform* planet, OceanConfig& ocean_config, GLuint colorTex, GLuint depthTex, int w, int h) {
+	void OceanRenderer::Render(Camera& camera, Universe::Planet* sun, Transform* planet, OceanConfig& ocean_config, GLuint colorTex, GLuint depthTex) {
 		oceanShader.Use();
+
+		glm::vec2 window_size = Galax::InputManager::Get().windowSize;
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, depthTex);
@@ -46,7 +50,7 @@ namespace Universe {
 		oceanShader.SetVec3("camPos", camera.transform->world_position);
 		oceanShader.SetVec3("sunPos", sun->transform->world_position);
 
-		oceanShader.SetVec2("screenResolution", glm::vec2(w, h));
+		oceanShader.SetVec2("screenResolution", glm::vec2(window_size.x, window_size.y));
 
 		oceanShader.SetVec3("camUp", camera.transform->up);
 		oceanShader.SetVec3("camForward", camera.transform->forward);

@@ -154,6 +154,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\core\Input.h" />
     <ClInclude Include="src\core\Time.h" />
     <ClInclude Include="src\core\Log.h" />
     <ClInclude Include="src\core\Maths.h" />

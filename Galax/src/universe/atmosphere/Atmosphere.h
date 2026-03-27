@@ -44,7 +44,7 @@ namespace Universe {
 		int numInScatteringPoints = 8;
 		int numOpticalDepthPoints = 8;
 
-		void Render(Camera& camera, Universe::Planet* sun, Transform* planet, AtmosphereConfig& atmos_config, GLuint screenTex, GLuint depthTex, GLuint starTex, int w, int h);
+		void Render(Camera& camera, Universe::Planet* sun, Transform* planet, AtmosphereConfig& atmos_config, GLuint screenTex, GLuint depthTex, GLuint starTex);
 
 	private:
 		Mesh quad;

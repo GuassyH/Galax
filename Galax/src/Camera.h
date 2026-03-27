@@ -11,7 +11,7 @@ public:
 	Camera();
 	~Camera();
 
-	void UpdateMatrix(unsigned int windowWidth, unsigned int windowHeight);
+	void UpdateMatrix();
 	void Move(GLFWwindow* window);
 	void Look(GLFWwindow* window);
 

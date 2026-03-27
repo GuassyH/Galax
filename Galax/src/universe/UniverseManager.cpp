@@ -1,7 +1,7 @@
 #include "UniverseManager.h"
 
 #include "core/Time.h"
-
+#include "core/Input.h"
 
 namespace Universe {
 
@@ -17,7 +17,7 @@ namespace Universe {
 
 	}
 
-	void UniverseManager::Update(Player& player, GLFWwindow* window, int w, int h) {
+	void UniverseManager::Update(Player& player) {
 		
 		for (auto& planet : planets)
 			planet->Update(player.camera);
@@ -39,17 +39,17 @@ namespace Universe {
 
 		ResolveGravity();
 
-		player.Look(window);
-		player.Move(window);
+		player.Look();
+		player.Move();
 
 		player.transform->UpdateMatrix();
-		player.camera.UpdateMatrix(w, h);
+		player.camera.UpdateMatrix();
 
 
 		starSkybox->Update(player.transform.get());
 	}
 
-	void CreateBuffers(GLuint* framebuffer, GLuint* screentex, GLuint* depthtex, int w, int h) {
+	void CreateBuffers(GLuint* framebuffer, GLuint* screentex, GLuint* depthtex) {
 		if (framebuffer) glDeleteFramebuffers(1, framebuffer);
 		if (screentex) glDeleteTextures(1, screentex);
 		if (depthtex) glDeleteTextures(1, depthtex);
@@ -57,10 +57,12 @@ namespace Universe {
 		glGenFramebuffers(1, framebuffer);
 		glBindFramebuffer(GL_FRAMEBUFFER, *framebuffer);
 
+		glm::vec2 window_size = Galax::InputManager::Get().windowSize;
+
 		// Screen color texture
 		glGenTextures(1, screentex);
 		glBindTexture(GL_TEXTURE_2D, *screentex);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, h, 0, GL_RGBA, GL_FLOAT, nullptr);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, window_size.x, window_size.y, 0, GL_RGBA, GL_FLOAT, nullptr);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *screentex, 0);
@@ -68,7 +70,7 @@ namespace Universe {
 		// Depth texture
 		glGenTextures(1, depthtex);
 		glBindTexture(GL_TEXTURE_2D, *depthtex);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, w, h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, window_size.x, window_size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
@@ -81,16 +83,17 @@ namespace Universe {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void UniverseManager::Render(Camera& camera, Planet* sun, int w, int h) {
+	void UniverseManager::Render(Camera& camera, Planet* sun) {
+		glm::vec2 window_size = Galax::InputManager::Get().windowSize;
 
 		// if the resolution has changed remake the framebuffers and textures
-		if (w != last_width || h != last_height) {
-			CreateBuffers(&baseFBO, &baseTexture, &baseDepth, w, h);
-			CreateBuffers(&starFBO, &starTexture, &starDepth, w, h);
+		if (window_size.x != last_width || window_size.y != last_height) {
+			CreateBuffers(&baseFBO, &baseTexture, &baseDepth);
+			CreateBuffers(&starFBO, &starTexture, &starDepth);
 
 
-			last_width = w;
-			last_height = h;
+			last_width = window_size.x;
+			last_height = window_size.y;
 		}
 		
 
@@ -98,7 +101,7 @@ namespace Universe {
 		glBindFramebuffer(GL_FRAMEBUFFER, starFBO);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glViewport(0, 0, w, h);
+		glViewport(0, 0, window_size.x, window_size.y);
 
 		// Dont test the depth, but allow writing
 		glDisable(GL_DEPTH_TEST);
@@ -125,7 +128,7 @@ namespace Universe {
 		glDepthFunc(GL_LESS);
 	
 		for (auto& planet : planets)
-			if (planet->hasOcean) oceanRenderer->Render(camera, sun, planet->transform.get(), planet->ocean_config, baseTexture, baseDepth, w, h);
+			if (planet->hasOcean) oceanRenderer->Render(camera, sun, planet->transform.get(), planet->ocean_config, baseTexture, baseDepth);
 
 		// Write to the atmosphere FBO
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -137,7 +140,7 @@ namespace Universe {
 		glDepthMask(GL_FALSE);
 
 		for (auto& planet : planets)
-			if(planet->hasAtmosphere) atmosphereRenderer->Render(camera, sun, planet->transform.get(), planet->atmosphere_config, baseTexture, baseDepth, starTexture, w, h);
+			if(planet->hasAtmosphere) atmosphereRenderer->Render(camera, sun, planet->transform.get(), planet->atmosphere_config, baseTexture, baseDepth, starTexture);
 			
 		glDepthMask(GL_TRUE);
 		glEnable(GL_DEPTH_TEST);

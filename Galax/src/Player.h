@@ -13,8 +13,8 @@ public:
 	float sensitivity = 0.002f;
 
 
-	void Move(GLFWwindow* window);
-	void Look(GLFWwindow* window);
+	void Move();
+	void Look();
 
 	void AllignToPlanet(Universe::Planet* planet, float _0_1_val);
 

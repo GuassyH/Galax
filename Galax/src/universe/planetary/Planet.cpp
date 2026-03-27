@@ -1,5 +1,6 @@
 #include "Planet.h"
 #include "core/Time.h"
+#include "core/Input.h"
 
 namespace Universe {
 

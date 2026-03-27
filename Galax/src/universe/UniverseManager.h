@@ -27,8 +27,8 @@ namespace Universe {
 		void Init(Camera& camera);
 
 		void ResolveGravity();
-		void Update(Player& player, GLFWwindow* window, int w, int h);
-		void Render(Camera& camera, Planet* sun, int w, int h);
+		void Update(Player& player);
+		void Render(Camera& camera, Planet* sun);
 
 		void Shutdown();
 
