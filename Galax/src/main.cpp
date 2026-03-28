@@ -83,8 +83,8 @@ int main() {
 	planet_char->terrainGenerator.surfaceColor = glm::vec4(0.396f, 0.58f, 0.306f, 1.0f);
 	planet_char->terrainGenerator.peakColor = glm::vec4(0.569f, 0.498f, 0.286f, 1.0f);
 
-	planet_char->mass = 1000000000;
-	planet_char->mpr = 0.0; // 12 minutes for one rot
+	planet_char->physicsBody.mass = 1000000000;
+	planet_char->mpr = 24.0; // 12 minutes for one rot
 
 	planet_char->Generate();
 	planet_char->transform->local_position = glm::vec3(0.0f, 0.0f, -50000.0f);
@@ -102,6 +102,7 @@ int main() {
 
 	planet_char->ocean_config.radius = planet_char->radius;
 	planet_char->ocean_config.densityFalloff = 1.0f;
+	planet_char->ocean_config.oceanColor = glm::vec4(0.0, 0.1, 0.3, 1.0);
 	planet_char->hasOcean = true;
 
 	std::shared_ptr<Universe::Planet> p_2 = std::make_shared<Universe::Planet>();
@@ -109,8 +110,8 @@ int main() {
 	p_2->radius = 50;
 	p_2->resolution = 32;
 	p_2->LODradii = { 6.0f, 3.0f, 1.0f, 0.8f };
-	p_2->mass = 100000;
-	p_2->physicsBody.velocity = glm::vec3(0.0f, 0.0f, -40.0f);
+	p_2->physicsBody.mass = 100000;
+	p_2->mpr = 10.0f;
 
 	p_2->Generate();
 	p_2->transform->local_position = glm::vec3(4000.0f, 0.0f, -50000.0f);
@@ -132,7 +133,6 @@ int main() {
 
 	sun->terrainGenerator.surfaceColor = glm::vec4(1.0f, 0.8f, 0.3f, 1.0f);
 	sun->terrainGenerator.peakColor = glm::vec4(1.0f, 0.9f, 0.6f, 1.0f);
-	sun->mass = 0;
 
 	sun->Generate();
 	sun->transform->local_position = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -144,6 +144,8 @@ int main() {
 	Universe::UniverseManager::Get().planets.push_back(sun);
 	Universe::UniverseManager::Get().planets.push_back(p_2);
 	Universe::UniverseManager::Get().planets.push_back(planet_char);
+
+	Universe::UniverseManager::Get().SetIdealOrbitVelocity(p_2.get(), planet_char.get());
 
 
 	bool isFullscreen = false;

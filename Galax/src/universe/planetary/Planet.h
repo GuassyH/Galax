@@ -49,7 +49,6 @@ namespace Universe {
 		float ambient = 0.0f;
 
 		// Body
-		float mass = 1.0f;
 		float mpr = 0.0f; // minutes
 		glm::vec3 rotation_axis = glm::vec3(0.0f, 1.0f, 0.0f);
 		PhysicsBody physicsBody;

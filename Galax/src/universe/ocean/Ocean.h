@@ -15,6 +15,7 @@ namespace Universe {
 	struct OceanConfig {
 		float radius = 1.0f;
 		float densityFalloff = 2.0f;
+		glm::vec4 oceanColor;
 	};
 
 	class OceanRenderer {

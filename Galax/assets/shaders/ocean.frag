@@ -6,6 +6,8 @@ uniform sampler2D screenTexture;
 
 uniform float oceanRadius;
 uniform float densityFalloff;
+uniform vec4 oceanColor;
+
 uniform float camFarPlane;
 uniform float camNearPlane;
 uniform float FOVdeg;
@@ -21,7 +23,6 @@ uniform mat4 viewMat;
 uniform mat4 projMat;
 
 uniform vec2 screenResolution;
-
 
 in vec2 texCoord;
 out vec4 fragColor;
@@ -127,13 +128,13 @@ void main(){
 	// colorise
 	// fragColor.rgb += calculateLight(entryPoint, rayDir, dstThrough + (epsilon * 2), fragColor.rgb);
 	// TEMP
-	float alpha = clamp(dstThrough / 10.0, 0, 1);
+	float alpha = clamp(dstThrough / 1.0, 0.1, 1.0);
 	float normal = max(dot(normalize(entryPoint - centre), -normalize(entryPoint - sunPos)), 0.1);
 
-	if(dstThrough < 0.2)
+	if(dstThrough < 0.1)
 		fragColor.rgb = vec3(1.0) * normal;
 	else
-		fragColor.rgb = mix(fragColor.rgb,  vec3(0.0, 0.2, 0.5) * normal, alpha);
+		fragColor.rgb = mix(fragColor.rgb,  oceanColor.rgb * normal, alpha);
 
 	// Set the depth DONT TOUCH!!!!
 	vec3 viewSpacePos = entryPoint - camPos;
