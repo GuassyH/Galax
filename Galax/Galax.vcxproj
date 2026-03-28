@@ -178,19 +178,22 @@
     <ClInclude Include="src\universe\UniverseManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\shaders\atmosphere.frag" />
-    <None Include="assets\shaders\atmosphere.vert" />
+    <None Include="assets\shaders\universe\atmosphere.frag" />
+    <None Include="assets\shaders\universe\atmosphere.vert" />
     <None Include="assets\shaders\default.frag" />
     <None Include="assets\shaders\default.vert" />
     <None Include="assets\shaders\default_unlit.frag" />
     <None Include="assets\shaders\default_unlit.vert" />
-    <None Include="assets\shaders\ocean.frag" />
-    <None Include="assets\shaders\ocean.vert" />
-    <None Include="assets\shaders\planet.frag" />
-    <None Include="assets\shaders\planet.vert" />
-    <None Include="assets\shaders\stars.frag" />
-    <None Include="assets\shaders\stars.vert" />
-    <None Include="assets\shaders\terrain.comp" />
+    <None Include="assets\shaders\universe\ocean.frag" />
+    <None Include="assets\shaders\universe\ocean.vert" />
+    <None Include="assets\shaders\universe\planet.frag" />
+    <None Include="assets\shaders\universe\planet.vert" />
+    <None Include="assets\shaders\universe\stars.frag" />
+    <None Include="assets\shaders\universe\stars.vert" />
+    <None Include="assets\shaders\universe\terrain.comp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="src\Diary.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

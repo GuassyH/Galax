@@ -28,9 +28,9 @@ float directionalLight(){
 	return diffuse;
 };
 
-
 out vec4 fragCol;
 void main(){
+
 	float relative_dot = dot(normalize(crntPos - centre), normal);
 	// fragCol = vertColor;
 	vec4 color;

@@ -45,6 +45,8 @@ public:
 	void SetVec2(const std::string& name, float x, float y) const;
 	void SetVec3(const std::string& name, const glm::vec3& value) const;
 	void SetVec3(const std::string& name, float x, float y, float z) const;
+	void SetVec3(const std::string& name, const glm::dvec3& value) const;
+	void SetVec3(const std::string& name, double x, double y, double z) const;
 	void SetVec4(const std::string& name, const glm::vec4& value) const;
 	void SetVec4(const std::string& name, float x, float y, float z, float w) const;
 	void SetMat2(const std::string& name, const glm::mat2& mat) const;

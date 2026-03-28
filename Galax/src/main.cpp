@@ -31,13 +31,16 @@
 #include "universe/UniverseManager.h"
 
 void frame_buffer_size_callback(GLFWwindow* window, int width, int height);
+
 int InitRenderer(GLFWwindow*& window, GLFWmonitor*& monitor);
 void SetFullscreen(GLFWwindow* window, bool fullscreen);
+void SetWindowResolution(GLFWwindow* window, int width, int height);
 
 int windowWidth = 1920;
 int windowHeight = 1080;
 int monitorWidth;
 int monitorHeight;
+
 
 
 int main() {
@@ -56,10 +59,10 @@ int main() {
 	player.camera.nearPlane = 1.0f;
 	player.camera.farPlane = 100000.0f;
 
-	player.transform->local_position = glm::vec3(1000.0f, 0.0f, -48000.0f);
+	player.transform->local_position = glm::vec3(44000.0f, 0.0f, 0.0f);
 	player.transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), 180);
 
-	FragShader shader("assets/shaders/planet.frag", "assets/shaders/planet.vert");
+	FragShader shader("assets/shaders/universe/planet.frag", "assets/shaders/universe/planet.vert");
 	FragShader unlit("assets/shaders/default_unlit.frag", "assets/shaders/default_unlit.vert");
 	
 	// Charley
@@ -84,10 +87,10 @@ int main() {
 	planet_char->terrainGenerator.peakColor = glm::vec4(0.569f, 0.498f, 0.286f, 1.0f);
 
 	planet_char->physicsBody.mass = 1000000000;
-	planet_char->mpr = 24.0; // 12 minutes for one rot
+	planet_char->mpr = 10.0; // x minutes for one rot
 
 	planet_char->Generate();
-	planet_char->transform->local_position = glm::vec3(0.0f, 0.0f, -50000.0f);
+	planet_char->transform->local_position = glm::vec3(45000.0f, 0.0f, 0.0f);
 	planet_char->transform->UpdateMatrix();
 
 	planet_char->atmosphere_config.planetRadius = planet_char->radius;
@@ -104,18 +107,6 @@ int main() {
 	planet_char->ocean_config.densityFalloff = 1.0f;
 	planet_char->ocean_config.oceanColor = glm::vec4(0.0, 0.1, 0.3, 1.0);
 	planet_char->hasOcean = true;
-
-	std::shared_ptr<Universe::Planet> p_2 = std::make_shared<Universe::Planet>();
-	p_2->planetShader = shader;
-	p_2->radius = 50;
-	p_2->resolution = 32;
-	p_2->LODradii = { 6.0f, 3.0f, 1.0f, 0.8f };
-	p_2->physicsBody.mass = 100000;
-	p_2->mpr = 10.0f;
-
-	p_2->Generate();
-	p_2->transform->local_position = glm::vec3(4000.0f, 0.0f, -50000.0f);
-	p_2->transform->UpdateMatrix();
 
 	// Sun
 	std::shared_ptr<Universe::Planet> sun = std::make_shared<Universe::Planet>();
@@ -135,37 +126,49 @@ int main() {
 	sun->terrainGenerator.peakColor = glm::vec4(1.0f, 0.9f, 0.6f, 1.0f);
 
 	sun->Generate();
-	sun->transform->local_position = glm::vec3(0.0f, 0.0f, 0.0f);
+	sun->transform->local_position = glm::vec3(0.0, 0.0f, 0.0f);
 	sun->transform->UpdateMatrix();
 
 
 	// NEED TO FIX, if planet_char is first, the subdivisions break somehow
 	Universe::UniverseManager::Get().Init(player.camera);
-	Universe::UniverseManager::Get().planets.push_back(sun);
-	Universe::UniverseManager::Get().planets.push_back(p_2);
-	Universe::UniverseManager::Get().planets.push_back(planet_char);
-
-	Universe::UniverseManager::Get().SetIdealOrbitVelocity(p_2.get(), planet_char.get());
+	Universe::UniverseManager::Get().PushPlanet(sun);
+	Universe::UniverseManager::Get().PushPlanet(planet_char);
 
 
-	bool isFullscreen = false;
-	bool isF11 = false;
+	bool isFullscreen = true;
 
 	SetFullscreen(window, true);
 	player.transform->UpdateMatrix();
 	
 	// Update Loop
 	while (!glfwWindowShouldClose(window)) {
+
+		if (Galax::Input::IsKeyJustPressed(GLFW_KEY_F11)) {
+			if (!isFullscreen) {
+				isFullscreen = true;
+				SetFullscreen(window, true);
+			}
+			else {
+				isFullscreen = false;
+				SetFullscreen(window, false);
+			}
+		}
+
 		Galax::Time::get().update();
 		
 		Universe::UniverseManager::Get().Update(player);
 		Universe::UniverseManager::Get().Render(player.camera, sun.get());
 		
+
+		if (Galax::Input::IsKeyJustPressed(GLFW_KEY_ESCAPE)) 
+			glfwSetWindowShouldClose(window, true);
+
+
+		Galax::InputManager::Get().Clear(); // Reset inputs
+		
 		glfwPollEvents();
 		glfwSwapBuffers(window);
-
-		if (Galax::Input::IsKeyPressed(GLFW_KEY_ESCAPE)) 
-			glfwSetWindowShouldClose(window, true);
 	}
 
 	Universe::UniverseManager::Get().Shutdown();
@@ -263,9 +266,18 @@ void SetFullscreen(GLFWwindow* window, bool fullscreen) {
 	}
 }
 
+void SetWindowResolution(GLFWwindow* window, int width, int height) {
+	glfwSetWindowSize(window, width, height);
+
+	float xpos = (2560 / 2.0f) - (width / 2.0f);
+	float ypos = (1440 / 2.0f) - (height / 2.0f);
+
+	glfwSetWindowPos(window, xpos, ypos);
+}
+
 void frame_buffer_size_callback(GLFWwindow* window, int width, int height) {
 	windowWidth = width;
 	windowHeight = height;
 	glViewport(0, 0, width, height);
-	// GX_TRACE("window size is {}x{}", windowWidth, windowHeight);
 }
+

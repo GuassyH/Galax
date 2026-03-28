@@ -110,6 +110,7 @@ void main(){
 
 	if (dstThrough <= 0.0)
 		discard;
+	
 
 	// Distance from camera along the current ray
 	float distanceAlongRayToScene = sceneDepthLinear / dot(rayDir, camForward);
@@ -135,6 +136,7 @@ void main(){
 		fragColor.rgb = vec3(1.0) * normal;
 	else
 		fragColor.rgb = mix(fragColor.rgb,  oceanColor.rgb * normal, alpha);
+
 
 	// Set the depth DONT TOUCH!!!!
 	vec3 viewSpacePos = entryPoint - camPos;

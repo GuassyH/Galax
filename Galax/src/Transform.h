@@ -31,6 +31,8 @@ public:
 	std::vector<Transform*> children;
 	Transform* parent = nullptr;
 
+
+
 	bool HasParent() const {
 		return parent != nullptr;
 	}
@@ -120,10 +122,10 @@ public:
 	glm::mat4& GetMatrix() { return modelMatrix; }
 	glm::mat3 GetRotationMatrix() { return glm::mat3(glm::transpose(glm::inverse(modelMatrix))); }
 
-	void UpdateMatrix() {
+	void UpdateMatrix(bool update_children = true) {
 		glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), local_scale);
 		glm::mat4 rotationMatrix = glm::mat4_cast(local_rotation);
-		glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), local_position);
+		glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(local_position));
 
 		glm::mat4 localModelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
 
@@ -131,7 +133,7 @@ public:
 			modelMatrix = parent->GetMatrix() * localModelMatrix;
 
 			world_rotation = glm::normalize(parent->world_rotation * local_rotation);
-			world_position = glm::vec3(modelMatrix * glm::vec4(0, 0, 0, 1));
+			world_position = glm::dvec3(modelMatrix * glm::dvec4(0, 0, 0, 1));
 		}
 		else {
 			modelMatrix = localModelMatrix;
@@ -144,8 +146,10 @@ public:
 		up = glm::normalize(world_rotation * glm::vec3(0, 1, 0));
 		right = glm::normalize(world_rotation * glm::vec3(1, 0, 0));
 
-		for (auto child : children)
-			child->UpdateMatrix();
+		if (update_children) {
+			for (auto child : children)
+				child->UpdateMatrix();
+		}
 	}
 
 	// Get rotation in Euler angles (degrees)

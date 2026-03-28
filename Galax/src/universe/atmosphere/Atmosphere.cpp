@@ -22,7 +22,7 @@ namespace Universe {
 
 
 	AtmosphereRenderer::AtmosphereRenderer() {
-		atmosphereShader.Compile("assets/shaders/atmosphere.frag", "assets/shaders/atmosphere.vert");
+		atmosphereShader.Compile("assets/shaders/universe/atmosphere.frag", "assets/shaders/universe/atmosphere.vert");
 
 		quad = Mesh(quad_verts, quad_inds);
 	}

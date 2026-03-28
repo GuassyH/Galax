@@ -23,7 +23,7 @@ namespace Universe {
 	StarSkybox::StarSkybox() {
 		transform = std::make_shared<Transform>();
 
-		starShader = FragShader("assets/shaders/stars.frag", "assets/shaders/stars.vert");
+		starShader = FragShader("assets/shaders/universe/stars.frag", "assets/shaders/universe/stars.vert");
 
 		quad = Mesh(quad_verts, quad_inds);
 

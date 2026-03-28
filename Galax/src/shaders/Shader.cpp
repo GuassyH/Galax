@@ -56,6 +56,14 @@ void Shader::SetVec3(const std::string& name, float x, float y, float z) const {
     GLint loc = glGetUniformLocation(ID, name.c_str());
 	if (loc >= 0) glProgramUniform3f(ID, loc, x, y, z);
 }
+void Shader::SetVec3(const std::string& name, const glm::dvec3& value) const {
+	GLint loc = glGetUniformLocation(ID, name.c_str());
+	if (loc >= 0) glProgramUniform3f(ID, loc, float(value.x), float(value.y), float(value.z));
+}
+void Shader::SetVec3(const std::string& name, double x, double y, double z) const {
+	GLint loc = glGetUniformLocation(ID, name.c_str());
+	if (loc >= 0) glProgramUniform3f(ID, loc, float(x), float(y), float(z));
+}
 void Shader::SetVec4(const std::string& name, const glm::vec4& value) const {
     GLint loc = glGetUniformLocation(ID, name.c_str());
 	if (loc >= 0) glProgramUniform4f(ID, loc, value.x, value.y, value.z, value.a);

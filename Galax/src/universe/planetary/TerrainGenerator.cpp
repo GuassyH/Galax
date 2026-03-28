@@ -4,7 +4,7 @@
 #include "core/Maths.h"
 
 TerrainGenerator::TerrainGenerator() {
-	terrain_compute.Compile("assets/shaders/terrain.comp");
+	terrain_compute.Compile("assets/shaders/universe/terrain.comp");
 
 	glGenBuffers(1, &vertBuff);
 	glGenBuffers(1, &craterBuff);

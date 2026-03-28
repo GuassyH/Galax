@@ -11,7 +11,10 @@ namespace Universe {
 	void UniverseManager::Init(Camera& camera) {
 		atmosphereRenderer = std::make_unique<Universe::AtmosphereRenderer>();
 		oceanRenderer = std::make_unique<Universe::OceanRenderer>();
-		
+
+		transform = std::make_shared<Transform>();
+		transform->UpdateMatrix(false);
+
 		starSkybox = std::make_unique<Universe::StarSkybox>();
 		starSkybox->Generate(3000, 3, 1.5F, 1000.0f);
 
@@ -19,6 +22,8 @@ namespace Universe {
 
 	void UniverseManager::Update(Player& player) {
 		
+		Recentre(player);
+
 		for (auto& planet : planets)
 			planet->Update(player.camera);
 
@@ -35,7 +40,7 @@ namespace Universe {
 			}
 		}
 
-		ResolveGravity();
+		// ResolveGravity();
 
 		player.Look();
 		player.Move();
@@ -118,14 +123,17 @@ namespace Universe {
 		glDepthMask(GL_TRUE);
 		glDepthFunc(GL_LESS);
 
+		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		for (auto& planet : planets)
 			planet->Render(camera, sun);
+		// glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
 
 		// Do test depth, do, always, write depth DONT TOUCH!!!, ENABLE, TRUE, LESS
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 		glDepthFunc(GL_LESS);
-	
+
 		for (auto& planet : planets)
 			if (planet->hasOcean) oceanRenderer->Render(camera, sun, planet->transform.get(), planet->ocean_config, baseTexture, baseDepth);
 
@@ -160,6 +168,28 @@ namespace Universe {
 		if (starTexture) glDeleteTextures(1, &starTexture);
 		if (starDepth) glDeleteTextures(1, &starDepth);
 
+	}
+
+
+
+	void UniverseManager::Recentre(Player& player) {
+		float player_dst = glm::distance(glm::vec3(0.0f), player.transform->world_position);
+		GX_TRACE("{}", player_dst);
+
+		if (player_dst > recentre_dist) {
+			glm::vec3 dir = -glm::normalize(player.transform->world_position);
+
+			// Set the position of the universes transform
+			transform->local_position += dir * player_dst;
+
+			// Only do if it has no parent, otherwise itll move away from planet
+			if (!player.transform->HasParent()) {
+				player.transform->local_position += dir * player_dst;
+			}
+
+			// DONT update children since they WILL be updated anyways
+			transform->UpdateMatrix(false);
+		}
 	}
 
 

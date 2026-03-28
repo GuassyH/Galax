@@ -1,0 +1,20 @@
+IMPORTANT
+
+Jitter when orbiting parent seems to be dependant on view in relation to the sun
+When the sun is to the right or left of the camera theres much more jitter, need to experiment
+
+DEFINITELY has something to do with the sun
+
+when close to the sun the jitter is minimised
+when far from the sun the jitter is maximised
+
+this COULD be because the sun is at the origo, ergo just coincidence. 
+maybe due to floating point precision errors when far from 0,0,0
+yes, seems to be due to floating point precision
+
+
+basically confirmed its floating point precision error
+
+Gonna try a recentering approach
+
+FIXED!!

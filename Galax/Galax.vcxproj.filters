@@ -142,10 +142,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\shaders\atmosphere.frag">
+    <None Include="assets\shaders\universe\atmosphere.frag">
       <Filter>Resource Files\assets\shaders</Filter>
     </None>
-    <None Include="assets\shaders\atmosphere.vert">
+    <None Include="assets\shaders\universe\atmosphere.vert">
       <Filter>Resource Files\assets\shaders</Filter>
     </None>
     <None Include="assets\shaders\default.frag">
@@ -160,22 +160,25 @@
     <None Include="assets\shaders\default_unlit.vert">
       <Filter>Resource Files\assets\shaders</Filter>
     </None>
-    <None Include="assets\shaders\planet.frag">
+    <None Include="assets\shaders\universe\planet.frag">
       <Filter>Resource Files\assets\shaders</Filter>
     </None>
-    <None Include="assets\shaders\planet.vert">
+    <None Include="assets\shaders\universe\planet.vert">
       <Filter>Resource Files\assets\shaders</Filter>
     </None>
-    <None Include="assets\shaders\stars.frag">
+    <None Include="assets\shaders\universe\stars.frag">
       <Filter>Resource Files\assets\shaders</Filter>
     </None>
-    <None Include="assets\shaders\stars.vert">
+    <None Include="assets\shaders\universe\stars.vert">
       <Filter>Resource Files\assets\shaders</Filter>
     </None>
-    <None Include="assets\shaders\terrain.comp">
+    <None Include="assets\shaders\universe\terrain.comp">
       <Filter>Resource Files\assets\shaders</Filter>
     </None>
-    <None Include="assets\shaders\ocean.frag" />
-    <None Include="assets\shaders\ocean.vert" />
+    <None Include="assets\shaders\universe\ocean.frag" />
+    <None Include="assets\shaders\universe\ocean.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="src\Diary.txt" />
   </ItemGroup>
 </Project>

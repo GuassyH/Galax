@@ -19,7 +19,7 @@ namespace Universe {
 
 
 	OceanRenderer::OceanRenderer() {
-		oceanShader.Compile("assets/shaders/ocean.frag", "assets/shaders/ocean.vert");
+		oceanShader.Compile("assets/shaders/universe/ocean.frag", "assets/shaders/universe/ocean.vert");
 
 		quad = Mesh(quad_verts, quad_inds);
 	}

@@ -9,6 +9,7 @@ namespace Universe {
 	void Planet::Generate() {
 		Delete();
 		
+
 		transform = std::make_shared<Transform>();
 		faces = CubeSphere::ConstructFaces(radius, resolution, transform.get());
 
@@ -39,11 +40,12 @@ namespace Universe {
 
 		if (mpr != 0.0f) {
 			float spr = mpr * 60.0f;
-			float angle_deg = (360.0f / spr) * Galax::Time::get().deltaTime;
+			float angle_deg = (360.0f * Galax::Time::get().deltaTime) / spr;
 			transform->AddRotationAroundAxis(rotation_axis, angle_deg, false);
 		}
 
 		transform->UpdateMatrix();
+		// GX_TRACE("{}x {}y {}z", transform->world_position.x, transform->world_position.y, transform->world_position.z);
 
 		if (!LODradii.empty())
 			UpdateAllLODs(camera.transform->world_position);

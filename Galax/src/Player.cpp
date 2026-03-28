@@ -50,7 +50,7 @@ void Player::Move() {
 
 
 
-	glm::vec3 localMoveDir = moveDir;
+	glm::vec3 localMoveDir = glm::vec3(0.0);
 
 	// if you are close to the ground, SDF?
 	if (transform->HasParent()) {
@@ -124,6 +124,7 @@ void Player::Look() {
 }
 
 
+
 // Allign to planet, also makes sure you have to be closer to the planet to 
 // get alligned to it than unalligned to stop edge-cases
 void Player::AllignToPlanet(Universe::Planet* planet, float _0_1_val) {	
@@ -142,6 +143,7 @@ void Player::AllignToPlanet(Universe::Planet* planet, float _0_1_val) {
 		glm::vec3 right = glm::normalize(glm::cross(forward, up));
 		forward = glm::normalize(glm::cross(up, right));
 
+
 		glm::mat3 rot(right, up, -forward);
 		transform->local_rotation = glm::quat_cast(rot);
 		
@@ -158,7 +160,9 @@ void Player::AllignToPlanet(Universe::Planet* planet, float _0_1_val) {
 	}
 
 	if (parent_planet) {
+
 		glm::vec3 up = glm::normalize(transform->world_position - parent_planet->transform->world_position);
+
 
 		// Keep forward but make it tangent
 		glm::vec3 forward = camera.transform->forward;
@@ -168,8 +172,11 @@ void Player::AllignToPlanet(Universe::Planet* planet, float _0_1_val) {
 		glm::vec3 right = glm::normalize(glm::cross(forward, up));
 		forward = glm::normalize(glm::cross(up, right));
 
+
 		glm::mat3 rot(right, up, -forward);
-		this->transform->SetWorldRotation(glm::quat_cast(rot));
+		glm::quat new_rot_quat = glm::quat_cast(rot);
+		this->transform->SetWorldRotation(new_rot_quat);
+
 		transform->UpdateMatrix();
 	}
 }
