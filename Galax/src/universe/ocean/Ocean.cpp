@@ -37,11 +37,20 @@ namespace Universe {
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, depthTex);
-		oceanShader.SetInt("depthTexure", 0);
+		oceanShader.SetInt("depthTexture", 0);
 
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, colorTex);
-		oceanShader.SetInt("screenTexture", colorTex);
+		oceanShader.SetInt("screenTexture", 1);
+
+		if (ocean_config.normalTexture) {
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, ocean_config.normalTexture->ID);
+			oceanShader.SetInt("normalTexture", 2);
+		}
+		oceanShader.SetBool("hasNormalTex", ocean_config.normalTexture != nullptr);
+		oceanShader.SetFloat("normalRepeat", ocean_config.normalRepeat);
+		oceanShader.SetFloat("normalScale", ocean_config.normalScale);
 
 		oceanShader.SetFloat("oceanRadius", ocean_config.radius);
 		oceanShader.SetFloat("densityFalloff", ocean_config.densityFalloff);

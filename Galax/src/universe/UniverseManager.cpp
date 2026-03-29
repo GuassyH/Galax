@@ -32,11 +32,12 @@ namespace Universe {
 
 		// Check for the closest planet
 		for (auto& planet : planets) {
+			// Use squares since its much faster than getting the roots
 			float distance_sqr = glm::distance2(player.transform->world_position, planet->transform->world_position);
-			// Use distance squared since its faster for comparing (sometimes more than 10x)
-			if (distance_sqr < (planet->radius * planet->radius) * 2.0f) {
+			float threshold_sqr = (planet->radius * 2.0f) * (planet->radius * 2.0f);
+			if (distance_sqr < threshold_sqr) {
 				closestPlanet = planet.get();
-				_0_1_val = distance_sqr / ((planet->radius * planet->radius) * 2.0f);
+				_0_1_val = glm::sqrt(distance_sqr) / (planet->radius * 2.0f);
 				break;
 			}
 		}
@@ -137,7 +138,7 @@ namespace Universe {
 
 		for (auto& planet : planets)
 			if (planet->hasOcean) oceanRenderer->Render(camera, sun, planet->transform.get(), planet->ocean_config, baseTexture, baseDepth);
-		
+
 		// Write to the atmosphere FBO
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

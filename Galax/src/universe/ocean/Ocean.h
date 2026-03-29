@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include "shaders/FragShader.h"
 #include "Mesh.h"
+#include "Texture.h"
 
 namespace Universe {
 
@@ -16,6 +17,9 @@ namespace Universe {
 		float radius = 1.0f;
 		float densityFalloff = 2.0f;
 		glm::vec4 oceanColor;
+		std::shared_ptr<Texture> normalTexture;
+		float normalRepeat = 1.0f;
+		float normalScale = 1.0f;
 	};
 
 	class OceanRenderer {

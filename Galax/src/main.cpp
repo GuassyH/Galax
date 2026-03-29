@@ -72,25 +72,26 @@ int main() {
 	std::shared_ptr<Universe::Planet> planet_char = std::make_shared<Universe::Planet>();
 	planet_char->shader = shader;
 	planet_char->radius = 500;
-	planet_char->resolution = 64;
-	planet_char->LODradii = { 6.0f, 3.0f, 1.0f, 0.8f };
+	planet_char->resolution = 80;
+	planet_char->LODradii = { 6.0f, 3.0f, 1.5f, 1.0f };
 
-	planet_char->terrainGenerator.numCraters = 0;
+	planet_char->terrainGenerator.numCraters = 50;
 	planet_char->terrainGenerator.sizeFalloff = 3.0f;
 	planet_char->terrainGenerator.baseSize = 10.0f;
 	planet_char->terrainGenerator.sizeExaggeration = 2.0f;
 	planet_char->terrainGenerator.smoothingK = 0.1f;
-	planet_char->terrainGenerator.craterHeight = 1.0f;
+	planet_char->terrainGenerator.craterHeight = 2.0f;
 
 	planet_char->terrainGenerator.numLayers = 8;
-	planet_char->terrainGenerator.noiseStrength = 40.0f;
+	planet_char->terrainGenerator.noiseStrength = 30.0f;
 	planet_char->terrainGenerator.noiseHeightShift = -2.0f;
-	planet_char->terrainGenerator.noiseScale = 0.1f;
+	planet_char->terrainGenerator.noiseScale = 0.075f;
 	planet_char->terrainGenerator.surfaceColor = glm::vec4(0.396f, 0.58f, 0.306f, 1.0f);
 	planet_char->terrainGenerator.peakColor = glm::vec4(0.569f, 0.498f, 0.286f, 1.0f);
 
 	planet_char->physicsBody.mass = 1000000000;
 	planet_char->mpr = 10.0; // x minutes for one rot
+	planet_char->rotation_axis = glm::normalize(glm::vec3(0.2f, 1.0f, 0.2f));
 
 	planet_char->Generate();
 	planet_char->transform->local_position = glm::vec3(45000.0f, 0.0f, 0.0f);
@@ -110,6 +111,9 @@ int main() {
 	planet_char->ocean_config.densityFalloff = 1.0f;
 	planet_char->ocean_config.oceanColor = glm::vec4(0.0, 0.1, 0.3, 1.0);
 	planet_char->hasOcean = true;
+	planet_char->ocean_config.normalTexture = std::make_shared<Texture>("assets/textures/water_normals.jpg");
+	planet_char->ocean_config.normalRepeat = 5.0f;
+	planet_char->ocean_config.normalScale = 1.0f;
 
 	// Sun
 	std::shared_ptr<Universe::Planet> sun = std::make_shared<Universe::Planet>();

@@ -3,6 +3,11 @@
 
 uniform sampler2D depthTexture;
 uniform sampler2D screenTexture;
+uniform sampler2D normalTexture;
+
+uniform float normalRepeat;
+uniform float normalScale;
+uniform bool hasNormalTex;
 
 uniform float oceanRadius;
 uniform float densityFalloff;
@@ -26,6 +31,66 @@ uniform vec2 screenResolution;
 
 in vec2 texCoord;
 out vec4 fragColor;
+
+
+vec3 getTriPlanarBlend(vec3 _wNorm){
+	// in wNorm is the world-space normal of the fragment
+	vec3 blending =  max(abs(_wNorm), 0.00001);
+	blending = normalize(max(blending, 0.00001)); // Force weights to sum to 1.0
+	blending /= (blending.x + blending.y + blending.z);
+	return blending;
+}
+
+
+vec3 normalCalculation(vec3 localPos){
+
+	vec3 blending = getTriPlanarBlend(normalize(localPos));
+	vec3 spherePos = normalize(localPos); // [-1,1] range
+
+	vec3 xaxis = texture(normalTexture, spherePos.yz * normalRepeat).rgb * 2.0 - 1.0;
+	vec3 yaxis = texture(normalTexture, spherePos.xz * normalRepeat).rgb * 2.0 - 1.0;
+	vec3 zaxis = texture(normalTexture, spherePos.xy * normalRepeat).rgb * 2.0 - 1.0;
+
+	// Reorient normals into world/object space
+	vec3 nx = vec3(xaxis.z, xaxis.y, -xaxis.x);
+	vec3 ny = vec3(yaxis.x, yaxis.z, -yaxis.y);
+	vec3 nz = vec3(zaxis.x, zaxis.y, zaxis.z);
+
+	vec3 normalTex = nx * blending.x + ny * blending.y + nz * blending.z;
+
+	normalTex.xy *= normalScale;
+	normalTex = normalize( normalTex );
+
+	vec3 N = spherePos;
+
+	// Pick a safe up vector
+	vec3 up = abs(N.y) < 0.999 ? vec3(0,1,0) : vec3(1,0,0);
+
+	vec3 T = normalize(cross(up, N));
+	vec3 B = cross(N, T);
+
+	mat3 TBN = mat3(T, B, N);
+
+	return normalize(TBN * normalTex);
+}
+
+
+float directionalLight(vec3 normal, vec3 sunDir, vec3 crntPos){
+	
+	// diffuse lighting
+	vec3 lightDirection = -normalize(sunDir);
+	vec3 n = normalize(normal);
+	float diffuse = max(dot(n, lightDirection), 0.1);
+
+	// specular lighting
+	float specularLight = 0.50;
+	vec3 viewDirection = normalize(camPos - crntPos);
+	vec3 reflectionDirection = reflect(-lightDirection, n);
+	float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0), 16);
+	float specular = specAmount * specularLight;
+
+	return diffuse + specular;
+};
 
 
 
@@ -61,17 +126,6 @@ float densityAtPoint(vec3 samplePoint){
 
 	return localDensity;
 }
-
-// Not implemented
-vec3 calculateLight(vec3 rayOrigin, vec3 rayDir, float dstThrough, vec3 originalCol) {
-	vec3 light = vec3(0.0);
-
-
-	return light;
-};
-
-
-
 
 
 // Get depth from OpenGL depth
@@ -128,16 +182,22 @@ void main(){
 	vec3 entryPoint = rayOrigin + (rayDir * (dstTo + epsilon*2));
 
 	// colorise
-	// fragColor.rgb += calculateLight(entryPoint, rayDir, dstThrough + (epsilon * 2), fragColor.rgb);
-	// TEMP
-	float alpha = clamp(dstThrough / 1.0, 0.1, 1.0);
-	float normal = max(dot(normalize(entryPoint - centre), -normalize(entryPoint - sunPos)), 0.1);
+	float alpha = clamp(dstThrough, 0.1, 1.0);
+
 
 	if(dstThrough < 0.1)
-		fragColor.rgb = vec3(1.0) * normal;
-	else
-		fragColor.rgb = mix(fragColor.rgb,  oceanColor.rgb * normal, alpha);
+		fragColor.rgb = vec3(1.0);
+	else {
+		vec3 normal;
+		if (hasNormalTex && dstTo > 0.0) {
+			normal = normalCalculation(entryPoint - centre) * 0.5 + 0.5;
+		}else {
+			normal = normalize(entryPoint - centre);
+		}
 
+		fragColor.rgb = mix(fragColor.rgb,  oceanColor.rgb, alpha);
+		fragColor.rgb *= directionalLight(normal, normalize(sunPos - centre), entryPoint);
+	}
 
 	// Set the depth DONT TOUCH!!!!
 	vec3 viewSpacePos = entryPoint - camPos;
