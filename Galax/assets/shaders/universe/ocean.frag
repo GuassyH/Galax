@@ -175,12 +175,12 @@ void main(){
 	const float epsilon = 0.001;
 	vec3 entryPoint = rayOrigin + (rayDir * (dstTo + epsilon*2));
 
+	vec3 diff_normal = normalize(entryPoint - centre);
+
 	if(dstThrough < 0.1){
-		fragColor.rgb = vec3(1.0);
+		fragColor.rgb = directionalLight(diff_normal, diff_normal, normalize(sunPos - entryPoint), rayDir, vec3(1.0));
 	}
 	else {
-
-		vec3 diff_normal = normalize(entryPoint - centre);
 		vec3 spec_normal;
 		if (hasNormalTex && dstTo > 0.0) {
 			spec_normal = normalCalculation(entryPoint - centre);
@@ -189,7 +189,7 @@ void main(){
 		}
 
 
-		float alpha = clamp(dstThrough, 0.1, 1.0);
+		float alpha = clamp(dstThrough / 5, 0.1, 1.0);
 		vec3 color = mix(fragColor.rgb,  oceanColor.rgb, alpha);
 		fragColor.rgb = directionalLight(diff_normal, spec_normal, normalize(sunPos - entryPoint), rayDir, color);
 

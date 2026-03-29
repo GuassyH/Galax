@@ -60,7 +60,7 @@ int main() {
 	player.camera.nearPlane = 1.0f;
 	player.camera.farPlane = 100000.0f;
 
-	player.transform->local_position = glm::vec3(44000.0f, 0.0f, 0.0f);
+	player.transform->local_position = glm::vec3(93000.0f, 0.0f, 0.0f);
 	player.transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), 180);
 
 	std::shared_ptr<PlanetShader> shader = std::make_shared<PlanetShader>("assets/shaders/universe/planet.frag", "assets/shaders/universe/planet.vert");
@@ -71,7 +71,7 @@ int main() {
 	// Charley
 	std::shared_ptr<Universe::Planet> planet_char = std::make_shared<Universe::Planet>();
 	planet_char->shader = shader;
-	planet_char->radius = 500;
+	planet_char->radius = 1000;
 	planet_char->resolution = 80;
 	planet_char->LODradii = { 6.0f, 3.0f, 1.5f, 1.0f };
 
@@ -82,19 +82,19 @@ int main() {
 	planet_char->terrainGenerator.smoothingK = 0.1f;
 	planet_char->terrainGenerator.craterHeight = 2.0f;
 
-	planet_char->terrainGenerator.numLayers = 8;
+	planet_char->terrainGenerator.numLayers = 12;
 	planet_char->terrainGenerator.noiseStrength = 30.0f;
 	planet_char->terrainGenerator.noiseHeightShift = -2.0f;
-	planet_char->terrainGenerator.noiseScale = 0.075f;
+	planet_char->terrainGenerator.noiseScale = 0.025f;
 	planet_char->terrainGenerator.surfaceColor = glm::vec4(0.396f, 0.58f, 0.306f, 1.0f);
 	planet_char->terrainGenerator.peakColor = glm::vec4(0.569f, 0.498f, 0.286f, 1.0f);
 
 	planet_char->physicsBody.mass = 1000000000;
-	planet_char->mpr = 2.0; // x minutes for one rot
+	planet_char->mpr = 24.0; // x minutes for one rot
 	planet_char->rotation_axis = glm::normalize(glm::vec3(0.2f, 1.0f, 0.2f));
 
 	planet_char->Generate();
-	planet_char->transform->local_position = glm::vec3(45000.0f, 0.0f, 0.0f);
+	planet_char->transform->local_position = glm::vec3(95000.0f, 0.0f, 0.0f);
 	planet_char->transform->UpdateMatrix();
 
 	planet_char->atmosphere_config.planetRadius = planet_char->radius;
@@ -118,7 +118,7 @@ int main() {
 	// Sun
 	std::shared_ptr<Universe::Planet> sun = std::make_shared<Universe::Planet>();
 	sun->shader = unlit;
-	sun->radius = 1000;
+	sun->radius = 2000;
 	sun->resolution = 50;
 	sun->LODradii = { };
 

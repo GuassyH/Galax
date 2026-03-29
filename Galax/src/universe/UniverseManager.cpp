@@ -178,14 +178,13 @@ namespace Universe {
 		float player_dst = glm::distance(glm::vec3(0.0f), player.transform->world_position);
 
 		if (player_dst > recentre_dist) {
-			glm::vec3 dir = -glm::normalize(player.transform->world_position);
 
 			// Set the position of the universes transform
-			transform->local_position += dir * player_dst;
+			transform->local_position -= player.transform->world_position;
 
 			// Only set players position if it has no parent, since if it does it will automatically recentre
 			if (!player.transform->HasParent()) {
-				player.transform->local_position += dir * player_dst;
+				player.transform->local_position -= player.transform->world_position;
 			}
 
 			// DONT update children since they WILL be updated anyways in void Update()

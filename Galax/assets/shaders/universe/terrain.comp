@@ -63,7 +63,8 @@ uniform vec4 peakColor;
 uniform vec4 surfaceColor;
 
 
-// CRATERS 
+// ===== CRATERS ===== 
+
 float smin( float a, float b, float k )
 {
     k *= 1.0;
@@ -101,7 +102,12 @@ float CraterInfluence(Vertex vert){
 }
 
 
-// BASIC NOISE
+// ===== RIDGES ===== 
+
+
+
+// ===== PERLIN ===== 
+
 float hash(float n) { return fract(sin(n) * 1e4); }
 float hash(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }
 
@@ -175,7 +181,12 @@ float NoiseInfluence(Vertex vert) {
 }
 
 
-// MAIN
+
+
+
+
+// ===== MAIN ===== 
+
 vec3 GetPosition(vec3 dir){
 	float d = 0.0;
 
@@ -185,8 +196,6 @@ vec3 GetPosition(vec3 dir){
 
 	d += NoiseInfluence(v);
 	d += CraterInfluence(v);
-
-	// d = max(d, 0.0);
 
 	return (v.position + dir * d);
 };
@@ -207,6 +216,12 @@ vec3 CalculateNormal(vec3 dir, vec3 pos){
 
 	return normal;
 };
+
+
+
+
+
+
 
 void main(){
 	uint idx = gl_GlobalInvocationID.x;
