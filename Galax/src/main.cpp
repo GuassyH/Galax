@@ -21,6 +21,7 @@
 #include "Mesh.h"
 #include "shaders/Shader.h"
 #include "shaders/FragShader.h"
+#include "shaders/PlanetShader.h"
 #include "Camera.h"
 #include "Player.h"
 
@@ -62,12 +63,14 @@ int main() {
 	player.transform->local_position = glm::vec3(44000.0f, 0.0f, 0.0f);
 	player.transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), 180);
 
-	FragShader shader("assets/shaders/universe/planet.frag", "assets/shaders/universe/planet.vert");
-	FragShader unlit("assets/shaders/default_unlit.frag", "assets/shaders/default_unlit.vert");
+	std::shared_ptr<PlanetShader> shader = std::make_shared<PlanetShader>("assets/shaders/universe/planet.frag", "assets/shaders/universe/planet.vert");
+	// shader->texture = std::make_shared<Texture>("assets/textures/grid.jpg");
+	
+	std::shared_ptr<FragShader> unlit = std::make_shared<FragShader>("assets/shaders/default_unlit.frag", "assets/shaders/default_unlit.vert");
 	
 	// Charley
 	std::shared_ptr<Universe::Planet> planet_char = std::make_shared<Universe::Planet>();
-	planet_char->planetShader = shader;
+	planet_char->shader = shader;
 	planet_char->radius = 500;
 	planet_char->resolution = 64;
 	planet_char->LODradii = { 6.0f, 3.0f, 1.0f, 0.8f };
@@ -110,7 +113,7 @@ int main() {
 
 	// Sun
 	std::shared_ptr<Universe::Planet> sun = std::make_shared<Universe::Planet>();
-	sun->planetShader = unlit;
+	sun->shader = unlit;
 	sun->radius = 1000;
 	sun->resolution = 50;
 	sun->LODradii = { };

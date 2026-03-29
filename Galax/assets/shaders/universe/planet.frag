@@ -7,9 +7,21 @@ uniform vec3 centre;
 uniform float radius;
 
 in vec3 normal;
+in vec3 localPos;
+in vec3 localNorm;
 in vec3 crntPos;
 in vec2 texCoord;
 in vec4 vertColor;
+
+vec3 getTriPlanarBlend(vec3 _wNorm){
+	// in wNorm is the world-space normal of the fragment
+	vec3 blending = abs( _wNorm );
+	blending = normalize(max(blending, 0.00001)); // Force weights to sum to 1.0
+	float b = (blending.x + blending.y + blending.z);
+	blending /= vec3(b, b, b);
+	return blending;
+}
+
 
 float directionalLight(){
 	
@@ -45,5 +57,7 @@ void main(){
 	if(distance(crntPos, centre) <= radius * 1.005)
 		fragCol.rgb = vec3(0.7, 0.6, 0.2);
 
+
 	fragCol *= directionalLight();
+	fragCol.a = 1.0;
 }

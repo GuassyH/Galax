@@ -186,7 +186,7 @@ void main(){
 	}
 
 	// Dim stars
-	if(texture(depthTexture, texCoord).r == 1 ){
+	if(texture(depthTexture, texCoord).r == 1){
 		fragColor += GetStarBrightness(length(fragColor.rgb));
 	}
 

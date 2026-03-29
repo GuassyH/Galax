@@ -90,6 +90,7 @@ float DepthBufferFromLinear(float zLinear, float zNear, float zFar) {
 
 void main(){
 	fragColor = texture(screenTexture, texCoord);
+	gl_FragDepth = texture(depthTexture, texCoord).r;
 
 	vec2 rayCoord = texCoord * 2.0 - 1.0;
 
@@ -109,7 +110,7 @@ void main(){
 
 
 	if (dstThrough <= 0.0)
-		discard;
+		return;
 	
 
 	// Distance from camera along the current ray
@@ -121,7 +122,7 @@ void main(){
 
 	// ACTUAL CALCS
 	if (dstThrough <= 0.0)
-		discard;
+		return;
 
 	const float epsilon = 0.001;
 	vec3 entryPoint = rayOrigin + (rayDir * (dstTo + epsilon*2));

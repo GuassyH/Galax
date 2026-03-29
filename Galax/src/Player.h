@@ -9,7 +9,7 @@ public:
 	Player();
 	~Player();
 
-	float speed = 10.0f;
+	float speed = 8.0f;
 	float sensitivity = 0.002f;
 
 

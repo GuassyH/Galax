@@ -146,21 +146,20 @@ void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
 }
 
 
-void CubeSphere::RenderChunk(Chunk* chunk, Transform* sun, Camera& camera, Shader& shader) {
+void CubeSphere::RenderChunk(Chunk* chunk, Transform* sun, Camera& camera, Shader* shader) {
 	if (!chunk)
 		return;
 
 	if (chunk->isLeaf) {
-		shader.Use();
-		shader.SetMat4("model", chunk->mesh.transform->GetMatrix());
-		shader.SetMat4("view", camera.GetView());
-		shader.SetMat4("proj", camera.GetProj());
-		shader.SetVec3("camPos", camera.transform->world_position);
-		shader.SetVec3("sunDir", glm::normalize(chunk->mesh.transform->world_position - sun->world_position));
-		shader.SetVec3("centre", chunk->mesh.transform->world_position);
-		shader.SetFloat("radius", chunk->radius);
-
-		chunk->mesh.Render(camera, shader);
+		shader->Use();
+		shader->SetMat4("model", chunk->mesh.transform->GetMatrix());
+		shader->SetMat4("view", camera.GetView());
+		shader->SetMat4("proj", camera.GetProj());
+		shader->SetVec3("camPos", camera.transform->world_position);
+		shader->SetVec3("sunDir", glm::normalize(chunk->mesh.transform->world_position - sun->world_position));
+		shader->SetVec3("centre", chunk->mesh.transform->world_position);
+		shader->SetFloat("radius", chunk->radius);
+		chunk->mesh.Render(camera);
 	}
 	else if (chunk->hasNodes) {
 		for (auto node : chunk->nodes) {

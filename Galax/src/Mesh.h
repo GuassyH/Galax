@@ -29,7 +29,7 @@ public:
 	Mesh();
 	Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices);
 
-	void Render(Camera& camera, Shader& shader);
+	void Render(Camera& camera);
 
 	bool Calculate();
 	void Delete();

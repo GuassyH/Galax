@@ -23,6 +23,7 @@ float skywards = 0.0f;
 glm::vec3 moveDir = glm::vec3(0.0f);
 void Player::Move() {
 
+	// INPUT
 	if (Galax::Input::IsKeyPressed(GLFW_KEY_D))
 		horizontal += 1.0f;
 
@@ -41,13 +42,13 @@ void Player::Move() {
 	if (Galax::Input::IsKeyPressed(GLFW_KEY_C))
 		skywards -= 1.0f;
 
-	float multiplier = 1.0f;
-	if (Galax::Input::IsKeyPressed(GLFW_KEY_LEFT_SHIFT))
-		multiplier = 25.0f;
+	// Change speed
+	if (Galax::Input::GetScrollOffset().y > 0.0 && speed < 20480.0f) // comfortable speed limit  
+		speed *= 2.0f;
 
-	if (Galax::Input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL))
-		multiplier = 0.3f;
-
+	else if (Galax::Input::GetScrollOffset().y < 0.0 && speed > 0.5f) // Good slowest speed
+		speed /= 2.0f;
+	
 
 
 	glm::vec3 localMoveDir = glm::vec3(0.0);
@@ -68,7 +69,7 @@ void Player::Move() {
 		localMoveDir = moveDir;
 	}
 
-	transform->local_position += localMoveDir * speed * multiplier * Galax::Time::get().deltaTime;
+	transform->local_position += localMoveDir * speed * Galax::Time::get().deltaTime;
 
 	moveDir = glm::vec3(0.0f);
 	horizontal = 0.0f;

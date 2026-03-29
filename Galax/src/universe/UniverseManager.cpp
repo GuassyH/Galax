@@ -21,7 +21,7 @@ namespace Universe {
 	}
 
 	void UniverseManager::Update(Player& player) {
-		
+		// Recentre the universe around the player
 		Recentre(player);
 
 		for (auto& planet : planets)
@@ -30,25 +30,30 @@ namespace Universe {
 		Universe::Planet* closestPlanet = nullptr;
 		float _0_1_val = 0.0f;
 
-
+		// Check for the closest planet
 		for (auto& planet : planets) {
-			float distance = glm::distance(player.transform->world_position, planet->transform->world_position);
-			if (distance < planet->radius * 2) {
+			float distance_sqr = glm::distance2(player.transform->world_position, planet->transform->world_position);
+			// Use distance squared since its faster for comparing (sometimes more than 10x)
+			if (distance_sqr < (planet->radius * planet->radius) * 2.0f) {
 				closestPlanet = planet.get();
-				_0_1_val = distance / (planet->radius * 2.0f);
+				_0_1_val = distance_sqr / ((planet->radius * planet->radius) * 2.0f);
 				break;
 			}
 		}
 
-		// ResolveGravity();
+		ResolveGravity();
 
 		player.Look();
 		player.Move();
 
+		// Update to make sure its accurate for allignment
 		player.transform->UpdateMatrix();
 		player.camera.UpdateMatrix();
 
 		player.AllignToPlanet(closestPlanet, _0_1_val);
+
+		// Update to make sure its accurate for rendering (transform is updated in allign)
+		player.camera.UpdateMatrix();
 
 		starSkybox->Update(player.transform.get());
 	}
@@ -95,7 +100,6 @@ namespace Universe {
 			CreateBuffers(&baseFBO, &baseTexture, &baseDepth);
 			CreateBuffers(&starFBO, &starTexture, &starDepth);
 
-
 			last_width = window_size.x;
 			last_height = window_size.y;
 		}
@@ -123,11 +127,8 @@ namespace Universe {
 		glDepthMask(GL_TRUE);
 		glDepthFunc(GL_LESS);
 
-		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		for (auto& planet : planets)
 			planet->Render(camera, sun);
-		// glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
 
 		// Do test depth, do, always, write depth DONT TOUCH!!!, ENABLE, TRUE, LESS
 		glEnable(GL_DEPTH_TEST);
@@ -136,7 +137,7 @@ namespace Universe {
 
 		for (auto& planet : planets)
 			if (planet->hasOcean) oceanRenderer->Render(camera, sun, planet->transform.get(), planet->ocean_config, baseTexture, baseDepth);
-
+		
 		// Write to the atmosphere FBO
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -174,7 +175,6 @@ namespace Universe {
 
 	void UniverseManager::Recentre(Player& player) {
 		float player_dst = glm::distance(glm::vec3(0.0f), player.transform->world_position);
-		GX_TRACE("{}", player_dst);
 
 		if (player_dst > recentre_dist) {
 			glm::vec3 dir = -glm::normalize(player.transform->world_position);
@@ -182,12 +182,12 @@ namespace Universe {
 			// Set the position of the universes transform
 			transform->local_position += dir * player_dst;
 
-			// Only do if it has no parent, otherwise itll move away from planet
+			// Only set players position if it has no parent, since if it does it will automatically recentre
 			if (!player.transform->HasParent()) {
 				player.transform->local_position += dir * player_dst;
 			}
 
-			// DONT update children since they WILL be updated anyways
+			// DONT update children since they WILL be updated anyways in void Update()
 			transform->UpdateMatrix(false);
 		}
 	}

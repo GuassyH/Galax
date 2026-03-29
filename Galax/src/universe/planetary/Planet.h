@@ -16,12 +16,7 @@
 namespace Universe {
 	class Planet {
 	public:
-		struct AngleColor {
-			glm::vec4 color;
-			float angle;
-			float pad[3];
-		};
-
+	
 		/// Core
 		Planet() = default;
 		~Planet() = default;
@@ -44,8 +39,7 @@ namespace Universe {
 		std::shared_ptr<Transform> transform;
 
 		// Material stuff
-		FragShader planetShader;
-		std::vector<AngleColor> angles_to_colors = { };
+		std::shared_ptr<Shader> shader;
 		float ambient = 0.0f;
 
 		// Body

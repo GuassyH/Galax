@@ -18,3 +18,5 @@ basically confirmed its floating point precision error
 Gonna try a recentering approach
 
 FIXED!!
+
+Textures are causing issues, i think its because the textures for the quads in ocean and atmosphere are already using GL_TEXTURE0 and that

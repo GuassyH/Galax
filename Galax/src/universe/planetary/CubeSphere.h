@@ -31,7 +31,7 @@ public:
 	};
 
 	static std::vector<Face> ConstructFaces(float radius, int resolution, Transform* base_transform = nullptr);
-	static void RenderChunk(Chunk* chunk, Transform* sun, Camera& camera, Shader& shader);
+	static void RenderChunk(Chunk* chunk, Transform* sun, Camera& camera, Shader* shader);
 
 	static void SubdivideChunk(Chunk* chunk);
 	static void DestroyChunk(Chunk* inChunk); // Destroy given chunk and its children

@@ -137,12 +137,15 @@
   <ItemGroup>
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\core\Log.cpp" />
+    <ClCompile Include="src\core\stb.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\shaders\ComputeShader.cpp" />
     <ClCompile Include="src\shaders\FragShader.cpp" />
+    <ClCompile Include="src\shaders\PlanetShader.cpp" />
     <ClCompile Include="src\shaders\Shader.cpp" />
+    <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\universe\atmosphere\Atmosphere.cpp" />
     <ClCompile Include="src\universe\ocean\Ocean.cpp" />
     <ClCompile Include="src\universe\planetary\CubeSphere.cpp" />
@@ -166,7 +169,9 @@
     <ClInclude Include="src\rendering\Vertex.h" />
     <ClInclude Include="src\shaders\ComputeShader.h" />
     <ClInclude Include="src\shaders\FragShader.h" />
+    <ClInclude Include="src\shaders\PlanetShader.h" />
     <ClInclude Include="src\shaders\Shader.h" />
+    <ClInclude Include="src\Texture.h" />
     <ClInclude Include="src\Transform.h" />
     <ClInclude Include="src\universe\atmosphere\Atmosphere.h" />
     <ClInclude Include="src\universe\ocean\Ocean.h" />
