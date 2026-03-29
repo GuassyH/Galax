@@ -90,7 +90,7 @@ int main() {
 	planet_char->terrainGenerator.peakColor = glm::vec4(0.569f, 0.498f, 0.286f, 1.0f);
 
 	planet_char->physicsBody.mass = 1000000000;
-	planet_char->mpr = 10.0; // x minutes for one rot
+	planet_char->mpr = 2.0; // x minutes for one rot
 	planet_char->rotation_axis = glm::normalize(glm::vec3(0.2f, 1.0f, 0.2f));
 
 	planet_char->Generate();
@@ -111,9 +111,9 @@ int main() {
 	planet_char->ocean_config.densityFalloff = 1.0f;
 	planet_char->ocean_config.oceanColor = glm::vec4(0.0, 0.1, 0.3, 1.0);
 	planet_char->hasOcean = true;
-	planet_char->ocean_config.normalTexture = std::make_shared<Texture>("assets/textures/water_normals.jpg");
-	planet_char->ocean_config.normalRepeat = 5.0f;
-	planet_char->ocean_config.normalScale = 1.0f;
+	planet_char->ocean_config.normalTexture = std::make_shared<Texture>("assets/textures/water_loop.jpeg");
+	planet_char->ocean_config.normalRepeat = 10.0f;
+	planet_char->ocean_config.normalScale = 0.5f;
 
 	// Sun
 	std::shared_ptr<Universe::Planet> sun = std::make_shared<Universe::Planet>();

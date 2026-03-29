@@ -57,6 +57,8 @@ namespace Universe {
 		oceanShader.SetVec4("oceanColor", ocean_config.oceanColor);
 		oceanShader.SetVec3("centre", planet->world_position);
 
+		oceanShader.SetMat4("modelMat", planet->GetMatrix());
+
 		oceanShader.SetVec3("camPos", camera.transform->world_position);
 		oceanShader.SetVec3("sunPos", sun->transform->world_position);
 
