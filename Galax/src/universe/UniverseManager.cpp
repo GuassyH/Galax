@@ -5,9 +5,6 @@
 
 namespace Universe {
 
-	static double G = 0.0007;
-
-
 	void UniverseManager::Init(Camera& camera) {
 		atmosphereRenderer = std::make_unique<Universe::AtmosphereRenderer>();
 		oceanRenderer = std::make_unique<Universe::OceanRenderer>();
@@ -25,7 +22,7 @@ namespace Universe {
 		Recentre(player);
 
 		for (auto& planet : planets)
-			planet->Update(player.camera);
+			planet->Update(player.camera, isSimulating);
 
 		Universe::Planet* closestPlanet = nullptr;
 		float _0_1_val = 0.0f;
@@ -42,7 +39,9 @@ namespace Universe {
 			}
 		}
 
-		ResolveGravity();
+		if (isSimulating) {
+			ResolveGravity();
+		}
 
 		player.Look();
 		player.Move();
@@ -104,7 +103,7 @@ namespace Universe {
 			last_width = window_size.x;
 			last_height = window_size.y;
 		}
-		
+
 
 		// Render stars
 		glBindFramebuffer(GL_FRAMEBUFFER, starFBO);
@@ -149,7 +148,7 @@ namespace Universe {
 		glDepthMask(GL_FALSE);
 
 		for (auto& planet : planets)
-		if (planet->hasAtmosphere) atmosphereRenderer->Render(camera, sun, planet->transform.get(), planet->atmosphere_config, baseTexture, baseDepth, starTexture);
+			if (planet->hasAtmosphere) atmosphereRenderer->Render(camera, sun, planet->transform.get(), planet->atmosphere_config, baseTexture, baseDepth, starTexture);
 
 		glDepthMask(GL_TRUE);
 		glEnable(GL_DEPTH_TEST);
@@ -197,6 +196,9 @@ namespace Universe {
 
 	void UniverseManager::ResolveGravity() {
 		// Add velocity
+		std::vector<glm::vec3> accelerations(planets.size(), glm::vec3(0.0f));
+
+
 		for (int i = 0; i < planets.size(); i++) {
 			for (int j = 0; j < planets.size(); j++) {
 				if (i == j)
@@ -208,7 +210,6 @@ namespace Universe {
 				if (!thisP || !otherP)
 					continue;
 
-
 				// F1 = G(m1 * m2) / d^2 = m * a 
 				// a1 = (G(m1 * m2) / d^2) / m1
 				// a1 = G(m2) / d^2
@@ -217,71 +218,65 @@ namespace Universe {
 
 				glm::vec3 direction = glm::normalize(otherP->transform->world_position - thisP->transform->world_position);
 
-				thisP->physicsBody.velocity += direction * acceleration * Galax::Time::Get().deltaTime;
+				accelerations[i] = direction * acceleration;
 			}
 		}
 
 		// Add position
-		for (auto planet : planets) {
-			planet->transform->local_position += planet->physicsBody.velocity * Galax::Time::Get().deltaTime;
+		for (int i = 0; i < planets.size(); i++) {
+			planets[i]->physicsBody.velocity += accelerations[i] * Galax::Time::Get().deltaTime;
+			planets[i]->transform->local_position += planets[i]->physicsBody.velocity * Galax::Time::Get().deltaTime;
 		}
 	}
+
 
 	void UniverseManager::SetIdealOrbitVelocity(Planet* planet, Planet* target) {
 		if (!planet || !target || planet == target)
 			return;
 
+		glm::vec3 planetPos = planet->transform->world_position;
+		glm::vec3 targetPos = target->transform->world_position;
 
-		planet->physicsBody.velocity = glm::vec3(0.0); // make sure its already still
+		// Direction from planet -> target
+		glm::vec3 radialDir = glm::normalize(targetPos - planetPos);
 
-		glm::vec3 offset = target->transform->world_position - planet->transform->world_position;
-		float r = glm::length(offset);
+		// --- 1. Compute net gravitational acceleration at planet ---
+		glm::vec3 netAcceleration(0.0f);
 
-		float orbitalSpeed = glm::sqrt(G * target->physicsBody.mass / r);
+		for (auto& other : planets) {
+			if (!other || other.get() == planet)
+				continue;
 
-		glm::vec3 forward = glm::normalize(offset);
-		glm::vec3 up = glm::vec3(0.0, 1.0, 0.0);
+			glm::vec3 dir = other->transform->world_position - planetPos;
+			float distSq = glm::dot(dir, dir);
 
-		if (glm::abs(glm::dot(forward, up)) > 0.99f)
-			up = glm::vec3(1.0, 0.0, 0.0);
+			if (distSq < 0.0001f) continue;
 
-		glm::vec3 right = glm::normalize(glm::cross(forward, up));
-
-		planet->physicsBody.velocity = right * orbitalSpeed;
-	}
-
-
-
-
-	/*
-	/// Draw the path the planet will take in the next numPoints, using the current velocity and gravity. 
-	/// Used for debugging and visualization, not performant.
-	void DrawPredictedPath(Planet* planet, int numPoints, float timeStep) {
-		std::vector<glm::vec3> points;
-		glm::vec3 position = planet->transform->world_position;
-		glm::vec3 velocity = planet->physicsBody.velocity;
-
-		// Calculate the path points
-		for (int i = 0; i < numPoints; i++) {
-			// Calculate gravity from other planets
-			glm::vec3 acceleration(0.0f);
-			for (auto& otherP : UniverseManager::Get().planets) {
-				if (otherP.get() == planet)
-					continue;
-				float dstSq = glm::distance2(position, otherP->transform->world_position);
-				if (dstSq < 0.0001f) // Avoid singularity
-					continue;
-
-				acceleration += G * otherP->physicsBody.mass / dstSq;
-			}
-			// Update velocity and position
-			velocity += acceleration * timeStep;
-			position += velocity * timeStep;
-			points.push_back(position);
+			float accel = G * other->physicsBody.mass / distSq;
+			netAcceleration += glm::normalize(dir) * accel;
 		}
 
-		// Do something else? Like render lines between the points or something, not sure how to do that yet
+		float accelMag = glm::length(netAcceleration);
+		if (accelMag < 0.00001f)
+			return;
+
+		// --- 2. Distance to target (defines orbit radius) ---
+		float r = glm::distance(planetPos, targetPos);
+
+		// --- 3. Compute orbital speed based on total acceleration ---
+		float orbitalSpeed = glm::sqrt(accelMag * r);
+
+		// --- 4. Find tangent direction (perpendicular to acceleration) ---
+		glm::vec3 accelDir = glm::normalize(netAcceleration);
+
+		glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+		if (glm::abs(glm::dot(accelDir, up)) > 0.99f)
+			up = glm::vec3(1.0f, 0.0f, 0.0f);
+
+		glm::vec3 tangent = glm::normalize(glm::cross(accelDir, up));
+
+		// --- 5. Set velocity relative to target motion ---
+		planet->physicsBody.velocity = target->physicsBody.velocity + tangent * orbitalSpeed;
 	}
-	*/
 
 };

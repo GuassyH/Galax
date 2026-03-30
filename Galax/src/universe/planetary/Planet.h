@@ -22,7 +22,7 @@ namespace Universe {
 		~Planet() = default;
 		void Generate();
 	
-		void Update(Camera& camera);
+		void Update(Camera& camera, bool isSimulating);
 		void UpdateLOD(CubeSphere::Chunk* chunk, glm::vec3& observer_pos);
 		void UpdateAllLODs(glm::vec3 observer_pos);
 		void Render(Camera& camera, Planet* sun);

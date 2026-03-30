@@ -20,6 +20,8 @@ namespace Universe {
 		}
 
 		float recentre_dist = 1000.0f;
+		double G = 0.07;
+		bool isSimulating = false;
 
 		std::unique_ptr<AtmosphereRenderer> atmosphereRenderer;
 		std::unique_ptr<OceanRenderer> oceanRenderer;
@@ -42,6 +44,7 @@ namespace Universe {
 		void Render(Camera& camera, Planet* sun);
 
 		void Shutdown();
+		std::vector<std::shared_ptr<Planet>>& GetPlanets() { return planets; }
 
 	private:
 		std::vector<std::shared_ptr<Planet>> planets;

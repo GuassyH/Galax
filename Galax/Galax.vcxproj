@@ -105,7 +105,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Galax\vendor\include;$(SolutionDir)\Galax\src;$(SolutionDir)\Galax\vendor\include\spdlog\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Galax\vendor\include;$(SolutionDir)\Galax\src;$(SolutionDir)\Galax\vendor\include\spdlog\include</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -124,7 +124,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Galax\vendor\include;$(SolutionDir)\Galax\src;$(SolutionDir)\Galax\vendor\include\spdlog\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Galax\vendor\include;$(SolutionDir)\Galax\src;$(SolutionDir)\Galax\vendor\include\spdlog\include</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -147,13 +147,22 @@
     <ClCompile Include="src\shaders\Shader.cpp" />
     <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\universe\atmosphere\Atmosphere.cpp" />
+    <ClCompile Include="src\gui\GUI.cpp" />
     <ClCompile Include="src\universe\ocean\Ocean.cpp" />
     <ClCompile Include="src\universe\planetary\CubeSphere.cpp" />
     <ClCompile Include="src\universe\planetary\Planet.cpp" />
     <ClCompile Include="src\universe\planetary\TerrainGenerator.cpp" />
     <ClCompile Include="src\universe\stars\StarSkybox.cpp" />
+    <ClCompile Include="src\universe\UniverseDebug.cpp" />
     <ClCompile Include="src\universe\UniverseManager.cpp" />
     <ClCompile Include="vendor\include\glad.c" />
+    <ClCompile Include="vendor\include\imgui\imgui.cpp" />
+    <ClCompile Include="vendor\include\imgui\imgui_demo.cpp" />
+    <ClCompile Include="vendor\include\imgui\imgui_draw.cpp" />
+    <ClCompile Include="vendor\include\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="vendor\include\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="vendor\include\imgui\imgui_tables.cpp" />
+    <ClCompile Include="vendor\include\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h" />
@@ -174,15 +183,19 @@
     <ClInclude Include="src\Texture.h" />
     <ClInclude Include="src\Transform.h" />
     <ClInclude Include="src\universe\atmosphere\Atmosphere.h" />
+    <ClInclude Include="src\gui\GUI.h" />
     <ClInclude Include="src\universe\ocean\Ocean.h" />
     <ClInclude Include="src\universe\PhysicsBody.h" />
     <ClInclude Include="src\universe\planetary\CubeSphere.h" />
     <ClInclude Include="src\universe\planetary\Planet.h" />
     <ClInclude Include="src\universe\planetary\TerrainGenerator.h" />
     <ClInclude Include="src\universe\stars\StarSkybox.h" />
+    <ClInclude Include="src\universe\UniverseDebug.h" />
     <ClInclude Include="src\universe\UniverseManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\shaders\debug\debug_path.frag" />
+    <None Include="assets\shaders\debug\debug_path.vert" />
     <None Include="assets\shaders\universe\atmosphere.frag" />
     <None Include="assets\shaders\universe\atmosphere.vert" />
     <None Include="assets\shaders\default.frag" />

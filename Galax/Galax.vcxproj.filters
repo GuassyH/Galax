@@ -78,6 +78,33 @@
     <ClCompile Include="src\shaders\PlanetShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\universe\UniverseDebug.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\GUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\include\imgui\imgui_widgets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\include\imgui\imgui_impl_opengl3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\include\imgui\imgui_impl_glfw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\include\imgui\imgui_demo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\include\imgui\imgui_draw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\include\imgui\imgui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\include\imgui\imgui_tables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\Log.h">
@@ -155,6 +182,12 @@
     <ClInclude Include="src\shaders\PlanetShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\universe\UniverseDebug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\GUI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\universe\atmosphere.frag">
@@ -192,6 +225,8 @@
     </None>
     <None Include="assets\shaders\universe\ocean.frag" />
     <None Include="assets\shaders\universe\ocean.vert" />
+    <None Include="assets\shaders\debug\debug_path.frag" />
+    <None Include="assets\shaders\debug\debug_path.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\Diary.txt" />

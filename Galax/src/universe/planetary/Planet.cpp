@@ -33,16 +33,18 @@ namespace Universe {
 
 	/// Update
 
-	void Planet::Update(Camera& camera) {
+	void Planet::Update(Camera& camera, bool isSimulating) {
 		// how many minutes per rotation (mpr)
 		// how many seconds per rotation (mpr / 60.0)
 		// spr = mpr / 60.0
 		// angles to move = (360 / seconds per rotation) * deltatime
 
-		if (mpr != 0.0f) {
-			float spr = mpr * 60.0f;
-			float angle_deg = (360.0f * Galax::Time::Get().deltaTime) / spr;
-			transform->AddRotationAroundAxis(rotation_axis, angle_deg, false);
+		if (isSimulating) {
+			if (mpr != 0.0f) {
+				float spr = mpr * 60.0f;
+				float angle_deg = (360.0f * Galax::Time::Get().deltaTime) / spr;
+				transform->AddRotationAroundAxis(rotation_axis, angle_deg, false);
+			}
 		}
 
 		transform->UpdateMatrix();

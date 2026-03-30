@@ -32,7 +32,6 @@ public:
 	Transform* parent = nullptr;
 
 
-
 	bool HasParent() const {
 		return parent != nullptr;
 	}
