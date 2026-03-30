@@ -7,7 +7,7 @@ public:
 	Texture() = default;
 	~Texture() = default;
 
-	Texture(const char* m_path);
+	Texture(const char* m_path, GLenum wrap_type = GL_REPEAT, GLenum filter_type = GL_LINEAR);
 	
 	void Bind();
 

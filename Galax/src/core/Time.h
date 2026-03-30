@@ -22,7 +22,7 @@ namespace Galax {
 		Time(const Time&) = delete;
 		Time& operator=(const Time&) = delete;
 
-		static Time& get() {
+		static Time& Get() {
 			static Time instance;
 			return instance;
 		}

@@ -58,9 +58,9 @@ int main() {
 	Player player;
 	player.camera.fovDeg = 90.0f;
 	player.camera.nearPlane = 1.0f;
-	player.camera.farPlane = 100000.0f;
+	player.camera.farPlane = 200000.0f;
 
-	player.transform->local_position = glm::vec3(93000.0f, 0.0f, 0.0f);
+	player.transform->local_position = glm::vec3(153000.0f, 0.0f, 0.0f);
 	player.transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), 180);
 
 	std::shared_ptr<PlanetShader> shader = std::make_shared<PlanetShader>("assets/shaders/universe/planet.frag", "assets/shaders/universe/planet.vert");
@@ -94,7 +94,7 @@ int main() {
 	planet_char->rotation_axis = glm::normalize(glm::vec3(0.2f, 1.0f, 0.2f));
 
 	planet_char->Generate();
-	planet_char->transform->local_position = glm::vec3(95000.0f, 0.0f, 0.0f);
+	planet_char->transform->local_position = glm::vec3(155000.0f, 0.0f, 0.0f);
 	planet_char->transform->UpdateMatrix();
 
 	planet_char->atmosphere_config.planetRadius = planet_char->radius;
@@ -111,9 +111,31 @@ int main() {
 	planet_char->ocean_config.densityFalloff = 1.0f;
 	planet_char->ocean_config.oceanColor = glm::vec4(0.0, 0.1, 0.3, 1.0);
 	planet_char->hasOcean = true;
-	planet_char->ocean_config.normalTexture = std::make_shared<Texture>("assets/textures/water_loop.jpeg");
+	planet_char->ocean_config.normalTexture = std::make_shared<Texture>("assets/textures/water_loop.jpeg", GL_REPEAT, GL_NEAREST);
 	planet_char->ocean_config.normalRepeat = 10.0f;
-	planet_char->ocean_config.normalScale = 0.5f;
+	planet_char->ocean_config.normalScale = 1.0f;
+
+
+	// Moon
+
+	std::shared_ptr<Universe::Planet> moon = std::make_shared<Universe::Planet>();
+	moon->shader = shader;
+	moon->radius = 160;
+	moon->resolution = 50;
+	moon->LODradii = { 6.0, 3.0, 1.5, 1.0 };
+
+	moon->terrainGenerator.numCraters = 2;
+	moon->terrainGenerator.baseSize = 3;
+
+
+	moon->mpr = 40;
+	moon->rotation_axis = glm::vec3(0.0, 1.0, 0.0);
+	moon->physicsBody.mass = 20070409;
+
+	moon->Generate();
+	moon->transform->local_position = planet_char->transform->world_position + glm::vec3(0.0, -500.0, 10000.0);
+	moon->transform->UpdateMatrix();
+							 
 
 	// Sun
 	std::shared_ptr<Universe::Planet> sun = std::make_shared<Universe::Planet>();
@@ -140,8 +162,10 @@ int main() {
 	// NEED TO FIX, if planet_char is first, the subdivisions break somehow
 	Universe::UniverseManager::Get().Init(player.camera);
 	Universe::UniverseManager::Get().PushPlanet(sun);
+	Universe::UniverseManager::Get().PushPlanet(moon);
 	Universe::UniverseManager::Get().PushPlanet(planet_char);
 
+	Universe::UniverseManager::Get().SetIdealOrbitVelocity(moon.get(), planet_char.get());
 
 	bool isFullscreen = true;
 
@@ -162,7 +186,7 @@ int main() {
 			}
 		}
 
-		Galax::Time::get().update();
+		Galax::Time::Get().update();
 		
 		Universe::UniverseManager::Get().Update(player);
 		Universe::UniverseManager::Get().Render(player.camera, sun.get());

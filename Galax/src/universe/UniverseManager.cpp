@@ -217,13 +217,13 @@ namespace Universe {
 
 				glm::vec3 direction = glm::normalize(otherP->transform->world_position - thisP->transform->world_position);
 
-				thisP->physicsBody.velocity += direction * acceleration * Galax::Time::get().deltaTime;
+				thisP->physicsBody.velocity += direction * acceleration * Galax::Time::Get().deltaTime;
 			}
 		}
 
 		// Add position
 		for (auto planet : planets) {
-			planet->transform->local_position += planet->physicsBody.velocity * Galax::Time::get().deltaTime;
+			planet->transform->local_position += planet->physicsBody.velocity * Galax::Time::Get().deltaTime;
 		}
 	}
 

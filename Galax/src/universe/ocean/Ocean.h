@@ -20,6 +20,7 @@ namespace Universe {
 		std::shared_ptr<Texture> normalTexture;
 		float normalRepeat = 1.0f;
 		float normalScale = 1.0f;
+		float sharpness = 1.0f / 2.0f;
 	};
 
 	class OceanRenderer {

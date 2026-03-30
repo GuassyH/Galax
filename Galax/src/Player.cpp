@@ -69,7 +69,7 @@ void Player::Move() {
 		localMoveDir = moveDir;
 	}
 
-	transform->local_position += localMoveDir * speed * Galax::Time::get().deltaTime;
+	transform->local_position += localMoveDir * speed * Galax::Time::Get().deltaTime;
 
 	moveDir = glm::vec3(0.0f);
 	horizontal = 0.0f;

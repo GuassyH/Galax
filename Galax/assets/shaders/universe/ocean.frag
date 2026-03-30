@@ -31,6 +31,9 @@ uniform mat4 projMat;
 
 uniform vec2 screenResolution;
 
+uniform float time;
+uniform float sharpness;
+
 in vec2 texCoord;
 out vec4 fragColor;
 
@@ -40,11 +43,12 @@ vec3 getTriPlanarBlend(vec3 _wNorm){
 	// in wNorm is the world-space normal of the fragment
 	vec3 blending =  max(abs(_wNorm), 0.00001);
 	blending = normalize(max(blending, 0.00001)); // Force weights to sum to 1.0
+	blending = pow(blending, vec3(sharpness)); // <-- control here
 	blending /= (blending.x + blending.y + blending.z);
 	return blending;
 }
 
-vec3 normalCalculation(vec3 localPos){
+vec3 normalCalculation(vec3 localPos, float offset){
 	vec3 spherePos = normalize(localPos);
 
 	mat3 normalMat = mat3(inverse(modelMat));
@@ -53,9 +57,9 @@ vec3 normalCalculation(vec3 localPos){
 
 	vec3 blending = getTriPlanarBlend(vNorm);
 	
-	vec3 xaxis = texture2D( normalTexture, vPos.yz * normalRepeat).rgb;
-	vec3 yaxis = texture2D( normalTexture, vPos.xz * normalRepeat).rgb;
-	vec3 zaxis = texture2D( normalTexture, vPos.xy * normalRepeat).rgb;
+	vec3 xaxis = texture2D( normalTexture, (vPos.yz * normalRepeat) + sin(offset) ).rgb;
+	vec3 yaxis = texture2D( normalTexture, (vPos.xz * normalRepeat) + cos(offset) ).rgb;
+	vec3 zaxis = texture2D( normalTexture, (vPos.xy * normalRepeat) + sin(offset) ).rgb;
 	vec3 normalTex = xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
 	
 	normalTex = (normalTex * 2.0) - 1.0;
@@ -66,7 +70,7 @@ vec3 normalCalculation(vec3 localPos){
   	vec3 BT = normalize( cross( vNorm, T ) * 1.0 );
 
   	mat3 tsb = mat3( normalize( T ), normalize( BT ), normalize( vNorm ) );
-  	return tsb * normalTex;
+  	return normalize(tsb * normalTex);
 }
 
 vec3 directionalLight(vec3 diff_normal, vec3 spec_normal, vec3 sunDir, vec3 rayDir, vec3 originalCol){
@@ -76,7 +80,7 @@ vec3 directionalLight(vec3 diff_normal, vec3 spec_normal, vec3 sunDir, vec3 rayD
 	float diffuse = max(dot(diff_normal, lightDirection), 0.1);
 
 	// specular lighting
-	float specularLight = 0.10;
+	float specularLight = 0.3;
 	vec3 reflectionDirection = reflect(-lightDirection, spec_normal);
 	float specAmount = pow(max(dot(-rayDir, reflectionDirection), 0.0), 16);
 	float specular = specAmount * specularLight;
@@ -157,7 +161,6 @@ void main(){
 
 	if (dstThrough <= 0.0)
 		return;
-	
 
 	// Distance from camera along the current ray
 	float distanceAlongRayToScene = sceneDepthLinear / dot(rayDir, camForward);
@@ -170,29 +173,24 @@ void main(){
 	if (dstThrough <= 0.0)
 		return;
 
-
 	// colorise
 	const float epsilon = 0.001;
 	vec3 entryPoint = rayOrigin + (rayDir * (dstTo + epsilon*2));
 
 	vec3 diff_normal = normalize(entryPoint - centre);
 
-	if(dstThrough < 0.1){
+	//						Also check in case youre looking up at the sky
+	if(dstThrough < 0.01 && texture(depthTexture,texCoord).r < 0.99){
 		fragColor.rgb = directionalLight(diff_normal, diff_normal, normalize(sunPos - entryPoint), rayDir, vec3(1.0));
 	}
 	else {
 		vec3 spec_normal;
-		if (hasNormalTex && dstTo > 0.0) {
-			spec_normal = normalCalculation(entryPoint - centre);
-		}else {
-			spec_normal = diff_normal;
-		}
+		if (hasNormalTex && dstTo > 0.0)	spec_normal = normalCalculation(entryPoint - centre, time / 100);
+		else								spec_normal = diff_normal;
 
-
-		float alpha = clamp(dstThrough / 5, 0.1, 1.0);
+		float alpha = clamp(dstThrough / 2, 0.1, 1.0);
 		vec3 color = mix(fragColor.rgb,  oceanColor.rgb, alpha);
 		fragColor.rgb = directionalLight(diff_normal, spec_normal, normalize(sunPos - entryPoint), rayDir, color);
-
 	}
 
 	// Set the depth DONT TOUCH!!!!

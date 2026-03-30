@@ -24,11 +24,10 @@ vec3 getTriPlanarBlend(vec3 _wNorm){
 
 
 float directionalLight(){
-	
 	// diffuse lighting
 	vec3 lightDirection = -normalize(sunDir);
 	vec3 n = normalize(normal);
-	float diffuse = max(dot(n, lightDirection), 0.1);
+	float diffuse = max(dot(n, lightDirection), 0.0);
 
 	// specular lighting
 	float specularLight = 0.50;

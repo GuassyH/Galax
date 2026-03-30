@@ -2,7 +2,7 @@
 #include "stb/stb_image.h"
 #include "core/Log.h"
 
-Texture::Texture(const char* m_path) {
+Texture::Texture(const char* m_path, GLenum wrap_type, GLenum filter_type) {
 	// Load Texture
 	bool flip = true;
 
@@ -45,11 +45,11 @@ Texture::Texture(const char* m_path) {
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		// Which filter type?
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter_type);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter_type);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_type);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_type);
 	}
 	else {
 		GX_ERROR("Failed to load image: {}", m_path);
