@@ -60,6 +60,7 @@ namespace Galax {
 		}
 
 		float deltaTime = 0.0f;
+		float timeScale = 1.0f;
 		int framerate = 0;
 	};
 

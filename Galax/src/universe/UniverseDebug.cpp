@@ -12,7 +12,7 @@ namespace Universe {
 		pathVBO = VBO();
 	}
 
-	void UniverseDebug::DrawPredictedPath(Player& player, Planet* planet, int numPoints, float timeStep, Planet* centre) {
+	void UniverseDebug::DrawPredictedPath(Player& player, Planet* planet, Planet* centre) {
 		UniverseManager& uniManager = UniverseManager::Get();
 
 		std::vector<glm::vec3> points;
@@ -37,7 +37,7 @@ namespace Universe {
 
 		int this_index = 0;
 		int centre_index = 0;
-		for (int i = 0; i < numPoints; i++) {
+		for (int i = 0; i < planet->physicsBody.num_points; i++) {
 
 			std::vector<glm::vec3> accelerations(numPlanets, glm::vec3(0.0f));
 
@@ -69,8 +69,8 @@ namespace Universe {
 
 			// Update velocities + positions
 			for (int t = 0; t < numPlanets; t++) {
-				other_velocities[t] += accelerations[t] * timeStep;
-				other_positions[t] += other_velocities[t] * timeStep;
+				other_velocities[t] += accelerations[t] * planet->physicsBody.time_step;
+				other_positions[t] += other_velocities[t] * planet->physicsBody.time_step;
 			}
 
 			// If there is a centre reference then recentre

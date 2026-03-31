@@ -42,7 +42,7 @@ namespace Universe {
 		if (isSimulating) {
 			if (mpr != 0.0f) {
 				float spr = mpr * 60.0f;
-				float angle_deg = (360.0f * Galax::Time::Get().deltaTime) / spr;
+				float angle_deg = (360.0f * Galax::Time::Get().deltaTime * Galax::Time::Get().timeScale) / spr;
 				transform->AddRotationAroundAxis(rotation_axis, angle_deg, false);
 			}
 		}

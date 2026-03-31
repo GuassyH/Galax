@@ -16,7 +16,8 @@
 namespace Universe {
 	class Planet {
 	public:
-	
+		const char* name = "anon_planet";
+
 		/// Core
 		Planet() = default;
 		~Planet() = default;

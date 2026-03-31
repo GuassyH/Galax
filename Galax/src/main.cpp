@@ -32,6 +32,7 @@
 #include "universe/UniverseManager.h"
 #include "universe/UniverseDebug.h"
 #include "gui/GUI.h"
+#include "gui/PlanetEditorGUI.h"
 
 void frame_buffer_size_callback(GLFWwindow* window, int width, int height);
 
@@ -43,7 +44,6 @@ int windowWidth = 1920;
 int windowHeight = 1080;
 int monitorWidth;
 int monitorHeight;
-bool debug_paths = false;
 
 
 // returns the sun
@@ -55,6 +55,7 @@ std::shared_ptr<Universe::Planet> CreateSystem() {
 
 	// Charley
 	std::shared_ptr<Universe::Planet> planet_char = std::make_shared<Universe::Planet>();
+	planet_char->name = "Charley Planet";
 	planet_char->shader = shader;
 	planet_char->radius = 1000;
 	planet_char->resolution = 80;
@@ -79,7 +80,7 @@ std::shared_ptr<Universe::Planet> CreateSystem() {
 	planet_char->rotation_axis = glm::normalize(glm::vec3(0.2f, 1.0f, 0.2f));
 
 	planet_char->Generate();
-	planet_char->transform->local_position = glm::vec3(155000.0f, 0.0f, 0.0f);
+	planet_char->transform->local_position = glm::vec3(555000.0f, 0.0f, 0.0f);
 	planet_char->transform->UpdateMatrix();
 
 	planet_char->atmosphere_config.planetRadius = planet_char->radius;
@@ -104,6 +105,7 @@ std::shared_ptr<Universe::Planet> CreateSystem() {
 	// Moon
 
 	std::shared_ptr<Universe::Planet> moon = std::make_shared<Universe::Planet>();
+	moon->name = "Luna";
 	moon->shader = shader;
 	moon->radius = 160;
 	moon->resolution = 50;
@@ -116,14 +118,16 @@ std::shared_ptr<Universe::Planet> CreateSystem() {
 	moon->mpr = 40;
 	moon->rotation_axis = glm::vec3(0.0, 1.0, 0.0);
 	moon->physicsBody.mass = 70409;
+	moon->physicsBody.velocity = glm::vec3(5.280, 0.0, -10.230f);
 
 	moon->Generate();
-	moon->transform->local_position = planet_char->transform->world_position + glm::vec3(0.0, -500.0, 6000.0);
+	moon->transform->local_position = planet_char->transform->world_position + glm::vec3(0.0, -1000.0, 20223.0);
 	moon->transform->UpdateMatrix();
 
 
 	// Sun
 	std::shared_ptr<Universe::Planet> sun = std::make_shared<Universe::Planet>();
+	sun->name = "Luxia";
 	sun->shader = unlit;
 	sun->radius = 2000;
 	sun->resolution = 50;
@@ -139,29 +143,24 @@ std::shared_ptr<Universe::Planet> CreateSystem() {
 	sun->terrainGenerator.surfaceColor = glm::vec4(1.0f, 0.8f, 0.3f, 1.0f);
 	sun->terrainGenerator.peakColor = glm::vec4(1.0f, 0.9f, 0.6f, 1.0f);
 
-	sun->physicsBody.mass = 1000000000;
-
 	// GIANT mass, since it should basically be stationary
+	sun->physicsBody.mass = 1000000000.0f;
 
 	sun->Generate();
 	sun->transform->local_position = glm::vec3(0.0, 0.0f, 0.0f);
 	sun->transform->UpdateMatrix();
 
-	//sun->physicsBody.mass = 10000000000;
 
 	// NEED TO FIX, if planet_char is first, the subdivisions break somehow
 	Universe::UniverseManager::Get().PushPlanet(sun);
 	Universe::UniverseManager::Get().PushPlanet(moon);
 	Universe::UniverseManager::Get().PushPlanet(planet_char);
 
-	planet_char->physicsBody.debug_path = true;
-	moon->physicsBody.debug_path = true;
 
-	planet_char->physicsBody.debug_centre = sun.get();
+	// planet_char->physicsBody.debug_centre = sun.get();
 	moon->physicsBody.debug_centre = planet_char.get();
 
 	Universe::UniverseManager::Get().SetIdealOrbitVelocity(planet_char.get(), sun.get());
-	moon->physicsBody.velocity = glm::vec3(9.5, 0.0, -20.5);
 
 	return sun;
 }
@@ -178,14 +177,14 @@ int main() {
 		return -1;
 	}
 
-	GUI gui;
+	GUI::GUI gui;
 	gui.Init(window);
 	Player player;
 	player.camera.fovDeg = 90.0f;
-	player.camera.nearPlane = 1.0f;
-	player.camera.farPlane = 200000.0f;
+	player.camera.nearPlane = 10.0f;
+	player.camera.farPlane = 10000000.0f; // one million
 
-	player.transform->local_position = glm::vec3(153000.0f, 0.0f, 0.0f);
+	player.transform->local_position = glm::vec3(553000.0f, 0.0f, 0.0f);
 	player.transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), 180);
 
 	Universe::UniverseManager::Get().Init(player.camera);
@@ -200,7 +199,6 @@ int main() {
 	SetFullscreen(window, true);
 	player.transform->UpdateMatrix();
 	
-
 	// Update Loop
 	while (!glfwWindowShouldClose(window)) {
 
@@ -217,16 +215,13 @@ int main() {
 
 		Galax::Time::Get().update();
 		
-	
 		Universe::UniverseManager::Get().Update(player);
 		Universe::UniverseManager::Get().Render(player.camera, sun.get());
 		
 		// Debug
-		if(debug_paths){
-			for (auto planet : Universe::UniverseManager::Get().GetPlanets()) {
-				if (planet->physicsBody.debug_path) {
-					universe_debug.DrawPredictedPath(player, planet.get(), 1000, 8, planet->physicsBody.debug_centre);
-				}
+		for (auto planet : Universe::UniverseManager::Get().GetPlanets()) {
+			if (planet->physicsBody.debug_path) {
+				universe_debug.DrawPredictedPath(player, planet.get(), planet->physicsBody.debug_centre);
 			}
 		}
 
@@ -237,8 +232,9 @@ int main() {
 
 		if(ImGui::Begin("tinker box")) {
 			ImGui::Checkbox("Simulate", &Universe::UniverseManager::Get().isSimulating);
-			ImGui::Checkbox("Debug Paths", &debug_paths);
-			ImGui::DragFloat3("MoonVelocity", &Universe::UniverseManager::Get().GetPlanets()[1]->physicsBody.velocity.x, 0.1f);
+			ImGui::DragFloat("TimeScale", &Galax::Time::Get().timeScale);
+			ImGui::Separator();
+			GUI::PlanetEditor::DrawPlanetEditor();
 		}
 		ImGui::End();
 

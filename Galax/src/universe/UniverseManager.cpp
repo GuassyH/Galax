@@ -31,7 +31,7 @@ namespace Universe {
 		for (auto& planet : planets) {
 			// Use squares since its much faster than getting the roots
 			float distance_sqr = glm::distance2(player.transform->world_position, planet->transform->world_position);
-			float threshold_sqr = (planet->radius * 2.0f) * (planet->radius * 2.0f);
+			float threshold_sqr = planet->radius * planet->radius * 4.0f;
 			if (distance_sqr < threshold_sqr) {
 				closestPlanet = planet.get();
 				_0_1_val = glm::sqrt(distance_sqr) / (planet->radius * 2.0f);
@@ -193,11 +193,10 @@ namespace Universe {
 
 
 
-
+	// The sun is not affecting the middle body?
 	void UniverseManager::ResolveGravity() {
 		// Add velocity
 		std::vector<glm::vec3> accelerations(planets.size(), glm::vec3(0.0f));
-
 
 		for (int i = 0; i < planets.size(); i++) {
 			for (int j = 0; j < planets.size(); j++) {
@@ -210,22 +209,23 @@ namespace Universe {
 				if (!thisP || !otherP)
 					continue;
 
+				// GX_TRACE("\'{}\' affecting \'{}\'", thisP->name, otherP->name);
+
 				// F1 = G(m1 * m2) / d^2 = m * a 
 				// a1 = (G(m1 * m2) / d^2) / m1
 				// a1 = G(m2) / d^2
 				float dstSq = glm::distance2(thisP->transform->world_position, otherP->transform->world_position);
 				float acceleration = G * otherP->physicsBody.mass / dstSq;
-
 				glm::vec3 direction = glm::normalize(otherP->transform->world_position - thisP->transform->world_position);
 
-				accelerations[i] = direction * acceleration;
+				accelerations[i] += direction * acceleration;
 			}
 		}
 
 		// Add position
 		for (int i = 0; i < planets.size(); i++) {
-			planets[i]->physicsBody.velocity += accelerations[i] * Galax::Time::Get().deltaTime;
-			planets[i]->transform->local_position += planets[i]->physicsBody.velocity * Galax::Time::Get().deltaTime;
+			planets[i]->physicsBody.velocity += accelerations[i] * Galax::Time::Get().deltaTime * Galax::Time::Get().timeScale;
+			planets[i]->transform->local_position += planets[i]->physicsBody.velocity * Galax::Time::Get().deltaTime * Galax::Time::Get().timeScale;
 		}
 	}
 

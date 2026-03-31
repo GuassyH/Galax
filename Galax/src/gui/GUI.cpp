@@ -1,29 +1,32 @@
 #include "GUI.h"
 
 
-void GUI::Init(GLFWwindow* window) {
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
+namespace GUI {
 
-	ImGui::StyleColorsClassic();
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 460");
-}
+	void GUI::Init(GLFWwindow* window) {
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO(); (void)io;
 
-void GUI::NewFrame(GLFWwindow* window) {
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
+		ImGui::StyleColorsClassic();
+		ImGui_ImplGlfw_InitForOpenGL(window, true);
+		ImGui_ImplOpenGL3_Init("#version 460");
+	}
 
-	int mode = 0;
-	glfwGetInputMode(window, mode);
+	void GUI::NewFrame(GLFWwindow* window) {
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		int mode = 0;
+		glfwGetInputMode(window, mode);
 
 
 
-}
+	}
 
-void GUI::EndFrame() {
-	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
+	void GUI::EndFrame() {
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	}
+};

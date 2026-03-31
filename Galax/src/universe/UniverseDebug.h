@@ -9,7 +9,7 @@ namespace Universe {
 		void Init();
 
 		/// Path stuff
-		void DrawPredictedPath(Player& player, Planet* planet, int numPoints, float timeStep, Planet* centre = nullptr);
+		void DrawPredictedPath(Player& player, Planet* planet, Planet* centre = nullptr);
 		std::shared_ptr<FragShader> pathShader;
 		VAO pathVAO;
 		VBO pathVBO;

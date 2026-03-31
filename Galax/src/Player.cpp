@@ -43,7 +43,7 @@ void Player::Move() {
 		skywards -= 1.0f;
 
 	// Change speed
-	if (Galax::Input::GetScrollOffset().y > 0.0 && speed < 20480.0f) // comfortable speed limit  
+	if (Galax::Input::GetScrollOffset().y > 0.0 && speed < (20480.0f * 8)) // comfortable speed limit  
 		speed *= 2.0f;
 
 	else if (Galax::Input::GetScrollOffset().y < 0.0 && speed > 0.5f) // Good slowest speed

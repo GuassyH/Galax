@@ -6,12 +6,15 @@
 
 #include <glfw/glfw3.h>
 
-class GUI {
-public:
-	GUI() = default;
-	~GUI() = default;
+namespace GUI {
 
-	void Init(GLFWwindow* window);
-	void NewFrame(GLFWwindow* window);
-	void EndFrame();
+	class GUI {
+	public:
+		GUI() = default;
+		~GUI() = default;
+
+		void Init(GLFWwindow* window);
+		void NewFrame(GLFWwindow* window);
+		void EndFrame();
+	};
 };
