@@ -140,13 +140,13 @@
     <ClCompile Include="src\core\stb.cpp" />
     <ClCompile Include="src\gui\PlanetEditorGUI.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Mesh.cpp" />
+    <ClCompile Include="src\rendering\Mesh.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\shaders\ComputeShader.cpp" />
     <ClCompile Include="src\shaders\FragShader.cpp" />
     <ClCompile Include="src\shaders\PlanetShader.cpp" />
     <ClCompile Include="src\shaders\Shader.cpp" />
-    <ClCompile Include="src\Texture.cpp" />
+    <ClCompile Include="src\rendering\Texture.cpp" />
     <ClCompile Include="src\universe\atmosphere\Atmosphere.cpp" />
     <ClCompile Include="src\gui\GUI.cpp" />
     <ClCompile Include="src\universe\ocean\Ocean.cpp" />
@@ -172,7 +172,7 @@
     <ClInclude Include="src\core\Log.h" />
     <ClInclude Include="src\core\Maths.h" />
     <ClInclude Include="src\gui\PlanetEditorGUI.h" />
-    <ClInclude Include="src\Mesh.h" />
+    <ClInclude Include="src\rendering\Mesh.h" />
     <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\rendering\EBO.h" />
     <ClInclude Include="src\rendering\VAO.h" />
@@ -182,7 +182,7 @@
     <ClInclude Include="src\shaders\FragShader.h" />
     <ClInclude Include="src\shaders\PlanetShader.h" />
     <ClInclude Include="src\shaders\Shader.h" />
-    <ClInclude Include="src\Texture.h" />
+    <ClInclude Include="src\rendering\Texture.h" />
     <ClInclude Include="src\Transform.h" />
     <ClInclude Include="src\universe\atmosphere\Atmosphere.h" />
     <ClInclude Include="src\gui\GUI.h" />

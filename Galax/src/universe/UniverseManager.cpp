@@ -13,7 +13,7 @@ namespace Universe {
 		transform->UpdateMatrix(false);
 
 		starSkybox = std::make_unique<Universe::StarSkybox>();
-		starSkybox->Generate(3000, 3, 1.5F, 1000.0f);
+		starSkybox->Generate(6000, 2, 0.25f, 1000.0f);
 
 	}
 
@@ -41,6 +41,7 @@ namespace Universe {
 
 		if (isSimulating) {
 			ResolveGravity();
+			time += Galax::Time::Get().deltaTime * Galax::Time::Get().timeScale;
 		}
 
 		player.Look();

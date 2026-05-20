@@ -15,6 +15,7 @@ namespace GUI {
 
 		void Init(GLFWwindow* window);
 		void NewFrame(GLFWwindow* window);
+		void Render(GLFWwindow* window);
 		void EndFrame();
 	};
 };

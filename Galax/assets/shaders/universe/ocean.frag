@@ -1,6 +1,5 @@
 #version 460 core
 
-
 uniform sampler2D depthTexture;
 uniform sampler2D screenTexture;
 uniform sampler2D normalTexture;
@@ -8,7 +7,8 @@ uniform sampler2D normalTexture;
 uniform mat4 modelMat;
 
 uniform float normalRepeat;
-uniform float normalScale;
+uniform float normalStrength;
+uniform int normalFactor;
 uniform bool hasNormalTex;
 
 uniform float oceanRadius;
@@ -26,175 +26,254 @@ uniform vec3 camUp;
 uniform vec3 camForward;
 uniform vec3 camRight;
 
-uniform mat4 viewMat;
-uniform mat4 projMat;
-
 uniform vec2 screenResolution;
 
 uniform float time;
-uniform float sharpness;
+uniform float triplanarBlend;
 
 in vec2 texCoord;
 out vec4 fragColor;
 
+////////////////////////////////////////////////////////////
+// TRIPLANAR
+////////////////////////////////////////////////////////////
 
-/// TRI planar borrowed from https://gist.github.com/patriciogonzalezvivo/20263fe85d52705e4530
-vec3 getTriPlanarBlend(vec3 _wNorm){
-	// in wNorm is the world-space normal of the fragment
-	vec3 blending =  max(abs(_wNorm), 0.00001);
-	blending = normalize(max(blending, 0.00001)); // Force weights to sum to 1.0
-	blending = pow(blending, vec3(sharpness)); // <-- control here
-	blending /= (blending.x + blending.y + blending.z);
-	return blending;
+vec3 getTriPlanarBlend(vec3 n)
+{
+    vec3 blending = max(abs(n), 0.00001);
+    blending = normalize(blending);
+    blending = pow(blending, vec3(triplanarBlend));
+    blending /= (blending.x + blending.y + blending.z);
+
+    return blending;
 }
 
-vec3 normalCalculation(vec3 localPos, float offset){
-	vec3 spherePos = normalize(localPos);
+vec3 normalCalculation(vec3 localPos, float offset)
+{
+    vec3 spherePos = normalize(localPos);
 
-	mat3 normalMat = mat3(inverse(modelMat));
-	vec3 vNorm = spherePos;
-	vec3 vPos = normalMat * spherePos;
+    vec2 flow = vec2(sin(offset), cos(offset));
 
-	vec3 blending = getTriPlanarBlend(vNorm);
-	
-	vec3 xaxis = texture2D( normalTexture, (vPos.yz * normalRepeat) + sin(offset) ).rgb;
-	vec3 yaxis = texture2D( normalTexture, (vPos.xz * normalRepeat) + cos(offset) ).rgb;
-	vec3 zaxis = texture2D( normalTexture, (vPos.xy * normalRepeat) + sin(offset) ).rgb;
-	vec3 normalTex = xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
-	
-	normalTex = (normalTex * 2.0) - 1.0;
-	normalTex.xy *= normalScale;
-	normalTex = normalize( normalTex );
+    mat3 normalMat = inverse(mat3(modelMat));
 
-	vec3 T = vec3(0.,1.,0.);
-  	vec3 BT = normalize( cross( vNorm, T ) * 1.0 );
+    vec3 vNorm = spherePos;
+    vec3 vPos = normalMat * spherePos;
 
-  	mat3 tsb = mat3( normalize( T ), normalize( BT ), normalize( vNorm ) );
-  	return normalize(tsb * normalTex);
+    vec3 blending = getTriPlanarBlend(vNorm);
+
+    vec3 xaxis = texture(normalTexture, vPos.yz * normalRepeat + flow).rgb;
+    vec3 yaxis = texture(normalTexture, vPos.xz * normalRepeat + flow).rgb;
+    vec3 zaxis = texture(normalTexture, vPos.xy * normalRepeat + flow).rgb;
+
+    vec3 normalTex =
+        xaxis * blending.x +
+        yaxis * blending.y +
+        zaxis * blending.z;
+
+    normalTex = normalTex * 2.0 - 1.0;
+    normalTex.xy *= normalStrength;
+    normalTex = normalize(normalTex);
+
+    vec3 up = abs(vNorm.y) < 0.999
+        ? vec3(0,1,0)
+        : vec3(1,0,0);
+
+    vec3 tangent = normalize(cross(up, vNorm));
+    vec3 bitangent = cross(vNorm, tangent);
+
+    mat3 tbn = mat3(
+        normalize(tangent),
+        normalize(bitangent),
+        normalize(vNorm)
+    );
+
+    return normalize(tbn * normalTex);
 }
 
-vec3 directionalLight(vec3 diff_normal, vec3 spec_normal, vec3 sunDir, vec3 rayDir, vec3 originalCol){
-	
-	// diffuse lighting
-	vec3 lightDirection = normalize(sunDir);
-	float diffuse = max(dot(diff_normal, lightDirection), 0.1);
+////////////////////////////////////////////////////////////
+// LIGHTING
+////////////////////////////////////////////////////////////
 
-	// specular lighting
-	float specularLight = 0.3;
-	vec3 reflectionDirection = reflect(-lightDirection, spec_normal);
-	float specAmount = pow(max(dot(-rayDir, reflectionDirection), 0.0), 16);
-	float specular = specAmount * specularLight;
+float fresnelSchlick(vec3 viewDir, vec3 normal)
+{
+    float cosTheta = max(dot(viewDir, normal), 0.0);
+    float f0 = 0.02;
+    return f0 + (1.0 - f0) * pow(1.0 - cosTheta, 5.0);
+}
 
-	return (originalCol * diffuse) + specular;
-};
+vec3 directionalLight(vec3 norm, vec3 sunDir, vec3 rayDir, vec3 baseColor, float fresnel){
+    vec3 lightDir = normalize(sunDir);
 
+    float diffuse = max(dot(norm, lightDir), 0.0);
+    vec3 ambient = baseColor * 0.05;
+    vec3 reflectionDirection = reflect(-lightDir, norm);
 
+    float specAmount = pow(max(dot(-rayDir, reflectionDirection), 0.0), normalFactor);
 
-// TAKEN FROM THE ATMOSPHERE SHADER
-vec2 raySphere (vec3 sphereCentre, vec3 rayOrigin, vec3 rayDir) {
+    float specularStrength = 0.5;
+    vec3 specular = vec3(specAmount * specularStrength) * fresnel;
+
+    return ambient + (baseColor * diffuse) + specular;
+}
+
+////////////////////////////////////////////////////////////
+// SPHERE INTERSECTION
+////////////////////////////////////////////////////////////
+
+vec2 raySphere(vec3 sphereCentre, vec3 rayOrigin, vec3 rayDir)
+{
     vec3 offset = rayOrigin - sphereCentre;
-    const float a = 1; // set to dot(rayDir, rayDir) if rayDir might be unnormalized
-    float b = 2 * dot (offset, rayDir);
-    float c = dot (offset, offset) - oceanRadius * oceanRadius;
 
-    float discriminant = b * b - 4 * a * c;
+    const float a = 1.0;
+    float b = 2.0 * dot(offset, rayDir);
+    float c = dot(offset, offset) - oceanRadius * oceanRadius;
 
-    // No intersections: discriminant < 0	1 intersection: discriminant == 0	2 intersections: discriminant > 0
-    if (discriminant > 0) {
+    float discriminant = b * b - 4.0 * a * c;
+
+    if(discriminant > 0.000001)
+    {
         float s = sqrt(discriminant);
-        float dstToSphereNear = max (0, (-b - s) / (2 * a));
-        float dstToSphereFar = (-b + s) / (2 * a);
+        float dstToSphereNear = max(0.0, (-b - s) / (2.0 * a));
+        float dstToSphereFar = (-b + s) / (2.0 * a);
 
-        if (dstToSphereFar >= 0) {
-            return vec2 (dstToSphereNear, dstToSphereFar - dstToSphereNear);
+        if(dstToSphereFar >= 0.0) {
+            return vec2(dstToSphereNear, dstToSphereFar - dstToSphereNear);
         }
     }
-    return vec2(0,0);
+
+    return vec2(0.0);
 }
 
-// Check what the density at a point would be
-float densityAtPoint(vec3 samplePoint){
-	float heightAbove = distance(samplePoint, centre);
-	float height01 = heightAbove / oceanRadius;
-	height01 = clamp(height01, 0.0, 1.0);
+////////////////////////////////////////////////////////////
+// DEPTH
+////////////////////////////////////////////////////////////
 
-	float localDensity = exp(-height01 * densityFalloff) * (1 - height01);
-
-	return localDensity;
-}
-
-
-// Get depth from OpenGL depth
-float LinearizeDepth(float d,float zNear,float zFar)
-{
+float LinearizeDepth(float d, float zNear, float zFar){
     float z_n = 2.0 * d - 1.0;
     return 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear));
 }
 
-// Get OpenGL depth from linear
-float DepthBufferFromLinear(float zLinear, float zNear, float zFar) { 
-	float z_n = (zLinear * (zFar + zNear) - 2.0 * zNear * zFar) / (zLinear * (zFar - zNear)); 
-	return 0.5 * (z_n + 1.0); 
+float DepthBufferFromLinear(float zLinear, float zNear, float zFar){
+    float z_n = (zLinear * (zFar + zNear) - 2.0 * zNear * zFar) / (zLinear * (zFar - zNear));
+    return 0.5 * (z_n + 1.0);
 }
 
+////////////////////////////////////////////////////////////
+// MAIN
+////////////////////////////////////////////////////////////
 
-void main(){
-	fragColor = texture(screenTexture, texCoord);
-	gl_FragDepth = texture(depthTexture, texCoord).r;
+void main()
+{
+    vec4 screenCol = texture(screenTexture, texCoord);
 
-	vec2 rayCoord = texCoord * 2.0 - 1.0;
+    fragColor = screenCol;
 
-	float fov = radians(FOVdeg); // adjust as needed
-	float aspect = screenResolution.x / screenResolution.y;
-	float scale = tan(fov * 0.5);
+    gl_FragDepth = texture(depthTexture, texCoord).r;
 
-	vec3 rayDir = normalize(	camForward + rayCoord.x * aspect * scale * camRight + rayCoord.y * scale * camUp	);
-	vec3 rayOrigin = camPos;
+    ////////////////////////////////////////////////////////
+    // SCREEN RAY
+    ////////////////////////////////////////////////////////
 
-	// Get the depth of the scene at the point
-	float sceneDepthLinear = LinearizeDepth(texture(depthTexture, texCoord).r, camNearPlane, camFarPlane);
+    vec2 rayCoord = texCoord * 2.0 - 1.0;
 
-	vec2 intersect = raySphere(centre, rayOrigin, rayDir); 
-	float dstTo = intersect.x;
-	float dstThrough = intersect.y;
+    float fov = radians(FOVdeg);
+    float aspect = screenResolution.x / screenResolution.y;
+    float scale = tan(fov * 0.5);
+
+    vec3 rayDir = normalize(
+        camForward +
+        rayCoord.x * aspect * scale * camRight +
+        rayCoord.y * scale * camUp
+    );
+
+    vec3 rayOrigin = camPos;
+
+    ////////////////////////////////////////////////////////
+    // SCENE DEPTH
+    ////////////////////////////////////////////////////////
+
+    float sceneDepthLinear = LinearizeDepth(texture(depthTexture, texCoord).r, camNearPlane, camFarPlane);
+
+    ////////////////////////////////////////////////////////
+    // OCEAN INTERSECTION
+    ////////////////////////////////////////////////////////
+
+    vec2 intersect = raySphere(centre, rayOrigin, rayDir);
+
+    float dstTo = intersect.x;
+    float dstThrough = intersect.y;
+
+    if(dstThrough <= 0.0)
+        return;
+
+    ////////////////////////////////////////////////////////
+    // DEPTH CLAMP
+    ////////////////////////////////////////////////////////
+
+    float denom = max(dot(rayDir, camForward), 0.1);
+
+    float distanceAlongRayToScene = sceneDepthLinear / denom;
+    dstThrough = max(0.0, min(dstThrough, distanceAlongRayToScene - dstTo));
 
 
-	if (dstThrough <= 0.0)
-		return;
+    if(dstThrough <= 0.0)
+        return;
 
-	// Distance from camera along the current ray
-	float distanceAlongRayToScene = sceneDepthLinear / dot(rayDir, camForward);
+    ////////////////////////////////////////////////////////
+    // ENTRY POINT
+    ////////////////////////////////////////////////////////
 
-	// Clamp dstThrough to not exceed the scene
-	dstThrough = min(dstThrough, distanceAlongRayToScene - dstTo);
+    const float epsilon = 0.001;
+    vec3 entryPoint = rayOrigin + rayDir * (dstTo + 2.0 * epsilon);
 
+    ////////////////////////////////////////////////////////
+    // NORMALS
+    ////////////////////////////////////////////////////////
 
-	// ACTUAL CALCS
-	if (dstThrough <= 0.0)
-		return;
+    vec3 normal;
 
-	// colorise
-	const float epsilon = 0.001;
-	vec3 entryPoint = rayOrigin + (rayDir * (dstTo + epsilon*2));
+    if(hasNormalTex && dstTo > 0.0) {
+        normal = normalCalculation(entryPoint - centre, time / 50);
+    }
+    else {
+        normal = normalize(entryPoint - centre);
+    }
 
-	vec3 diff_normal = normalize(entryPoint - centre);
+    ////////////////////////////////////////////////////////
+    // FRESNEL
+    ////////////////////////////////////////////////////////
 
-	//						Also check in case youre looking up at the sky
-	if(dstThrough < 0.01 && texture(depthTexture,texCoord).r < 0.99){
-		fragColor.rgb = directionalLight(diff_normal, diff_normal, normalize(sunPos - entryPoint), rayDir, vec3(1.0));
-	}
-	else {
-		vec3 spec_normal;
-		if (hasNormalTex && dstTo > 0.0)	spec_normal = normalCalculation(entryPoint - centre, time / 100);
-		else								spec_normal = diff_normal;
+    vec3 viewDir = normalize(camPos - entryPoint);
+    float fresnel = fresnelSchlick(viewDir, normal);
 
-		float alpha = clamp(dstThrough / 2, 0.1, 1.0);
-		vec3 color = mix(fragColor.rgb,  oceanColor.rgb, alpha);
-		fragColor.rgb = directionalLight(diff_normal, spec_normal, normalize(sunPos - entryPoint), rayDir, color);
-	}
+    ////////////////////////////////////////////////////////
+    // WATER ABSORPTION
+    ////////////////////////////////////////////////////////
 
-	// Set the depth DONT TOUCH!!!!
-	vec3 viewSpacePos = entryPoint - camPos;
-	float camDepth = dot(viewSpacePos, camForward);
-	gl_FragDepth = DepthBufferFromLinear(max(camDepth, 0), camNearPlane, camFarPlane);
-} 
+    float absorption = exp(-dstThrough * 0.2);
+    vec3 waterColor = mix(oceanColor.rgb, screenCol.rgb, absorption);
+
+    ////////////////////////////////////////////////////////
+    // FRESNEL REFLECTION
+    ////////////////////////////////////////////////////////
+
+    // should be the atmosphere colour
+    vec3 skyColor = vec3(0.35, 0.55, 0.85);
+    vec3 finalWaterColor = mix(waterColor, skyColor, fresnel);
+
+    ////////////////////////////////////////////////////////
+    // LIGHTING
+    ////////////////////////////////////////////////////////
+
+    vec3 litColor = directionalLight(normal, normalize(sunPos - entryPoint), rayDir, finalWaterColor, fresnel);
+    fragColor.rgb = litColor;
+
+    ////////////////////////////////////////////////////////
+    // DEPTH WRITE
+    ////////////////////////////////////////////////////////
+
+    vec3 viewSpacePos = entryPoint - camPos;
+    float camDepth = dot(viewSpacePos, camForward);
+
+    gl_FragDepth = DepthBufferFromLinear(max(camDepth, camNearPlane), camNearPlane, camFarPlane);
+}

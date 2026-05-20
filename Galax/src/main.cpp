@@ -18,7 +18,7 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
-#include "Mesh.h"
+#include "rendering/Mesh.h"
 #include "shaders/Shader.h"
 #include "shaders/FragShader.h"
 #include "shaders/PlanetShader.h"
@@ -53,12 +53,12 @@ std::shared_ptr<Universe::Planet> CreateSystem() {
 
 	std::shared_ptr<FragShader> unlit = std::make_shared<FragShader>("assets/shaders/default_unlit.frag", "assets/shaders/default_unlit.vert");
 
-	// Charley
+	// Charley planetary system
 	std::shared_ptr<Universe::Planet> planet_char = std::make_shared<Universe::Planet>();
 	planet_char->name = "Charley Planet";
 	planet_char->shader = shader;
 	planet_char->radius = 1000;
-	planet_char->resolution = 80;
+	planet_char->resolution = 100;
 	planet_char->LODradii = { 6.0f, 3.0f, 1.5f, 1.0f };
 
 	planet_char->terrainGenerator.numCraters = 50;
@@ -68,7 +68,7 @@ std::shared_ptr<Universe::Planet> CreateSystem() {
 	planet_char->terrainGenerator.smoothingK = 0.1f;
 	planet_char->terrainGenerator.craterHeight = 2.0f;
 
-	planet_char->terrainGenerator.numLayers = 12;
+	planet_char->terrainGenerator.numLayers = 25;
 	planet_char->terrainGenerator.noiseStrength = 30.0f;
 	planet_char->terrainGenerator.noiseHeightShift = -2.0f;
 	planet_char->terrainGenerator.noiseScale = 0.025f;
@@ -94,16 +94,16 @@ std::shared_ptr<Universe::Planet> CreateSystem() {
 	planet_char->hasAtmosphere = true;
 
 	planet_char->ocean_config.radius = planet_char->radius;
-	planet_char->ocean_config.densityFalloff = 1.0f;
+	planet_char->ocean_config.densityFalloff = 2.0f;
 	planet_char->ocean_config.oceanColor = glm::vec4(0.0, 0.1, 0.3, 1.0);
 	planet_char->hasOcean = true;
-	planet_char->ocean_config.normalTexture = std::make_shared<Texture>("assets/textures/water_loop.jpeg", GL_REPEAT, GL_NEAREST);
-	planet_char->ocean_config.normalRepeat = 10.0f;
-	planet_char->ocean_config.normalScale = 1.0f;
+	planet_char->ocean_config.normalTexture = std::make_shared<Texture>("assets/textures/water_four.jpeg", GL_REPEAT, GL_LINEAR);
+	planet_char->ocean_config.normalRepeat = 100.0f;
+	planet_char->ocean_config.normalStrength = 0.2f;
+	planet_char->ocean_config.triplanarBlend = 2.5f;
 
 
 	// Moon
-
 	std::shared_ptr<Universe::Planet> moon = std::make_shared<Universe::Planet>();
 	moon->name = "Luna";
 	moon->shader = shader;
@@ -114,8 +114,7 @@ std::shared_ptr<Universe::Planet> CreateSystem() {
 	moon->terrainGenerator.numCraters = 2;
 	moon->terrainGenerator.baseSize = 3;
 
-
-	moon->mpr = 40;
+	moon->mpr = 60;
 	moon->rotation_axis = glm::vec3(0.0, 1.0, 0.0);
 	moon->physicsBody.mass = 70409;
 	moon->physicsBody.velocity = glm::vec3(5.280, 0.0, -10.230f);
@@ -157,7 +156,7 @@ std::shared_ptr<Universe::Planet> CreateSystem() {
 	Universe::UniverseManager::Get().PushPlanet(planet_char);
 
 
-	// planet_char->physicsBody.debug_centre = sun.get();
+	planet_char->physicsBody.debug_centre = sun.get();
 	moon->physicsBody.debug_centre = planet_char.get();
 
 	Universe::UniverseManager::Get().SetIdealOrbitVelocity(planet_char.get(), sun.get());
@@ -179,10 +178,11 @@ int main() {
 
 	GUI::GUI gui;
 	gui.Init(window);
+
 	Player player;
 	player.camera.fovDeg = 90.0f;
-	player.camera.nearPlane = 10.0f;
-	player.camera.farPlane = 10000000.0f; // one million
+	player.camera.nearPlane = 1.0f;
+	player.camera.farPlane = 10E6; // one million
 
 	player.transform->local_position = glm::vec3(553000.0f, 0.0f, 0.0f);
 	player.transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), 180);
@@ -215,6 +215,7 @@ int main() {
 
 		Galax::Time::Get().update();
 		
+		// Universe Management
 		Universe::UniverseManager::Get().Update(player);
 		Universe::UniverseManager::Get().Render(player.camera, sun.get());
 		
@@ -228,15 +229,10 @@ int main() {
 		if (Galax::Input::IsKeyJustPressed(GLFW_KEY_ESCAPE)) 
 			glfwSetWindowShouldClose(window, true);
 
+		// UI Management
 		gui.NewFrame(window);
 
-		if(ImGui::Begin("tinker box")) {
-			ImGui::Checkbox("Simulate", &Universe::UniverseManager::Get().isSimulating);
-			ImGui::DragFloat("TimeScale", &Galax::Time::Get().timeScale);
-			ImGui::Separator();
-			GUI::PlanetEditor::DrawPlanetEditor();
-		}
-		ImGui::End();
+		gui.Render(window);
 
 		gui.EndFrame();
 

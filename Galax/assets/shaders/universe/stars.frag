@@ -14,5 +14,4 @@ void main()
 
     fragColor = vec4(vec3(brightness), 1.0);
     gl_FragDepth = 1.0;
-    // fragColor = texture(screenTexture, texCoord);
 }

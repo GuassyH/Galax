@@ -2,7 +2,7 @@
 
 #include "Camera.h"
 #include "shaders/FragShader.h"
-#include "Mesh.h"
+#include "rendering/Mesh.h"
 
 namespace Universe {
 

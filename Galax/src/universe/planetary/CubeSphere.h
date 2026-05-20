@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 
 #include "rendering/Vertex.h"
-#include "Mesh.h"
+#include "rendering/Mesh.h"
 
 class CubeSphere {
 public:

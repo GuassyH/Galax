@@ -1,6 +1,8 @@
 #include "Ocean.h"
 #include "universe/planetary/Planet.h"
 
+#include "universe/UniverseManager.h"
+
 #include "core/Input.h"
 #include "core/Time.h"
 
@@ -52,7 +54,8 @@ namespace Universe {
 
 		oceanShader.SetBool("hasNormalTex", ocean_config.normalTexture != nullptr);
 		oceanShader.SetFloat("normalRepeat", ocean_config.normalRepeat);
-		oceanShader.SetFloat("normalScale", ocean_config.normalScale);
+		oceanShader.SetFloat("normalStrength", ocean_config.normalStrength);
+		oceanShader.SetInt("normalFactor", ocean_config.normalFactor);
 
 		oceanShader.SetFloat("oceanRadius", ocean_config.radius);
 		oceanShader.SetFloat("densityFalloff", ocean_config.densityFalloff);
@@ -77,8 +80,8 @@ namespace Universe {
 		oceanShader.SetMat4("viewMat", camera.GetView());
 		oceanShader.SetMat4("projMat", camera.GetProj());
 
-		oceanShader.SetFloat("time", Galax::Time::Get().GetTime());
-		oceanShader.SetFloat("sharpness", ocean_config.sharpness);
+		oceanShader.SetFloat("time", UniverseManager::Get().time);
+		oceanShader.SetFloat("triplanarBlend", ocean_config.triplanarBlend);
 
 		quad.vao.Bind();
 		glDrawElements(GL_TRIANGLES, quad.indices.size(), GL_UNSIGNED_INT, 0);

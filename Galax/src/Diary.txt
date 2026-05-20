@@ -20,3 +20,11 @@ Gonna try a recentering approach
 FIXED!!
 
 Textures are causing issues, i think its because the textures for the quads in ocean and atmosphere are already using GL_TEXTURE0 and that
+
+FIXED
+
+Im going to cleanup the entire project, but after that i have a few ideas. 
+-Firstly i want to add more planets since that would be cool
+-Secondly i want to make it so if you are more than say 100000m from a planet (it will be tiny) it becomes a post process dot, like a star. 
+	since otherwise its hard to see
+-Thirdly i want to add a galaxy gas skybox. I have the procedural stars, but it would be cool to have like a galaxy 

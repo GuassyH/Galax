@@ -22,6 +22,7 @@ namespace Universe {
 		float recentre_dist = 1000.0f;
 		double G = 0.07;
 		bool isSimulating = false;
+		float time = 0.0f;
 
 		std::unique_ptr<AtmosphereRenderer> atmosphereRenderer;
 		std::unique_ptr<OceanRenderer> oceanRenderer;

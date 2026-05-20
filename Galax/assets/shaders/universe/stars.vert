@@ -10,6 +10,7 @@ uniform mat4 view;
 uniform mat4 proj;
 uniform vec3 origo;
 
+
 out vec2 texCoord;
 void main(){
 	vec3 right = vec3(view[0][0], view[1][0], view[2][0]);
@@ -18,6 +19,7 @@ void main(){
 	vec3 worldPos = instancePos + aPos.x * instanceSize * right + aPos.y * instanceSize * up;
 	worldPos += origo;
 	gl_Position = proj * view * vec4(worldPos, 1.0);
+
 
 	texCoord = aTexCoords;
 }

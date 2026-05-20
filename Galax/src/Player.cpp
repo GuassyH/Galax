@@ -51,6 +51,7 @@ void Player::Move() {
 	
 
 
+
 	glm::vec3 localMoveDir = glm::vec3(0.0);
 
 	// if you are close to the ground, SDF?
@@ -79,9 +80,22 @@ void Player::Move() {
 
 double last_mouseX = 0.0;
 double last_mouseY = 0.0;
+float last_mouse_fov = 0.0;
 void Player::Look() {
 	glm::vec2 mouse_pos = Galax::Input::GetMousePosition();
 
+	double fov_scalar = camera.fovDeg / 90.0f;
+	
+	// Change FOV
+	if (Galax::Input::IsKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
+		if (Galax::Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1)) {
+			float current_mouse_fov = -(last_mouse_fov - mouse_pos.y) * fov_scalar;
+			camera.fovDeg = glm::clamp(camera.fovDeg + current_mouse_fov, 0.01f, 140.0f);
+		}
+	}
+
+	last_mouse_fov = mouse_pos.y;
+	
 	if (Galax::Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT) != GLFW_PRESS) {
 		last_mouseX = mouse_pos.x;
 		last_mouseY = mouse_pos.y;
@@ -94,7 +108,6 @@ void Player::Look() {
 
 	double mouseX = mouse_pos.x;
 	double mouseY = mouse_pos.y;
-	
 
 	// Should be clamped to window size
 
@@ -106,12 +119,12 @@ void Player::Look() {
 	
 	// Apply rotations to Euler angles
 	if (parent_planet) {
-		camera.transform->AddRotationAroundAxis(glm::vec3(1.0f, 0.0f, 0.0), -rotX, true); // pitch
-		this->transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0), -rotY, true); // yaw
+		camera.transform->AddRotationAroundAxis(glm::vec3(1.0f, 0.0f, 0.0), -rotX * fov_scalar, true); // pitch
+		this->transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0), -rotY * fov_scalar, true); // yaw
 	}
 	else {
-		camera.transform->AddRotationAroundAxis(glm::vec3(1.0f, 0.0f, 0.0), -rotX, false); // pitch
-		this->transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), -rotY, false); // yaw
+		camera.transform->AddRotationAroundAxis(glm::vec3(1.0f, 0.0f, 0.0), -rotX * fov_scalar, false); // pitch
+		this->transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), -rotY * fov_scalar, false); // yaw
 	}
 
 	// Clamp pitch to avoid flipping

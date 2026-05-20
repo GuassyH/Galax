@@ -22,6 +22,33 @@ namespace GUI {
 					ImGui::DragInt(("NumPoints" + id + "_points").c_str(), &planet->physicsBody.num_points);
 					ImGui::DragFloat(("TimeStep" + id + "_step").c_str(), &planet->physicsBody.time_step);
 				}
+
+				ImGui::Checkbox("HasAtmosphere", &planet->hasAtmosphere);
+				if (planet->hasAtmosphere) {
+					ImGui::Indent(20);
+					if (ImGui::CollapsingHeader("Atmosphere")) {
+						ImGui::DragFloat("Atmosphere Height", &planet->atmosphere_config.atmosphereHeight);
+						ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+						ImGui::DragFloat("Density Falloff", &planet->atmosphere_config.densityFalloff);
+						ImGui::DragFloat("Intensity", &planet->atmosphere_config.intensity);
+
+					}
+					ImGui::Unindent(20);
+				}
+
+				ImGui::Checkbox("HasOcean", &planet->hasOcean);
+				if (planet->hasOcean) {
+					ImGui::Indent(20);
+					if (ImGui::CollapsingHeader("Ocean")) {
+						ImGui::DragFloat("Ocean Radius", &planet->ocean_config.radius);
+						ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+						ImGui::DragFloat("Normal Repeat", &planet->ocean_config.normalRepeat);
+						ImGui::DragInt("Normal Factor", &planet->ocean_config.normalFactor);
+						ImGui::DragFloat("Normal Strength", &planet->ocean_config.normalStrength);
+						ImGui::DragFloat("Triplanar Blend", &planet->ocean_config.triplanarBlend);
+					}
+					ImGui::Unindent(20);
+				}
 			}
 		}
 	}

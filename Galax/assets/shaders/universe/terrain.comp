@@ -169,8 +169,8 @@ float NoiseInfluence(Vertex vert) {
         totalStrength += strength;
 
         // Prepare for next layer
-        noiseFreq *= 1.5;  // Increase frequency (smaller features)
-        strength *= 0.5;   // Decrease amplitude (finer details contribute less)
+        noiseFreq *= 1.25;  // Increase frequency (smaller features)
+        strength *= 0.75;   // Decrease amplitude (finer details contribute less)
     }
 
     // Normalize and apply height shift
