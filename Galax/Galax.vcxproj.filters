@@ -111,6 +111,9 @@
     <ClCompile Include="src\system_presets\SystemPresets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\rendering\Quad.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\Log.h">
@@ -200,6 +203,9 @@
     <ClInclude Include="src\system_presets\SystemPresets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\rendering\Quad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\universe\atmosphere.frag">
@@ -239,6 +245,8 @@
     <None Include="assets\shaders\universe\ocean.vert" />
     <None Include="assets\shaders\debug\debug_path.frag" />
     <None Include="assets\shaders\debug\debug_path.vert" />
+    <None Include="assets\shaders\composite.frag" />
+    <None Include="assets\shaders\composite.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\Diary.txt" />

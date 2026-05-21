@@ -5,27 +5,16 @@
 #include <glad/glad.h>
 #include <vector>
 
+#include "rendering/Quad.h"
+
 namespace Universe {
-
-	static std::vector<Vertex> quad_verts = {
-		{ {-1.0f, -1.0f, 0.0f }, {}, {}, {}, {}, { 0.0f, 0.0f }, {} },
-		{ {1.0f, -1.0f, 0.0f }, {}, {}, {}, {}, { 1.0f, 0.0f }, {} },
-		{ {-1.0f, 1.0f, 0.0f }, {}, {}, {}, {}, { 0.0f, 1.0f }, {} },
-		{ {1.0f, 1.0f, 0.0f }, {}, {}, {}, {}, { 1.0f, 1.0f }, {} },
-	};
-
-	static std::vector<GLuint> quad_inds = {
-		0, 1, 2,
-		2, 1, 3
-	};
-
 	
 	StarSkybox::StarSkybox() {
 		transform = std::make_shared<Transform>();
 
 		starShader = FragShader("assets/shaders/universe/stars.frag", "assets/shaders/universe/stars.vert");
 
-		quad = Mesh(quad_verts, quad_inds);
+		quad = Mesh(Quad::vertices, Quad::indices);
 
 	}
 	StarSkybox::~StarSkybox() {

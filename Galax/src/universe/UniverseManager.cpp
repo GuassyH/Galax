@@ -3,6 +3,8 @@
 #include "core/Time.h"
 #include "core/Input.h"
 
+#include "rendering/Quad.h"
+
 namespace Universe {
 
 	void UniverseManager::Init(Camera& camera) {
@@ -15,6 +17,8 @@ namespace Universe {
 		starSkybox = std::make_unique<Universe::StarSkybox>();
 		starSkybox->Generate(6000, 2, 0.2f, 1000.0f);
 
+		composite_quad = Mesh(Quad::vertices, Quad::indices);
+		composite_shader = std::make_unique<FragShader>("assets/shaders/composite.frag", "assets/shaders/composite.vert");
 	}
 
 	void UniverseManager::Update(Player& player) {
@@ -140,10 +144,6 @@ namespace Universe {
 			if (planet->hasOcean) oceanRenderer->Render(camera, sun, planet->transform.get(), planet->ocean_config, baseTexture, baseDepth);
 
 		// Write to the atmosphere FBO
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		// Do not test depth, do not write depth DONT TOUCH!!! DISABLE, FALSE
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE);
@@ -151,9 +151,21 @@ namespace Universe {
 		for (auto& planet : planets)
 			if (planet->hasAtmosphere) atmosphereRenderer->Render(camera, sun, planet->transform.get(), planet->atmosphere_config, baseTexture, baseDepth, starTexture);
 
-		glDepthMask(GL_TRUE);
-		glEnable(GL_DEPTH_TEST);
+		// Draw everything in a composite quad
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_FALSE);
+
+		composite_shader->Use();
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, baseTexture);
+		composite_shader->SetInt("baseTexture", 0);
+
+		composite_quad.Render();
 	}
 
 	void UniverseManager::Shutdown() {

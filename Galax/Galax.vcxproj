@@ -142,6 +142,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\rendering\Mesh.cpp" />
     <ClCompile Include="src\Player.cpp" />
+    <ClCompile Include="src\rendering\Quad.cpp" />
     <ClCompile Include="src\shaders\ComputeShader.cpp" />
     <ClCompile Include="src\shaders\FragShader.cpp" />
     <ClCompile Include="src\shaders\PlanetShader.cpp" />
@@ -176,6 +177,7 @@
     <ClInclude Include="src\rendering\Mesh.h" />
     <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\rendering\EBO.h" />
+    <ClInclude Include="src\rendering\Quad.h" />
     <ClInclude Include="src\rendering\VAO.h" />
     <ClInclude Include="src\rendering\VBO.h" />
     <ClInclude Include="src\rendering\Vertex.h" />
@@ -198,6 +200,8 @@
     <ClInclude Include="src\universe\UniverseManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\shaders\composite.frag" />
+    <None Include="assets\shaders\composite.vert" />
     <None Include="assets\shaders\debug\debug_path.frag" />
     <None Include="assets\shaders\debug\debug_path.vert" />
     <None Include="assets\shaders\universe\atmosphere.frag" />

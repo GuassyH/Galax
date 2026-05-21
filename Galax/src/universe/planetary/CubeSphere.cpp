@@ -163,7 +163,7 @@ void CubeSphere::RenderChunk(Chunk* chunk, Transform* sun, Camera& camera, Shade
 		
 
 
-		chunk->mesh.Render(camera);
+		chunk->mesh.Render();
 	}
 	else if (chunk->hasNodes) {
 		for (auto node : chunk->nodes) {

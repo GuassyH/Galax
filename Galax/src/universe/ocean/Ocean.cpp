@@ -1,6 +1,9 @@
 #include "Ocean.h"
-#include "universe/planetary/Planet.h"
 
+#include "rendering/Quad.h"
+
+
+#include "universe/planetary/Planet.h"
 #include "universe/UniverseManager.h"
 
 #include "core/Input.h"
@@ -8,23 +11,10 @@
 
 namespace Universe {
 
-	static std::vector<Vertex> quad_verts = {
-	{ {-1.0f, -1.0f, 0.0f }, {}, {}, {}, {}, { 0.0f, 0.0f }, {} },
-	{ {1.0f, -1.0f, 0.0f }, {}, {}, {}, {}, { 1.0f, 0.0f }, {} },
-	{ {-1.0f, 1.0f, 0.0f }, {}, {}, {}, {}, { 0.0f, 1.0f }, {} },
-	{ {1.0f, 1.0f, 0.0f }, {}, {}, {}, {}, { 1.0f, 1.0f }, {} },
-	};
-
-	static std::vector<GLuint> quad_inds = {
-		0, 1, 2,
-		2, 1, 3
-	};
-
-
 	OceanRenderer::OceanRenderer() {
 		oceanShader.Compile("assets/shaders/universe/ocean.frag", "assets/shaders/universe/ocean.vert");
 
-		quad = Mesh(quad_verts, quad_inds);
+		quad = Mesh(Quad::vertices, Quad::indices);
 	}
 
 	OceanRenderer::~OceanRenderer() {

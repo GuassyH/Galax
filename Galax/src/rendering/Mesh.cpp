@@ -37,7 +37,7 @@ bool Mesh::Calculate() {
 }
 
 // Transform matrix must be updated first, with planets its done automatically
-void Mesh::Render(Camera& camera) { 
+void Mesh::Render() { 
 	vao.Bind();
 	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, 0);
 }

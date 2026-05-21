@@ -58,6 +58,9 @@ namespace Universe {
 		GLuint starTexture;
 		GLuint starDepth;
 
+		Mesh composite_quad;
+		std::unique_ptr<Shader> composite_shader;
+
 		int last_width, last_height = 0;
 	};
 }
