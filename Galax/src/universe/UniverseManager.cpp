@@ -13,7 +13,7 @@ namespace Universe {
 		transform->UpdateMatrix(false);
 
 		starSkybox = std::make_unique<Universe::StarSkybox>();
-		starSkybox->Generate(6000, 2, 0.25f, 1000.0f);
+		starSkybox->Generate(6000, 2, 0.2f, 1000.0f);
 
 	}
 

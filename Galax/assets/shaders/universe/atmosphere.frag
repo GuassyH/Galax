@@ -9,7 +9,7 @@ uniform float densityFalloff;
 
 uniform vec3 centre;
 uniform vec3 wavelengths;
-uniform vec3 scatteringCoefficients;
+uniform vec3 wavelengthScatter;
 
 uniform float scatteringStrength;
 
@@ -111,10 +111,10 @@ vec3 calculateLight(float atmosphereRadius, vec3 rayOrigin, vec3 rayDir, float d
 		float sunRayLength = raySphere(centre, atmosphereRadius, inScatterPoint, dirToSun).y;
 		float sunRayOpticalDepth = opticalDepth(atmosphereRadius, inScatterPoint, dirToSun, sunRayLength);
 		viewRayOpticalDepth = opticalDepth(atmosphereRadius, inScatterPoint, -rayDir, stepSize * i);
-		vec3 transmittance = exp(-(sunRayOpticalDepth + viewRayOpticalDepth) * scatteringCoefficients);
+		vec3 transmittance = exp(-(sunRayOpticalDepth + viewRayOpticalDepth) * wavelengthScatter);
 		float localDensity = densityAtPoint(atmosphereRadius, inScatterPoint);
 
-		inScatteredLight += localDensity * transmittance * scatteringCoefficients * stepSize;
+		inScatteredLight += localDensity * transmittance * wavelengthScatter * stepSize;
 		inScatterPoint += rayDir * stepSize;
 	}
 

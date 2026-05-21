@@ -29,8 +29,20 @@ namespace GUI {
 					if (ImGui::CollapsingHeader("Atmosphere")) {
 						ImGui::DragFloat("Atmosphere Height", &planet->atmosphere_config.atmosphereHeight);
 						ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+						
 						ImGui::DragFloat("Density Falloff", &planet->atmosphere_config.densityFalloff);
 						ImGui::DragFloat("Intensity", &planet->atmosphere_config.intensity);
+
+						ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+						
+						bool lambda = ImGui::DragFloat3("Wavelengths", &planet->atmosphere_config.wavelengths.r);
+						bool strength = ImGui::DragFloat("Scatter Strength", &planet->atmosphere_config.scatteringStrength);
+						bool coeff = ImGui::DragFloat("Scatter Coefficient", &planet->atmosphere_config.scatteringCoefficient);
+
+						if (lambda || strength || coeff) {
+							planet->atmosphere_config.UpdateWavelengthScatter();
+						}
+
 
 					}
 					ImGui::Unindent(20);
@@ -41,6 +53,7 @@ namespace GUI {
 					ImGui::Indent(20);
 					if (ImGui::CollapsingHeader("Ocean")) {
 						ImGui::DragFloat("Ocean Radius", &planet->ocean_config.radius);
+						ImGui::ColorEdit3("Ocean Colour", &planet->ocean_config.oceanColor.r);
 						ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
 						ImGui::DragFloat("Normal Repeat", &planet->ocean_config.normalRepeat);
 						ImGui::DragInt("Normal Factor", &planet->ocean_config.normalFactor);

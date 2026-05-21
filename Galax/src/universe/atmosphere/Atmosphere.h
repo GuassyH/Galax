@@ -21,17 +21,17 @@ namespace Universe {
 		float densityFalloff = 5.0f; // Default 5.0
 
 		glm::vec3 wavelengths = glm::vec3(700.0f, 550.0f, 440.0f); // Default 700, 550, 440
-		glm::vec3 scatteringCoefficients; // SET AUTOMATICALLY
+		glm::vec3 wavelengthScatter; // SET AUTOMATICALLY
 
 		float scatteringCoefficient = 380.0f; // Default 380
 		float scatteringStrength = 0.75f; // Default 0.75
 		
-		void UpdateScatteringCoefficients() {
+		void UpdateWavelengthScatter() {
 			float scatterR = glm::pow(scatteringCoefficient / wavelengths.x, 4) * scatteringStrength;
 			float scatterG = glm::pow(scatteringCoefficient / wavelengths.y, 4) * scatteringStrength;
 			float scatterB = glm::pow(scatteringCoefficient / wavelengths.z, 4) * scatteringStrength;
 
-			scatteringCoefficients = glm::vec3(scatterR, scatterG, scatterB);
+			wavelengthScatter = glm::vec3(scatterR, scatterG, scatterB);
 		}
 	};
 

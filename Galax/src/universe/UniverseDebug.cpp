@@ -12,6 +12,19 @@ namespace Universe {
 		pathVBO = VBO();
 	}
 
+
+	void UniverseDebug::Update(Player& player) {
+
+	}
+
+	void UniverseDebug::Render(Player& player) {
+		for (auto planet : Universe::UniverseManager::Get().GetPlanets()) {
+			if (planet->physicsBody.debug_path) {
+				DrawPredictedPath(player, planet.get(), planet->physicsBody.debug_centre);
+			}
+		}
+	}
+
 	void UniverseDebug::DrawPredictedPath(Player& player, Planet* planet, Planet* centre) {
 		UniverseManager& uniManager = UniverseManager::Get();
 

@@ -147,6 +147,7 @@
     <ClCompile Include="src\shaders\PlanetShader.cpp" />
     <ClCompile Include="src\shaders\Shader.cpp" />
     <ClCompile Include="src\rendering\Texture.cpp" />
+    <ClCompile Include="src\system_presets\SystemPresets.cpp" />
     <ClCompile Include="src\universe\atmosphere\Atmosphere.cpp" />
     <ClCompile Include="src\gui\GUI.cpp" />
     <ClCompile Include="src\universe\ocean\Ocean.cpp" />
@@ -183,6 +184,7 @@
     <ClInclude Include="src\shaders\PlanetShader.h" />
     <ClInclude Include="src\shaders\Shader.h" />
     <ClInclude Include="src\rendering\Texture.h" />
+    <ClInclude Include="src\system_presets\SystemPresets.h" />
     <ClInclude Include="src\Transform.h" />
     <ClInclude Include="src\universe\atmosphere\Atmosphere.h" />
     <ClInclude Include="src\gui\GUI.h" />

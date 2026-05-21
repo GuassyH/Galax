@@ -108,6 +108,9 @@
     <ClCompile Include="src\gui\PlanetEditorGUI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\system_presets\SystemPresets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\Log.h">
@@ -192,6 +195,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\PlanetEditorGUI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\system_presets\SystemPresets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

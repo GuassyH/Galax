@@ -32,7 +32,6 @@ namespace Universe {
 
 		quad.Delete();
 	}
-
 	
 
 	void AtmosphereRenderer::Render(Camera& camera, Universe::Planet* sun, Transform* planet, AtmosphereConfig& atmos_config, GLuint screenTex, GLuint depthTex, GLuint starTex) {
@@ -53,20 +52,19 @@ namespace Universe {
 		atmosphereShader.SetInt("starTexture", 2);
 
 
-
 		atmosphereShader.SetFloat("planetRadius", atmos_config.planetRadius);
 		atmosphereShader.SetFloat("atmosphereHeight", atmos_config.atmosphereHeight);
 		atmosphereShader.SetFloat("intensity", atmos_config.intensity);
 		atmosphereShader.SetFloat("densityFalloff", atmos_config.densityFalloff);
 		atmosphereShader.SetVec3("centre", planet->world_position);
 		atmosphereShader.SetVec3("wavelengths", atmos_config.wavelengths);
-		atmosphereShader.SetVec3("scatteringCoefficients", atmos_config.scatteringCoefficients);
+		atmosphereShader.SetVec3("wavelengthScatter", atmos_config.wavelengthScatter);
 		atmosphereShader.SetFloat("scatteringStrength", atmos_config.scatteringStrength);
 
 		atmosphereShader.SetVec3("camPos", camera.transform->world_position);
 		atmosphereShader.SetVec3("sunPos", sun->transform->world_position);
 
-		atmosphereShader.SetVec2("screenResolution", glm::vec2(window_size.x, window_size.y));
+		atmosphereShader.SetVec2("screenResolution", window_size);
 
 		atmosphereShader.SetVec3("camUp", camera.transform->up);
 		atmosphereShader.SetVec3("camForward", camera.transform->forward);
