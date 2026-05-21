@@ -13,6 +13,13 @@ in vec3 crntPos;
 in vec2 texCoord;
 in vec4 vertColor;
 
+
+/////////////////////////////////////
+// Tri Planar
+/////////////////////////////////////
+
+
+
 vec3 getTriPlanarBlend(vec3 _wNorm){
 	// in wNorm is the world-space normal of the fragment
 	vec3 blending = abs( _wNorm );
@@ -21,6 +28,13 @@ vec3 getTriPlanarBlend(vec3 _wNorm){
 	blending /= vec3(b, b, b);
 	return blending;
 }
+
+
+
+/////////////////////////////////////
+// Lighting
+/////////////////////////////////////
+
 
 
 float directionalLight(){
@@ -38,6 +52,14 @@ float directionalLight(){
 
 	return diffuse;
 };
+
+
+
+/////////////////////////////////////
+// Main
+/////////////////////////////////////
+
+
 
 out vec4 fragCol;
 void main(){

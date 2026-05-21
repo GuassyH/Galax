@@ -1,5 +1,8 @@
 #pragma once
 
+#include <iostream>
+#include <memory>
+
 #include "Shader.h"
 #include "rendering/Texture.h"
 
@@ -13,14 +16,18 @@ public:
 	virtual void Use() override;
 	virtual void Delete() override;
 
-	struct AngleColor {
-		glm::vec4 color;
-		float angle;
-		float pad[3];
+
+	struct MaterialPreset {
+		glm::vec3 shallow_colour;
+		float height_above_sea = 0.0f;
+		// std::shared_ptr<Texture> shallow_texture;
+		
+		glm::vec3 steep_colour;
+		float angle = 0.0f;
+		// std::shared_ptr<Texture> steep_texture;
 	};
 	
-	std::vector<AngleColor> angles_to_colors = { };
-	// std::shared_ptr<Texture> texture = nullptr;
+	std::vector<MaterialPreset> colour_presets = { };
 
 	std::string fragment_path;
 	std::string vertex_path;

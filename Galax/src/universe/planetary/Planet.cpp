@@ -48,7 +48,6 @@ namespace Universe {
 		}
 
 		transform->UpdateMatrix();
-		// GX_TRACE("{}x {}y {}z", transform->world_position.x, transform->world_position.y, transform->world_position.z);
 
 		if (!LODradii.empty())
 			UpdateAllLODs(camera.transform->world_position);
@@ -107,7 +106,6 @@ namespace Universe {
 
 	// Should this be on another thread?
 	void Planet::UpdateAllLODs(glm::vec3 observer_pos) {
-
 		glm::vec3 dir_to_planet = glm::normalize(transform->world_position - observer_pos);
 		float range = LODradii[0] * radius;
 
@@ -133,7 +131,6 @@ namespace Universe {
 
 
 	/// Delete
-
 	void Planet::Delete() {
 		for (auto& face : faces) {
 			CubeSphere::DestroyFace(face);

@@ -42,6 +42,13 @@ uniform int numInScatteringPoints;
 uniform int numOpticalDepthPoints;
 
 
+
+/////////////////////////////////////
+// Atmospheric Calculations
+/////////////////////////////////////
+
+
+
 // Check if a ray intersects with a sphere
 vec2 raySphere (vec3 sphereCentre, float sphereRadius, vec3 rayOrigin, vec3 rayDir) {
     vec3 offset = rayOrigin - sphereCentre;
@@ -95,6 +102,13 @@ float opticalDepth(float atmosphereRadius, vec3 rayOrigin, vec3 rayDir, float su
 }
 
 
+
+/////////////////////////////////////
+// Calculation 
+/////////////////////////////////////
+
+
+
 // Light coming from the points along the ray
 vec3 calculateLight(float atmosphereRadius, vec3 rayOrigin, vec3 rayDir, float dstThrough, vec3 originalCol){
 
@@ -126,6 +140,13 @@ vec3 calculateLight(float atmosphereRadius, vec3 rayOrigin, vec3 rayDir, float d
 }
 
 
+
+/////////////////////////////////////
+// Depth and Star
+/////////////////////////////////////
+
+
+
 // Convert from OpenGL depth to length zNear->zFar
 float LinearizeDepth(float d,float zNear,float zFar)
 {
@@ -142,6 +163,13 @@ vec4 GetStarBrightness(float brightness){
 
 	return result;
 }
+
+
+
+/////////////////////////////////////
+// Main
+/////////////////////////////////////
+
 
 
 void main(){

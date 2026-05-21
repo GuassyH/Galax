@@ -16,7 +16,7 @@
 namespace Universe {
 	class Planet {
 	public:
-		const char* name = "anon_planet";
+		const char* name = "new_planet";
 
 		/// Core
 		Planet() = default;
@@ -53,8 +53,5 @@ namespace Universe {
 
 		bool hasOcean = false;
 		OceanConfig ocean_config;
-	private:
-		ComputeShader terrain_compute;
-		ComputeShader normals_compute;
 	};
 }
