@@ -60,10 +60,17 @@ namespace Universe {
 	void StarSkybox::Update(Transform* origin) {
 
 	}
-	void StarSkybox::Render(Camera& camera) {
-
+	void StarSkybox::Render(Camera& camera, GLuint screenTex, GLuint depthTex) {
 
 		starShader.Use();
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, screenTex);
+		starShader.SetInt("baseTexture", 0);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, depthTex);
+		starShader.SetInt("baseDepth", 1);
 
 		starShader.SetMat4("view", camera.GetView());
 		starShader.SetMat4("proj", camera.GetProj());

@@ -24,7 +24,7 @@ namespace Universe {
 	}
 	
 
-	void AtmosphereRenderer::Render(Camera& camera, Universe::Planet* sun, Transform* planet, AtmosphereConfig& atmos_config, GLuint screenTex, GLuint depthTex, GLuint starTex) {
+	void AtmosphereRenderer::Render(Camera& camera, Universe::Planet* sun, Transform* planet, AtmosphereConfig& atmos_config, GLuint screenTex, GLuint depthTex) {
 		glm::vec2 window_size = Galax::InputManager::Get().windowSize;
 
 		atmosphereShader.Use();
@@ -36,10 +36,6 @@ namespace Universe {
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, depthTex);
 		atmosphereShader.SetInt("depthTexture", 1);
-
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, starTex);
-		atmosphereShader.SetInt("starTexture", 2);
 
 
 		atmosphereShader.SetFloat("planetRadius", atmos_config.planetRadius);

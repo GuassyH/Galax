@@ -243,10 +243,10 @@
     </None>
     <None Include="assets\shaders\universe\ocean.frag" />
     <None Include="assets\shaders\universe\ocean.vert" />
-    <None Include="assets\shaders\debug\debug_path.frag" />
-    <None Include="assets\shaders\debug\debug_path.vert" />
     <None Include="assets\shaders\composite.frag" />
     <None Include="assets\shaders\composite.vert" />
+    <None Include="assets\shaders\debug\debug_path.frag" />
+    <None Include="assets\shaders\debug\debug_path.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\Diary.txt" />

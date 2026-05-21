@@ -64,9 +64,9 @@ namespace Universe {
 	}
 
 	void CreateBuffers(GLuint* framebuffer, GLuint* screentex, GLuint* depthtex) {
-		if (framebuffer) glDeleteFramebuffers(1, framebuffer);
-		if (screentex) glDeleteTextures(1, screentex);
-		if (depthtex) glDeleteTextures(1, depthtex);
+		if (*framebuffer) glDeleteFramebuffers(1, framebuffer);
+		if (*screentex) glDeleteTextures(1, screentex);
+		if (*depthtex) glDeleteTextures(1, depthtex);
 
 		glGenFramebuffers(1, framebuffer);
 		glBindFramebuffer(GL_FRAMEBUFFER, *framebuffer);
@@ -84,9 +84,11 @@ namespace Universe {
 		// Depth texture
 		glGenTextures(1, depthtex);
 		glBindTexture(GL_TEXTURE_2D, *depthtex);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, window_size.x, window_size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, window_size.x, window_size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, *depthtex, 0);
 
@@ -109,61 +111,67 @@ namespace Universe {
 			last_height = window_size.y;
 		}
 
-
-		// Render stars
-		glBindFramebuffer(GL_FRAMEBUFFER, starFBO);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glViewport(0, 0, window_size.x, window_size.y);
-
-		// Dont test the depth, but allow writing
-		glDisable(GL_DEPTH_TEST);
-		glDepthMask(GL_TRUE);
-
-		starSkybox->Render(camera);
-
 		// Render planets
 		glBindFramebuffer(GL_FRAMEBUFFER, baseFBO);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glViewport(0, 0, window_size.x, window_size.y);
 
-		// Do test depth and do write if the depth is less, ENABLE, TRUE, LESS
+		// DRAW PLANETS
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 		glDepthFunc(GL_LESS);
-
 		for (auto& planet : planets)
 			planet->Render(camera, sun);
 
-		// Do test depth, do, always, write depth DONT TOUCH!!!, ENABLE, TRUE, LESS
+		// DRAW OCEAMS
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 		glDepthFunc(GL_LESS);
-
 		for (auto& planet : planets)
 			if (planet->hasOcean) oceanRenderer->Render(camera, sun, planet->transform.get(), planet->ocean_config, baseTexture, baseDepth);
 
-		// Write to the atmosphere FBO
-		// Do not test depth, do not write depth DONT TOUCH!!! DISABLE, FALSE
+		// DRAW ATMOSPHERES
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE);
-
+		glDepthFunc(GL_ALWAYS);
 		for (auto& planet : planets)
-			if (planet->hasAtmosphere) atmosphereRenderer->Render(camera, sun, planet->transform.get(), planet->atmosphere_config, baseTexture, baseDepth, starTexture);
+			if (planet->hasAtmosphere) atmosphereRenderer->Render(camera, sun, planet->transform.get(), planet->atmosphere_config, baseTexture, baseDepth);
 
-		// Draw everything in a composite quad
+		// DRAW STARS
+		glBindFramebuffer(GL_FRAMEBUFFER, starFBO);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_FALSE);
+		glDepthFunc(GL_LESS);
+
+		starSkybox->Render(camera, baseTexture, baseDepth);
+
+
+		// COMPOSITE
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glDisable(GL_DEPTH_TEST);
-		glDepthMask(GL_FALSE);
+		glDepthFunc(GL_LESS);
+		glDepthMask(GL_TRUE);
 
 		composite_shader->Use();
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, baseTexture);
 		composite_shader->SetInt("baseTexture", 0);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, baseDepth);
+		composite_shader->SetInt("baseDepth", 1);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, starTexture);
+		composite_shader->SetInt("starTexture", 2);
 
 		composite_quad.Render();
 	}
@@ -182,6 +190,8 @@ namespace Universe {
 		if (starTexture) glDeleteTextures(1, &starTexture);
 		if (starDepth) glDeleteTextures(1, &starDepth);
 
+		composite_quad.Delete();
+		composite_shader->Delete();
 	}
 
 

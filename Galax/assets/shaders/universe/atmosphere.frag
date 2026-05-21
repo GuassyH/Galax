@@ -14,7 +14,6 @@ uniform vec3 wavelengthScatter;
 uniform float scatteringStrength;
 
 
-
 in vec2 texCoord;
 out vec4 fragColor;
 
@@ -24,7 +23,6 @@ uniform vec3 sunPos;
 
 uniform sampler2D screenTexture;
 uniform sampler2D depthTexture;
-uniform sampler2D starTexture;
 
 uniform vec2 screenResolution;
 
@@ -142,7 +140,7 @@ vec3 calculateLight(float atmosphereRadius, vec3 rayOrigin, vec3 rayDir, float d
 
 
 /////////////////////////////////////
-// Depth and Star
+// Depth
 /////////////////////////////////////
 
 
@@ -152,16 +150,6 @@ float LinearizeDepth(float d,float zNear,float zFar)
 {
     float z_n = 2.0 * d - 1.0;
     return 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear));
-}
-
-
-vec4 GetStarBrightness(float brightness){
-	vec4 result = vec4(0.0);
-	float weighted_brightness = clamp((1 - (brightness * 4)), 0, 1);
-
-	result.rgb = vec3(texture(starTexture, texCoord).r * weighted_brightness);
-
-	return result;
 }
 
 
@@ -210,12 +198,5 @@ void main(){
 
 			fragColor += vec4(light, 0.0);
 		}
-
 	}
-
-	// Dim stars
-	if(texture(depthTexture, texCoord).r == 1){
-		fragColor += GetStarBrightness(length(fragColor.rgb));
-	}
-
 } 

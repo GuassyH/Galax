@@ -18,7 +18,7 @@ namespace Universe {
 
 		void Generate(int numStars, float starSize, float sizeVariability, float starDistance);
 		void Update(Transform* origin);
-		void Render(Camera& camera); // Instanced
+		void Render(Camera& camera, GLuint screenTex, GLuint depthTex); // Instanced
 
 		std::shared_ptr<Transform> transform;
 
