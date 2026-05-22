@@ -111,30 +111,36 @@ namespace Universe {
 			last_height = window_size.y;
 		}
 
+
+		//glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+		//glDepthFunc(GL_GREATER);
+		//glClearDepth(1.0);
+
 		// Render planets
 		glBindFramebuffer(GL_FRAMEBUFFER, baseFBO);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glViewport(0, 0, window_size.x, window_size.y);
 
+
 		// DRAW PLANETS
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
-		glDepthFunc(GL_LESS);
+		glDepthFunc(GL_LESS); // less
 		for (auto& planet : planets)
 			planet->Render(camera, sun);
 
 		// DRAW OCEAMS
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
-		glDepthFunc(GL_LESS);
+		glDepthFunc(GL_LESS);  // less
 		for (auto& planet : planets)
 			if (planet->hasOcean) oceanRenderer->Render(camera, sun, planet->transform.get(), planet->ocean_config, baseTexture, baseDepth);
 
 		// DRAW ATMOSPHERES
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE);
-		glDepthFunc(GL_ALWAYS);
+		glDepthFunc(GL_ALWAYS); // always
 		for (auto& planet : planets)
 			if (planet->hasAtmosphere) atmosphereRenderer->Render(camera, sun, planet->transform.get(), planet->atmosphere_config, baseTexture, baseDepth);
 
@@ -156,8 +162,8 @@ namespace Universe {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glDisable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
 		glDepthMask(GL_TRUE);
+		glDepthFunc(GL_LESS);
 
 		composite_shader->Use();
 

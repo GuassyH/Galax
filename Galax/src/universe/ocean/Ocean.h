@@ -16,7 +16,8 @@ namespace Universe {
 	struct OceanConfig {
 		float radius = 1.0f;
 		float densityFalloff = 2.0f;
-		glm::vec4 oceanColor;
+		glm::vec4 oceanColor = glm::vec4(0.35, 0.55, 0.85, 1.0);
+		glm::vec4 fresnelColor = glm::vec4(0.35, 0.55, 0.85, 1.0);
 		std::shared_ptr<Texture> normalTexture;
 		float normalRepeat = 1.0f;
 		float normalStrength = 1.0f;

@@ -47,5 +47,5 @@ void main()
     vec3 baseColor = texture(baseTexture, uv).rgb;
     fragColor = GetStarBrightness(length(baseColor.rgb)) * 0.4;
 
-    gl_FragDepth = 1.0;
+    gl_FragDepth = 0.0;
 }

@@ -46,10 +46,6 @@ public:
 	float noiseHeightShift = 0.0f; // Default 0
 	float noiseScale = 1.0f; // bigger value is like zooming in the noise
 
-	// Colors
-	glm::vec4 peakColor = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
-	glm::vec4 surfaceColor = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f);
-
 private:
 	GLuint vertBuff = 0;
 	GLuint craterBuff = 0;

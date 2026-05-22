@@ -75,7 +75,7 @@ void main(){
 	}
 
 	fragCol = color;
-	if(distance(crntPos, centre) <= radius * 1.001)
+	if(distance(crntPos, centre) <= radius + 1)
 		fragCol.rgb = vec3(0.7, 0.6, 0.2);
 
 

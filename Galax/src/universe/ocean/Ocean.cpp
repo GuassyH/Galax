@@ -50,6 +50,7 @@ namespace Universe {
 		oceanShader.SetFloat("oceanRadius", ocean_config.radius);
 		oceanShader.SetFloat("densityFalloff", ocean_config.densityFalloff);
 		oceanShader.SetVec4("oceanColor", ocean_config.oceanColor);
+		oceanShader.SetVec4("fresnelColor", ocean_config.fresnelColor);
 		oceanShader.SetVec3("centre", planet->world_position);
 
 		oceanShader.SetMat4("modelMat", planet->GetMatrix());

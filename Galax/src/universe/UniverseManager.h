@@ -39,7 +39,7 @@ namespace Universe {
 
 		void Recentre(Player& player);
 		void ResolveGravity();
-		void SetIdealOrbitVelocity(Planet* planet, Planet* target); // Sets planets velocity to be in a circular orbit around the target
+		void SetIdealOrbitVelocity(Planet* planet, Planet* target); // Doesnt work
 		
 		void Update(Player& player);
 		void Render(Camera& camera, Planet* sun);

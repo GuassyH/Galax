@@ -67,6 +67,7 @@ namespace GUI {
 
 					ImGui::DragFloat(("Ocean Radius" + id + "_ocean_radius").c_str(), &planet->ocean_config.radius);
 					ImGui::ColorEdit3(("Ocean Colour" + id + "_ocean_colour").c_str(), &planet->ocean_config.oceanColor.r);
+					ImGui::ColorEdit3(("Fresnel Colour" + id + "_fresnel_colour").c_str(), &planet->ocean_config.fresnelColor.r);
 					ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
 					ImGui::DragFloat(("Normal Repeat" + id + "_normal_repeat").c_str(), &planet->ocean_config.normalRepeat);
 					ImGui::DragInt(("Normal Factor" + id + "_normal_factor").c_str(), &planet->ocean_config.normalFactor);

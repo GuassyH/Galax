@@ -14,6 +14,7 @@ uniform bool hasNormalTex;
 uniform float oceanRadius;
 uniform float densityFalloff;
 uniform vec4 oceanColor;
+uniform vec4 fresnelColor;
 
 uniform float camFarPlane;
 uniform float camNearPlane;
@@ -120,13 +121,28 @@ vec3 directionalLight(vec3 norm, vec3 sunDir, vec3 rayDir, vec3 baseColor, float
 // SPHERE INTERSECTION
 ////////////////////////////////////////////////////////////
 
+// for waves and movement
+float wave(vec3 p)
+{
+    float t = time;
+
+    float w1 = sin(p.x * 0.8 + t * 1.2);
+    float w2 = sin(p.z * 1.3 + t * 0.9);
+    float w3 = sin((p.x + p.z) * 0.6 + t * 1.5);
+
+    return (w1 + w2 + w3) * 0.5;
+}
+
 vec2 raySphere(vec3 sphereCentre, vec3 rayOrigin, vec3 rayDir)
 {
     vec3 offset = rayOrigin - sphereCentre;
 
     const float a = 1.0;
     float b = 2.0 * dot(offset, rayDir);
-    float c = dot(offset, offset) - oceanRadius * oceanRadius;
+
+    float r = oceanRadius;
+
+    float c = dot(offset, offset) - r * r;
 
     float discriminant = b * b - 4.0 * a * c;
 
@@ -258,8 +274,7 @@ void main()
     ////////////////////////////////////////////////////////
 
     // should be the atmosphere colour
-    vec3 skyColor = vec3(0.35, 0.55, 0.85);
-    vec3 finalWaterColor = mix(waterColor, skyColor, fresnel);
+    vec3 finalWaterColor = mix(waterColor, fresnelColor.rgb, fresnel);
 
     ////////////////////////////////////////////////////////
     // LIGHTING

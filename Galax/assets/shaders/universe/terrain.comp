@@ -58,11 +58,6 @@ uniform float noiseBaseFrequency;
 uniform float noiseHeightShift;
 uniform float noiseScale;
 
-// coloring
-uniform vec4 peakColor;
-uniform vec4 surfaceColor;
-
-
 // ===== CRATERS ===== 
 
 float smin( float a, float b, float k )
@@ -241,8 +236,6 @@ void main(){
 
 	vec4 color;
 	color = vec4(col_blend, col_blend, col_blend, 1.0);
-	color = mix(surfaceColor, peakColor, col_blend);
-	color = clamp(color, surfaceColor, peakColor);
 
 	vert.position = pos;
 	vert.normal = normal;

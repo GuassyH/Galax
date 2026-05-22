@@ -62,9 +62,6 @@ void TerrainGenerator::ApplyTerrain(CubeSphere::Chunk* chunk) {
 	terrain_compute.SetFloat("noiseHeightShift", noiseHeightShift);
 	terrain_compute.SetFloat("noiseScale", noiseScale);
 
-	terrain_compute.SetVec4("peakColor", peakColor);
-	terrain_compute.SetVec4("surfaceColor", surfaceColor);
-
 	// Buffers std430
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, vertBuff);
 	glBufferData(GL_SHADER_STORAGE_BUFFER, vertBuffSize, chunk->mesh.vertices.data(), GL_DYNAMIC_COPY);
