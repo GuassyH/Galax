@@ -62,7 +62,7 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem() {
 	std::shared_ptr<Universe::Planet> moon = std::make_shared<Universe::Planet>();
 	moon->name = "Luna";
 	moon->shader = shader;
-	moon->radius = 160;
+	moon->radius = 460;
 	moon->resolution = 50;
 	moon->LODradii = { 6.0, 3.0, 1.5, 1.0 };
 

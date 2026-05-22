@@ -131,16 +131,13 @@ namespace Universe {
 			planet->Render(camera, sun);
 
 		// DRAW OCEAMS
-		glEnable(GL_DEPTH_TEST);
-		glDepthMask(GL_TRUE);
-		glDepthFunc(GL_GREATER);  // less
 		for (auto& planet : planets)
 			if (planet->hasOcean) oceanRenderer->Render(camera, sun, planet->transform.get(), planet->ocean_config, baseTexture, baseDepth);
 
 		// DRAW ATMOSPHERES
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE);
-		glDepthFunc(GL_ALWAYS); // always
+		glDepthFunc(GL_NEVER); // always
 		for (auto& planet : planets)
 			if (planet->hasAtmosphere) atmosphereRenderer->Render(camera, sun, planet->transform.get(), planet->atmosphere_config, baseTexture, baseDepth);
 
@@ -155,15 +152,12 @@ namespace Universe {
 
 		starSkybox->Render(camera, baseTexture, baseDepth);
 
-
 		// COMPOSITE
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
-		glDepthFunc(GL_GREATER);
 
 		composite_shader->Use();
 

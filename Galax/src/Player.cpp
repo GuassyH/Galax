@@ -42,14 +42,12 @@ void Player::Move() {
 		skywards -= 1.0f;
 
 	// Change speed
-	if (Galax::Input::GetScrollOffset().y > 0.0 && speed < (20480.0f * 32)) // comfortable speed limit  
+	if (Galax::Input::GetScrollOffset().y > 0.0 && speed < (20480.0f * 256)) // comfortable speed limit  
 		speed *= 2.0f;
 
 	else if (Galax::Input::GetScrollOffset().y < 0.0 && speed > 0.5f) // Good slowest speed
 		speed /= 2.0f;
 	
-
-
 
 	glm::vec3 localMoveDir = glm::vec3(0.0);
 
@@ -120,10 +118,13 @@ void Player::Look() {
 	if (parent_planet) {
 		camera.transform->AddRotationAroundAxis(glm::vec3(1.0f, 0.0f, 0.0), -rotX * fov_scalar, true); // pitch
 		this->transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0), -rotY * fov_scalar, true); // yaw
+		// Change nearplane when close to planet
+		camera.nearPlane = 0.03f;
 	}
 	else {
 		camera.transform->AddRotationAroundAxis(glm::vec3(1.0f, 0.0f, 0.0), -rotX * fov_scalar, false); // pitch
 		this->transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), -rotY * fov_scalar, false); // yaw
+		camera.nearPlane = 100.0f;
 	}
 
 	// Clamp pitch to avoid flipping
