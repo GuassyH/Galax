@@ -56,6 +56,7 @@ namespace Universe {
 		atmosphereShader.SetVec3("camForward", camera.transform->forward);
 		atmosphereShader.SetVec3("camRight", camera.transform->right);
 		atmosphereShader.SetFloat("camNearPlane", camera.nearPlane);
+		atmosphereShader.SetMat4("invProjMat", glm::inverse(camera.GetProj()));
 
 		atmosphereShader.SetFloat("FOVdeg", camera.fovDeg);
 

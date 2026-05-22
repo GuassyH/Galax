@@ -54,6 +54,7 @@ namespace Universe {
 		oceanShader.SetVec3("centre", planet->world_position);
 
 		oceanShader.SetMat4("modelMat", planet->GetMatrix());
+		oceanShader.SetMat4("invProjMat", glm::inverse(camera.GetProj()));
 
 		oceanShader.SetVec3("camPos", camera.transform->world_position);
 		oceanShader.SetVec3("sunPos", sun->transform->world_position);
@@ -66,9 +67,6 @@ namespace Universe {
 		oceanShader.SetFloat("camNearPlane", camera.nearPlane);
 
 		oceanShader.SetFloat("FOVdeg", camera.fovDeg);
-
-		oceanShader.SetMat4("viewMat", camera.GetView());
-		oceanShader.SetMat4("projMat", camera.GetProj());
 
 		oceanShader.SetFloat("time", UniverseManager::Get().time);
 		oceanShader.SetFloat("triplanarBlend", ocean_config.triplanarBlend);

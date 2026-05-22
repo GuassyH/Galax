@@ -13,10 +13,10 @@ uniform vec3 wavelengthScatter;
 
 uniform float scatteringStrength;
 
+uniform mat4 invProjMat;
 
 in vec2 texCoord;
 out vec4 fragColor;
-
 
 uniform vec3 camPos;
 uniform vec3 sunPos;
@@ -151,6 +151,20 @@ float LinearizeDepth(float d, float nearPlane)
 }
 
 
+vec3 ReconstructViewPos(vec2 uv, float depth)
+{
+    vec4 clip = vec4(
+        uv * 2.0 - 1.0,
+        depth,
+        1.0
+    );
+
+    vec4 view = invProjMat * clip;
+    view /= view.w;
+
+    return view.xyz;
+}
+
 /////////////////////////////////////
 // Main
 /////////////////////////////////////
@@ -168,29 +182,29 @@ void main(){
 	float scale = tan(fov * 0.5);
 
 	vec3 rayDir = normalize(	camForward + rayCoord.x * aspect * scale * camRight + rayCoord.y * scale * camUp	);
-	vec3 rayOrigin = camPos;
+	vec3 rayOrigin = vec3(0.0);
+	vec3 localOrigin = centre - camPos;
 
 	// Get Ray depths
-	float sceneDepthLinear = LinearizeDepth(texture(depthTexture, texCoord).r, camNearPlane);
+	float depth = texture(depthTexture, texCoord).r;
+	vec3 scenePos = ReconstructViewPos(texCoord, depth);
+	float sceneDepthLinear = length(scenePos);
 
 	float atmosphereRadius = planetRadius + atmosphereHeight;
 
-	vec2 intersect = raySphere(centre, atmosphereRadius, rayOrigin, rayDir); 
+	vec2 intersect = raySphere(localOrigin, atmosphereRadius, rayOrigin, rayDir); 
 	float dstTo = intersect.x;
 	float dstThrough = intersect.y;
 
 	// If the ray intersects 
 	if (dstThrough > 0.0) {
-		// Distance from camera along the current ray
-		float distanceAlongRayToScene = sceneDepthLinear / dot(rayDir, camForward);
-
 		// Clamp dstThrough to not exceed the scene
-		dstThrough = min(dstThrough, distanceAlongRayToScene - dstTo);
+		dstThrough = min(dstThrough, sceneDepthLinear - dstTo);
 
 		if(dstThrough > 0.0) {
 			const float epsilon = 0.001;
-			vec3 entryPoint = rayOrigin + (rayDir * (dstTo + epsilon));
-			vec3 light = calculateLight(atmosphereRadius, entryPoint, rayDir, dstThrough - (epsilon * 2), vec3(fragColor));
+			vec3 entryPoint = (rayDir * (dstTo + epsilon));
+			vec3 light = calculateLight(atmosphereRadius, entryPoint + camPos, rayDir, dstThrough - (epsilon * 2), vec3(fragColor));
 
 			fragColor += vec4(light, 0.0);
 		}

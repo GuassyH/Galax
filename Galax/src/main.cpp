@@ -61,7 +61,7 @@ int main() {
 	// Create Player
 	Player player;
 	player.camera.fovDeg = 90.0f;
-	player.camera.nearPlane = 0.1f;
+	player.camera.nearPlane = 1.0f;
 
 	player.transform->local_position = glm::vec3(5548000.0f, 0.0f, 0.0f);
 	player.transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), 180);

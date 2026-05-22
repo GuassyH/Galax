@@ -5,6 +5,7 @@ uniform sampler2D screenTexture;
 uniform sampler2D normalTexture;
 
 uniform mat4 modelMat;
+uniform mat4 invProjMat;
 
 uniform float normalRepeat;
 uniform float normalStrength;
@@ -173,6 +174,21 @@ float DepthBufferFromLinear(float zLinear, float zNear)
     return zNear / zLinear;
 }
 
+vec3 ReconstructViewPos(vec2 uv, float depth)
+{
+    vec4 clip = vec4(
+        uv * 2.0 - 1.0,
+        depth,
+        1.0
+    );
+
+    vec4 view = invProjMat * clip;
+    view /= view.w;
+
+    return view.xyz;
+}
+
+
 ////////////////////////////////////////////////////////////
 // MAIN
 ////////////////////////////////////////////////////////////
@@ -199,19 +215,23 @@ void main()
         rayCoord.y * scale * camUp
     );
 
-    vec3 rayOrigin = camPos;
+    vec3 rayOrigin = vec3(0.0);
+    vec3 localOrigin = centre - camPos;
 
     ////////////////////////////////////////////////////////
     // SCENE DEPTH
     ////////////////////////////////////////////////////////
 
-    float sceneDepthLinear = LinearizeDepth(texture(depthTexture, texCoord).r, camNearPlane);
+    float depth = texture(depthTexture, texCoord).r;
+	vec3 scenePos = ReconstructViewPos(texCoord, depth);
+	float sceneDepthLinear = length(scenePos);
+
 
     ////////////////////////////////////////////////////////
     // OCEAN INTERSECTION
     ////////////////////////////////////////////////////////
 
-    vec2 intersect = raySphere(centre, rayOrigin, rayDir);
+    vec2 intersect = raySphere(localOrigin, rayOrigin, rayDir);
 
     float dstTo = intersect.x;
     float dstThrough = intersect.y;
@@ -223,11 +243,7 @@ void main()
     // DEPTH CLAMP
     ////////////////////////////////////////////////////////
 
-    float denom = max(dot(rayDir, camForward), 0.1);
-
-    float distanceAlongRayToScene = sceneDepthLinear / denom;
-    dstThrough = max(0.0, min(dstThrough, distanceAlongRayToScene - dstTo));
-
+    dstThrough = max(0.0, min(dstThrough, sceneDepthLinear - dstTo));
 
     if(dstThrough <= 0.0)
         return;
@@ -246,17 +262,17 @@ void main()
     vec3 normal;
 
     if(hasNormalTex && dstTo > 0.0) {
-        normal = normalCalculation(entryPoint - centre, time / 50);
+        normal = normalCalculation(entryPoint - localOrigin, time / 50);
     }
     else {
-        normal = normalize(entryPoint - centre);
+        normal = normalize(entryPoint - localOrigin);
     }
 
     ////////////////////////////////////////////////////////
     // FRESNEL
     ////////////////////////////////////////////////////////
 
-    vec3 viewDir = normalize(camPos - entryPoint);
+    vec3 viewDir = normalize(-entryPoint);
     float fresnel = fresnelSchlick(viewDir, normal);
 
     ////////////////////////////////////////////////////////
@@ -277,14 +293,14 @@ void main()
     // LIGHTING
     ////////////////////////////////////////////////////////
 
-    vec3 litColor = directionalLight(normal, normalize(sunPos - entryPoint), rayDir, finalWaterColor, fresnel);
+    vec3 litColor = directionalLight(normal, normalize(sunPos - (entryPoint + camPos)), rayDir, finalWaterColor, fresnel);
     fragColor.rgb = litColor;
 
     ////////////////////////////////////////////////////////
     // DEPTH WRITE
     ////////////////////////////////////////////////////////
 
-    vec3 viewSpacePos = entryPoint - camPos;
+    vec3 viewSpacePos = entryPoint;
     float camDepth = dot(viewSpacePos, camForward);
 
     gl_FragDepth = DepthBufferFromLinear(max(camDepth, camNearPlane), camNearPlane);
