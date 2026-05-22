@@ -3,9 +3,8 @@
 #include "core/Input.h"
 
 Player::Player() {
-  camera.fovDeg = 90.0f; 
+	camera.fovDeg = 90.0f; 
     camera.nearPlane = 0.3f; 
-	camera.farPlane = 30000.0f;
 	
 	transform = std::make_shared<Transform>();
 

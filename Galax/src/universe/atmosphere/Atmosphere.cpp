@@ -55,7 +55,6 @@ namespace Universe {
 		atmosphereShader.SetVec3("camUp", camera.transform->up);
 		atmosphereShader.SetVec3("camForward", camera.transform->forward);
 		atmosphereShader.SetVec3("camRight", camera.transform->right);
-		atmosphereShader.SetFloat("camFarPlane", camera.farPlane);
 		atmosphereShader.SetFloat("camNearPlane", camera.nearPlane);
 
 		atmosphereShader.SetFloat("FOVdeg", camera.fovDeg);

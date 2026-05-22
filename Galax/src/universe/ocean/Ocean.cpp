@@ -63,7 +63,6 @@ namespace Universe {
 		oceanShader.SetVec3("camUp", camera.transform->up);
 		oceanShader.SetVec3("camForward", camera.transform->forward);
 		oceanShader.SetVec3("camRight", camera.transform->right);
-		oceanShader.SetFloat("camFarPlane", camera.farPlane);
 		oceanShader.SetFloat("camNearPlane", camera.nearPlane);
 
 		oceanShader.SetFloat("FOVdeg", camera.fovDeg);

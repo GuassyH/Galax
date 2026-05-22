@@ -16,7 +16,6 @@ uniform float densityFalloff;
 uniform vec4 oceanColor;
 uniform vec4 fresnelColor;
 
-uniform float camFarPlane;
 uniform float camNearPlane;
 uniform float FOVdeg;
 
@@ -164,14 +163,14 @@ vec2 raySphere(vec3 sphereCentre, vec3 rayOrigin, vec3 rayDir)
 // DEPTH
 ////////////////////////////////////////////////////////////
 
-float LinearizeDepth(float d, float zNear, float zFar){
-    float z_n = 2.0 * d - 1.0;
-    return 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear));
+float LinearizeDepth(float d, float nearPlane)
+{
+    return nearPlane / d;
 }
 
-float DepthBufferFromLinear(float zLinear, float zNear, float zFar){
-    float z_n = (zLinear * (zFar + zNear) - 2.0 * zNear * zFar) / (zLinear * (zFar - zNear));
-    return 0.5 * (z_n + 1.0);
+float DepthBufferFromLinear(float zLinear, float zNear)
+{
+    return zNear / zLinear;
 }
 
 ////////////////////////////////////////////////////////////
@@ -183,8 +182,6 @@ void main()
     vec4 screenCol = texture(screenTexture, texCoord);
 
     fragColor = screenCol;
-
-    gl_FragDepth = texture(depthTexture, texCoord).r;
 
     ////////////////////////////////////////////////////////
     // SCREEN RAY
@@ -208,7 +205,7 @@ void main()
     // SCENE DEPTH
     ////////////////////////////////////////////////////////
 
-    float sceneDepthLinear = LinearizeDepth(texture(depthTexture, texCoord).r, camNearPlane, camFarPlane);
+    float sceneDepthLinear = LinearizeDepth(texture(depthTexture, texCoord).r, camNearPlane);
 
     ////////////////////////////////////////////////////////
     // OCEAN INTERSECTION
@@ -290,5 +287,5 @@ void main()
     vec3 viewSpacePos = entryPoint - camPos;
     float camDepth = dot(viewSpacePos, camForward);
 
-    gl_FragDepth = DepthBufferFromLinear(max(camDepth, camNearPlane), camNearPlane, camFarPlane);
+    gl_FragDepth = DepthBufferFromLinear(max(camDepth, camNearPlane), camNearPlane);
 }

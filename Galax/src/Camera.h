@@ -17,7 +17,6 @@ public:
 
 	float fovDeg = 60.0f;
 	float nearPlane = 0.1f;
-	float farPlane = 1000.0f;
 
 
 	glm::mat4& GetView() { return view; }

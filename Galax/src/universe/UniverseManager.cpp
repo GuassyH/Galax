@@ -112,9 +112,9 @@ namespace Universe {
 		}
 
 
-		//glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
-		//glDepthFunc(GL_GREATER);
-		//glClearDepth(1.0);
+		// Reverse the depth, and go from 0 -> 1, instead of -1 -> 1
+		glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+		glClearDepth(0.0);
 
 		// Render planets
 		glBindFramebuffer(GL_FRAMEBUFFER, baseFBO);
@@ -126,14 +126,14 @@ namespace Universe {
 		// DRAW PLANETS
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
-		glDepthFunc(GL_LESS); // less
+		glDepthFunc(GL_GREATER); // less
 		for (auto& planet : planets)
 			planet->Render(camera, sun);
 
 		// DRAW OCEAMS
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
-		glDepthFunc(GL_LESS);  // less
+		glDepthFunc(GL_GREATER);  // less
 		for (auto& planet : planets)
 			if (planet->hasOcean) oceanRenderer->Render(camera, sun, planet->transform.get(), planet->ocean_config, baseTexture, baseDepth);
 
@@ -151,7 +151,7 @@ namespace Universe {
 
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE);
-		glDepthFunc(GL_LESS);
+		glDepthFunc(GL_GREATER);
 
 		starSkybox->Render(camera, baseTexture, baseDepth);
 
@@ -163,7 +163,7 @@ namespace Universe {
 
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
-		glDepthFunc(GL_LESS);
+		glDepthFunc(GL_GREATER);
 
 		composite_shader->Use();
 

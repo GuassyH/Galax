@@ -29,7 +29,6 @@ uniform vec2 screenResolution;
 uniform vec3 camUp;
 uniform vec3 camForward;
 uniform vec3 camRight;
-uniform float camFarPlane;
 uniform float camNearPlane;
 
 uniform float FOVdeg;
@@ -146,12 +145,10 @@ vec3 calculateLight(float atmosphereRadius, vec3 rayOrigin, vec3 rayDir, float d
 
 
 // Convert from OpenGL depth to length zNear->zFar
-float LinearizeDepth(float d,float zNear,float zFar)
+float LinearizeDepth(float d, float nearPlane)
 {
-    float z_n = 2.0 * d - 1.0;
-    return 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear));
+    return nearPlane / d;
 }
-
 
 
 /////////////////////////////////////
@@ -174,8 +171,7 @@ void main(){
 	vec3 rayOrigin = camPos;
 
 	// Get Ray depths
-	float sceneDepthLinear = LinearizeDepth(texture(depthTexture, texCoord).r, camNearPlane, camFarPlane);
-
+	float sceneDepthLinear = LinearizeDepth(texture(depthTexture, texCoord).r, camNearPlane);
 
 	float atmosphereRadius = planetRadius + atmosphereHeight;
 

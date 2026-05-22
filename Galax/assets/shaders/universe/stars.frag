@@ -41,7 +41,7 @@ void main()
     float depth = texture(baseDepth, uv).r;
 
     // Check if out of bounds
-    if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0 || depth < 1.0)
+    if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0 || depth > 0.0)
         discard;
 
     vec3 baseColor = texture(baseTexture, uv).rgb;
