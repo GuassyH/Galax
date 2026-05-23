@@ -46,15 +46,28 @@ namespace GUI {
 		ImGui::Text(time_text.str().c_str());
 	}
 
+	void Header(const char* title) {
+		ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
 
-	void GUI::Render(GLFWwindow* window) {
+		ImGui::SetCursorPosX((ImGui::GetWindowWidth() / 2.0f) - (ImGui::CalcTextSize(title).x / 2.0));
+		ImGui::Text(title);
+		ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+	}
+
+
+	void GUI::Render(GLFWwindow* window, Player& player) {
 		if (ImGui::Begin("tinker box")) {
+			Header("Simulation");
+
 			ImGui::Checkbox("Simulate", &Universe::UniverseManager::Get().isSimulating);
 			ImGui::DragFloat("TimeScale", &Galax::Time::Get().timeScale);
 			DrawTime(Universe::UniverseManager::Get().time, 60, 60, 24, 365);
-			ImGui::Separator();
+	
+			Header("Bodies");
 
-			PlanetEditor::DrawPlanetEditor();
+			PlanetEditor::DrawPlanetEditor(player);
 		}
 		ImGui::End();
 	}

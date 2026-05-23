@@ -6,14 +6,29 @@
 
 namespace GUI {
 
-	void PlanetEditor::DrawPlanetEditor() {
+
+	void Spacing() {
+		ImGui::Spacing();	ImGui::Spacing();	ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();	ImGui::Spacing();	ImGui::Spacing();
+	}
+
+	void PlanetEditor::DrawPlanetEditor(Player& player) {
 		Universe::UniverseManager& universeManager = Universe::UniverseManager::Get();
 
 		for (auto planet : universeManager.GetPlanets()) {
 			std::string id = std::string("##") + std::string(planet->name);
 
 			if(ImGui::CollapsingHeader(planet->name)) {
+				ImGui::Spacing();	ImGui::Spacing();	ImGui::Spacing();
 				
+				if (ImGui::Button(("Move to" + id + "_move_to").c_str())) {
+					glm::vec3 new_pos = planet->transform->world_position - (player.camera.transform->forward * planet->radius * 4.0f);
+					player.transform->SetWorldPosition(new_pos);
+				}
+				
+				Spacing();
+
 				// Physics Settings
 				ImGui::Text("Physics");
 				ImGui::DragFloat3(("Position" + id + "_position").c_str(), &planet->transform->local_position.x);
@@ -22,13 +37,15 @@ namespace GUI {
 
 
 				// Body Settings
-				ImGui::Separator();
+				Spacing();
+
 				ImGui::Text("Body");
 				ImGui::DragFloat(("Radius" + id + "_radius").c_str(), &planet->radius);
 
 
 				// Debug Settings
-				ImGui::Separator();
+				Spacing();
+
 				ImGui::Text("Debug");
 				ImGui::Checkbox(("Debug Path" + id + "_path").c_str(), &planet->physicsBody.debug_path);
 				
@@ -39,7 +56,8 @@ namespace GUI {
 				
 
 				// Atmosphere Settings
-				ImGui::Separator();
+				Spacing();
+
 				ImGui::Checkbox(("HasAtmosphere" + id + "_has_atmosphere").c_str(), & planet->hasAtmosphere);
 				if (planet->hasAtmosphere) {
 
@@ -57,9 +75,8 @@ namespace GUI {
 					if (lambda || strength || coeff) {
 						planet->atmosphere_config.UpdateWavelengthScatter();
 					}
-
-					ImGui::Separator();
 				}
+				Spacing();
 
 				// Ocean Settings
 				ImGui::Checkbox(("HasOcean" + id + "_has_ocean").c_str(), & planet->hasOcean);
@@ -73,9 +90,9 @@ namespace GUI {
 					ImGui::DragInt(("Normal Factor" + id + "_normal_factor").c_str(), &planet->ocean_config.normalFactor);
 					ImGui::DragFloat(("Normal Strength" + id + "_normal_strength").c_str(), &planet->ocean_config.normalStrength);
 					ImGui::DragFloat(("Triplanar Blend" + id + "_triplanar_blend").c_str(), &planet->ocean_config.triplanarBlend);
-					
-					ImGui::Separator();
 				}
+
+				Spacing();
 			}
 		}
 	}

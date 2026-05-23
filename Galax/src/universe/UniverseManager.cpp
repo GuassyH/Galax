@@ -139,7 +139,7 @@ namespace Universe {
 		glDepthMask(GL_FALSE);
 		glDepthFunc(GL_NEVER); // always
 		for (auto& planet : planets)
-			if (planet->hasAtmosphere) atmosphereRenderer->Render(camera, sun, planet->transform.get(), planet->atmosphere_config, baseTexture, baseDepth);
+			if (planet->hasAtmosphere) atmosphereRenderer->Render(camera, sun, planet.get(), planet->atmosphere_config, baseTexture, baseDepth);
 
 		// DRAW STARS
 		glBindFramebuffer(GL_FRAMEBUFFER, starFBO);

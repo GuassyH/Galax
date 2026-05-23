@@ -125,14 +125,16 @@ vec3 calculateLight(float atmosphereRadius, vec3 rayOrigin, vec3 rayDir, float d
 		vec3 transmittance = exp(-(sunRayOpticalDepth + viewRayOpticalDepth) * wavelengthScatter);
 		float localDensity = densityAtPoint(atmosphereRadius, inScatterPoint);
 
+		// inScatteredLight += localDensity * transmittance;
 		inScatteredLight += localDensity * transmittance * wavelengthScatter * stepSize;
 		inScatterPoint += rayDir * stepSize;
 	}
 
+	// inScatteredLight *= wavelengthScatter * intensity * stepSize / planetRadius;
 	inScatteredLight *= intensity;
 	float originalColTransmittance = exp(-viewRayOpticalDepth);
 
-	// return originalCol * originalColTransmittance + inScatteredLight;
+	// return viewRayOpticalDepth == 0 ? inScatteredLight : (originalCol * originalColTransmittance) + inScatteredLight;
 	return inScatteredLight;
 }
 

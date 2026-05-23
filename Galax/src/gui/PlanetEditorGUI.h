@@ -1,10 +1,11 @@
 #pragma once
 
+#include "Player.h"
 
 namespace GUI {
 
 	class PlanetEditor {
 	public:
-		static void DrawPlanetEditor();
+		static void DrawPlanetEditor(Player& player);
 	};
 };

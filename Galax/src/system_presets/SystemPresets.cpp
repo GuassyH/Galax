@@ -37,7 +37,6 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem() {
 	planet_char->transform->local_position = glm::vec3(5555000.0f, 0.0f, 0.0f);
 	planet_char->transform->UpdateMatrix();
 
-	planet_char->atmosphere_config.planetRadius = planet_char->radius;
 	planet_char->atmosphere_config.densityFalloff = 6.5f;
 	planet_char->atmosphere_config.atmosphereHeight = 600.0f;
 	planet_char->atmosphere_config.scatteringCoefficient = 200.0f;

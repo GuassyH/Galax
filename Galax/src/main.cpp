@@ -88,7 +88,7 @@ int main() {
 
 		// UI 
 		gui.NewFrame(window);
-		gui.Render(window);
+		gui.Render(window, player);
 		gui.EndFrame();
 
 		// End frame

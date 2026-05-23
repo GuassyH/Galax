@@ -15,7 +15,6 @@ namespace Universe {
 
 	// allign to nearest 16 bytes
 	struct AtmosphereConfig {
-		float planetRadius = 1.0f; // Default 1.0
 		float atmosphereHeight = 50.0f; // Default 50.0
 		float intensity = 1.0f; // Default 1.0
 		float densityFalloff = 5.0f; // Default 5.0
@@ -44,7 +43,7 @@ namespace Universe {
 		int numInScatteringPoints = 8;
 		int numOpticalDepthPoints = 8;
 
-		void Render(Camera& camera, Universe::Planet* sun, Transform* planet, AtmosphereConfig& atmos_config, GLuint screenTex, GLuint depthTex);
+		void Render(Camera& camera, Universe::Planet* sun, Universe::Planet* planet, AtmosphereConfig& atmos_config, GLuint screenTex, GLuint depthTex);
 
 	private:
 		Mesh quad;
