@@ -2,8 +2,8 @@
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 instancePos;
-layout (location = 2) in float instanceSize;
-layout (location = 3) in vec2 aTexCoords;
+layout (location = 2) in vec2 aTexCoords;
+layout (location = 3) in float instanceSize;
 
 uniform mat4 view;
 uniform mat4 proj;

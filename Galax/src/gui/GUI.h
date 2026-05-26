@@ -6,6 +6,7 @@
 
 #include <glfw/glfw3.h>
 #include "Player.h"
+#include "rendering/Renderer.h"
 
 namespace GUI {
 
@@ -16,7 +17,7 @@ namespace GUI {
 
 		void Init(GLFWwindow* window);
 		void NewFrame(GLFWwindow* window);
-		void Render(GLFWwindow* window, Player& player);
+		void Render(Renderer& renderer, GLFWwindow* window, Player& player);
 		void EndFrame();
 	};
 };

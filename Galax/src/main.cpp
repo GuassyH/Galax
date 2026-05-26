@@ -91,7 +91,7 @@ int main() {
 
 		// UI 
 		gui.NewFrame(window);
-		gui.Render(window, player);
+		gui.Render(renderer, window, player);
 		gui.EndFrame();
 
 		// End frame
@@ -107,6 +107,8 @@ int main() {
 		}
 		if (Galax::Input::IsKeyJustPressed(GLFW_KEY_ESCAPE)) 
 			glfwSetWindowShouldClose(window, true);
+
+
 
 		Galax::InputManager::Get().Clear(); // Reset inputs
 

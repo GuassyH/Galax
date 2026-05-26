@@ -35,7 +35,7 @@ public:
 	};
 
 	enum PlanetBuffer {
-		Vertex, Crater, Noise
+		VertexBuffer, CraterBuffer, NoiseBuffer
 	};
 
 	size_t Align(size_t value, size_t alignment){
@@ -53,6 +53,6 @@ public:
 };
 
 // 128, 8, 4 megabyte of memory per buffer
-#define MAX_VERTICES floor(((128 * 1E7) / 64) + 1)
+#define MAX_VERTICES floor(((128 * 1E7) / 48) + 1)
 #define MAX_CRATERS floor(((8 * 1E6) / 32) + 1)
 #define MAX_NOISE_LAYERS floor(((4 * 1E6) / 48) + 1)

@@ -32,13 +32,13 @@ void TerrainGenerator::ComputeBuffers(Renderer& renderer, float radius) {
 	if (!craterSlice.inPool) {
 		craterSlice.stride = craters.size() * sizeof(Crater);
 
-		renderer.AddToPlanetBuffer(Renderer::PlanetBuffer::Crater, craterSlice, craters.data());
+		renderer.AddToPlanetBuffer(Renderer::PlanetBuffer::CraterBuffer, craterSlice, craters.data());
 	}
 
 	if (!noiseSlice.inPool) {
 		noiseSlice.stride = noiseLayers.size() * sizeof(NoiseLayer);
 
-		renderer.AddToPlanetBuffer(Renderer::PlanetBuffer::Noise, noiseSlice, noiseLayers.data());
+		renderer.AddToPlanetBuffer(Renderer::PlanetBuffer::NoiseBuffer, noiseSlice, noiseLayers.data());
 	}
 }
 
@@ -50,7 +50,7 @@ void TerrainGenerator::ApplyTerrain(Renderer& renderer, CubeSphere::Chunk* chunk
 	if (!chunk->vertexSlice.inPool) {
 		chunk->vertexSlice.stride = sizeof(Vertex) * chunk->mesh.vertices.size();
 
-		renderer.AddToPlanetBuffer(Renderer::PlanetBuffer::Vertex, chunk->vertexSlice, chunk->mesh.vertices.data());
+		renderer.AddToPlanetBuffer(Renderer::PlanetBuffer::VertexBuffer, chunk->vertexSlice, chunk->mesh.vertices.data());
 	}
 
 	if (!chunk->vertexSlice.inPool || !craterSlice.inPool || !noiseSlice.inPool) {

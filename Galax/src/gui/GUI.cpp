@@ -57,7 +57,7 @@ namespace GUI {
 	}
 
 
-	void GUI::Render(GLFWwindow* window, Player& player) {
+	void GUI::Render(Renderer& renderer, GLFWwindow* window, Player& player) {
 		if (ImGui::Begin("tinker box")) {
 			Header("Simulation");
 
@@ -70,6 +70,57 @@ namespace GUI {
 			PlanetEditor::DrawPlanetEditor(player);
 		}
 		ImGui::End();
+
+		if (ImGui::Begin("Resources")) {
+			Header("Vertex SSBO");
+
+			float used_vtx = (MAX_VERTICES * sizeof(Vertex));
+			for (int i = 0; i < renderer.freeVertexSlices.size(); i++) {
+				used_vtx -= renderer.freeVertexSlices[i].stride;
+			}
+
+			float vtx_prc = used_vtx / (MAX_VERTICES * sizeof(Vertex));
+			vtx_prc *= 100;
+			vtx_prc = floor(vtx_prc * 100) / 100.0f;
+
+			std::ostringstream vtx_ssbo_info; vtx_ssbo_info << "Vertex SSBO: " << vtx_prc << "%%";
+			ImGui::Text(vtx_ssbo_info.str().c_str());
+
+
+
+			Header("Crater SSBO");
+
+			float used_crtr = MAX_CRATERS * sizeof(TerrainGenerator::Crater);
+			for (int i = 0; i < renderer.freeCraterSlices.size(); i++) {
+				used_crtr -= renderer.freeCraterSlices[i].stride;
+			}
+
+			float crtr_prc = used_crtr / (MAX_CRATERS * sizeof(TerrainGenerator::Crater));
+			crtr_prc *= 100;
+			crtr_prc = floor(crtr_prc * 100) / 100.0f;
+
+			std::ostringstream crtr_ssbo_info; crtr_ssbo_info << "Crater SSBO: " << crtr_prc << "%%";
+			ImGui::Text(crtr_ssbo_info.str().c_str());
+
+
+
+
+			Header("NoiseLayer SSBO");
+
+			float used_nslyr = MAX_NOISE_LAYERS * sizeof(NoiseLayer);
+			for (int i = 0; i < renderer.freeNoiseSlices.size(); i++) {
+				used_nslyr -= renderer.freeNoiseSlices[i].stride;
+			}
+
+			float nslyr_prc = used_nslyr / (MAX_NOISE_LAYERS * sizeof(NoiseLayer));
+			nslyr_prc *= 100;
+			nslyr_prc = floor(nslyr_prc * 100) / 100.0f;
+
+			std::ostringstream nslyr_ssbo_info; nslyr_ssbo_info << "NoiseLayer SSBO: " << nslyr_prc << "%%";
+			ImGui::Text(nslyr_ssbo_info.str().c_str());
+
+		}
+		ImGui::End();
 	}
 
 	void GUI::NewFrame(GLFWwindow* window) {
@@ -79,9 +130,6 @@ namespace GUI {
 
 		int mode = 0;
 		glfwGetInputMode(window, mode);
-
-
-
 	}
 
 	void GUI::EndFrame() {

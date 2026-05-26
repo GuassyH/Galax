@@ -48,10 +48,10 @@ namespace Universe {
 		quad.vao.Bind();
 		instanceVBO.Bind();
 		quad.vao.LinkAttrib(1, 3, GL_FLOAT, sizeof(StarInstance), 0);
-		quad.vao.LinkAttrib(2, 1, GL_FLOAT, sizeof(StarInstance), offsetof(StarInstance, size));
+		quad.vao.LinkAttrib(3, 1, GL_FLOAT, sizeof(StarInstance), offsetof(StarInstance, size));
 
 		glVertexAttribDivisor(1, 1);
-		glVertexAttribDivisor(2, 1);
+		glVertexAttribDivisor(3, 1);
 	
 		quad.vao.Unbind();
 		instanceVBO.Unbind();

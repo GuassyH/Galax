@@ -16,7 +16,6 @@ struct Vertex {
 	float pad1; // match CPU padding
 	vec3 normal;
 	float pad2; // match CPU padding
-	vec4 color;
 	vec2 texCoords;
 	float pad[2];
 };
@@ -280,7 +279,6 @@ void main(){
 
 	vert.position = pos;
 	vert.normal = normal;
-	vert.color = color;
 
 	// assign it back
 	vertices[vertID] = vert;

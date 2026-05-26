@@ -30,7 +30,7 @@ namespace Universe {
 		OceanRenderer();
 		~OceanRenderer();
 
-		void Render(Camera& camera, Universe::Planet* sun, Transform* planet, OceanConfig& ocean_config, GLuint colorTex, GLuint depthTex);
+		void Render(Camera& camera, Universe::Planet* sun, Universe::Planet* planet, OceanConfig& ocean_config, GLuint colorTex, GLuint depthTex);
 
 	private:
 		Mesh quad;

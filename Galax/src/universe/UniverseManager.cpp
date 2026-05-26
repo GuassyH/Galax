@@ -57,6 +57,7 @@ namespace Universe {
 		player.camera.UpdateMatrix();
 
 		renderer.starSkybox->Update(player.transform.get());
+		
 	}
 
 	
@@ -92,15 +93,15 @@ namespace Universe {
 			planet->Render(renderer, camera, sun);
 
 		// DRAW OCEAMS
-		// for (auto& planet : planets)
-			// if (planet->hasOcean) renderer.oceanRenderer->Render(camera, sun, planet->transform.get(), planet->ocean_config, baseTexture, baseDepth);
+		for (auto& planet : planets)
+			if (planet->hasOcean) renderer.oceanRenderer->Render(camera, sun, planet.get(), planet->ocean_config, baseTexture, baseDepth);
 
 		// DRAW ATMOSPHERES
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE);
 		glDepthFunc(GL_NEVER); // always
-		// for (auto& planet : planets)
-			// if (planet->hasAtmosphere) renderer.atmosphereRenderer->Render(camera, sun, planet.get(), planet->atmosphere_config, baseTexture, baseDepth);
+		for (auto& planet : planets)
+			if (planet->hasAtmosphere) renderer.atmosphereRenderer->Render(camera, sun, planet.get(), planet->atmosphere_config, baseTexture, baseDepth);
 
 		// DRAW STARS
 		glBindFramebuffer(GL_FRAMEBUFFER, starFBO);

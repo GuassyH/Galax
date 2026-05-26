@@ -23,7 +23,7 @@ namespace Universe {
 		quad.Delete();
 	}
 
-	void OceanRenderer::Render(Camera& camera, Universe::Planet* sun, Transform* planet, OceanConfig& ocean_config, GLuint colorTex, GLuint depthTex) {
+	void OceanRenderer::Render(Camera& camera, Universe::Planet* sun, Universe::Planet* planet, OceanConfig& ocean_config, GLuint colorTex, GLuint depthTex) {
 		oceanShader.Use();
 
 		glm::vec2 window_size = Galax::InputManager::Get().windowSize;
@@ -51,9 +51,9 @@ namespace Universe {
 		oceanShader.SetFloat("densityFalloff", ocean_config.densityFalloff);
 		oceanShader.SetVec4("oceanColor", ocean_config.oceanColor);
 		oceanShader.SetVec4("fresnelColor", ocean_config.fresnelColor);
-		oceanShader.SetVec3("centre", planet->world_position);
+		oceanShader.SetVec3("centre", planet->transform->world_position);
 
-		oceanShader.SetMat4("modelMat", planet->GetMatrix());
+		oceanShader.SetMat4("modelMat", planet->transform->GetMatrix());
 		oceanShader.SetMat4("invProjMat", glm::inverse(camera.GetProj()));
 
 		oceanShader.SetVec3("camPos", camera.transform->world_position);

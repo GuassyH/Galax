@@ -25,9 +25,9 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 
 	NoiseLayer baseLayer;
 	baseLayer.numLayers = 30;
-	baseLayer.intensity = 1.0f;
+	baseLayer.intensity = 80.0f;
 	baseLayer.heightShift = -10.0f;
-	baseLayer.frequency = 0.01f;
+	baseLayer.frequency = 0.00001f;
 	planet_char->terrainGenerator.noiseLayers.push_back(baseLayer);
 
 
@@ -88,7 +88,7 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	sun->name = "Luxia";
 	sun->shader = unlit;
 	sun->radius = 20000;
-	sun->resolution = 50;
+	sun->resolution = 10;
 	sun->LODradii = { };
 
 	// sun->terrainGenerator.numCraters = 0;
@@ -107,6 +107,7 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 
 	// NEED TO FIX, if planet_char is first, the subdivisions break somehow
 	Universe::UniverseManager::Get().PushPlanet(sun);
+
 	Universe::UniverseManager::Get().PushPlanet(moon);
 	Universe::UniverseManager::Get().PushPlanet(planet_char);
 

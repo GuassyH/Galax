@@ -24,7 +24,6 @@ Renderer::Renderer() {
 	glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_VERTICES * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
 	FreeSlice wholeVertexSlice = { 0, MAX_VERTICES * sizeof(Vertex) };
 	freeVertexSlices.push_back(wholeVertexSlice);
-	GX_TRACE("{}", wholeVertexSlice.stride);
 
 	// Allocate crater buffer size
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, craterBuffer);
@@ -56,8 +55,8 @@ Renderer::Renderer() {
 
 bool Renderer::GetBufferFreeSlice(PlanetBuffer buffer, GPUslice& slice, FreeSlice& outFree, bool removeOnFind) {
 
-	GLuint s_buffer = (buffer == PlanetBuffer::Vertex ? vertexBuffer : (buffer == PlanetBuffer::Crater ? craterBuffer : noiseBuffer));
-	std::vector<FreeSlice>& freeList = (buffer == PlanetBuffer::Vertex ? freeVertexSlices : (buffer == PlanetBuffer::Crater ? freeCraterSlices : freeNoiseSlices));
+	GLuint s_buffer = (buffer == PlanetBuffer::VertexBuffer ? vertexBuffer : (buffer == PlanetBuffer::CraterBuffer ? craterBuffer : noiseBuffer));
+	std::vector<FreeSlice>& freeList = (buffer == PlanetBuffer::VertexBuffer ? freeVertexSlices : (buffer == PlanetBuffer::CraterBuffer ? freeCraterSlices : freeNoiseSlices));
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, s_buffer);
 
@@ -129,7 +128,8 @@ bool Renderer::GetBufferFreeSlice(PlanetBuffer buffer, GPUslice& slice, FreeSlic
 void Renderer::FreePlanetBufferSlice(PlanetBuffer buffer, GPUslice& slice) {
 	if (!slice.inPool) return;
 
-	GLuint s_buffer = (buffer == PlanetBuffer::Vertex ? vertexBuffer : (buffer == PlanetBuffer::Crater ? craterBuffer : noiseBuffer));
+	GLuint s_buffer = (buffer == PlanetBuffer::VertexBuffer ? vertexBuffer : (buffer == PlanetBuffer::CraterBuffer ? craterBuffer : noiseBuffer));
+	std::vector<FreeSlice>& freeList = (buffer == PlanetBuffer::VertexBuffer ? freeVertexSlices : (buffer == PlanetBuffer::CraterBuffer ? freeCraterSlices : freeNoiseSlices));
 
 	// Set null values
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, s_buffer);
@@ -137,11 +137,55 @@ void Renderer::FreePlanetBufferSlice(PlanetBuffer buffer, GPUslice& slice) {
 
 	// if there is a free slice before or after the slice in the buffer, 
 	// then make sure to make the new free slice the size of both this slice and the free adjacent slice
+	GLsizeiptr leftBounds = slice.offset;
+	GLsizeiptr rightBounds = slice.offset + slice.stride;
+
+	int leftSliceI = -1;
+	int rightSliceI = -1;
+
+	// For every free space check if it is directly adjacent to the slice
+	for (int i = 0; i < freeList.size(); i++) {
+		if (freeList[i].offset == rightBounds) {
+			rightSliceI = i;
+		}
+		if (freeList[i].offset + slice.stride == slice.offset) {
+			leftSliceI = i;
+		}
+
+		// Both are set
+		if (leftSliceI != -1 && rightSliceI != -1) {
+			break;
+		}
+	}
+
+	// Set the left and right bounds
+	std::vector<FreeSlice> newList;
+	for (int i = 0; i < freeList.size(); i++) {
+		if (i == leftSliceI) {
+			leftBounds = freeList[i].offset + freeList[i].stride;
+			continue;
+		}
+		else if (i == rightSliceI) {
+			rightBounds = freeList[i].offset;
+			continue;
+		}
+		
+		newList.push_back(freeList[i]);
+	}
+
+
+	// Create the new slice and add it to the list
+	FreeSlice newSlice;
+	newSlice.offset = leftBounds;
+	newSlice.stride = rightBounds - leftBounds; // difference
+	newList.push_back(newSlice);
+
+	freeList.swap(newList);
 }
 
 
 bool Renderer::AddToPlanetBuffer(PlanetBuffer buffer, GPUslice& slice, const void* data) {
-	GLuint s_buffer = (buffer == PlanetBuffer::Vertex ? vertexBuffer : (buffer == PlanetBuffer::Crater ? craterBuffer : noiseBuffer));
+	GLuint s_buffer = (buffer == PlanetBuffer::VertexBuffer ? vertexBuffer : (buffer == PlanetBuffer::CraterBuffer ? craterBuffer : noiseBuffer));
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, s_buffer);
 
