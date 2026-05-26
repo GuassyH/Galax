@@ -15,11 +15,7 @@ void ConstructChunk(CubeSphere::Chunk* inChunk, Transform* base_transform) {
 			float v = glm::mix(inChunk->minUV.y, inChunk->maxUV.y,
 				(float)y / inChunk->resolution);
 
-			glm::vec3 position = glm::vec3(
-				u - 0.5f,
-				v - 0.5f,
-				0.5f
-			);
+			glm::vec3 position = glm::vec3(u - 0.5f, v - 0.5f, 0.5f);
 
 			position = inChunk->rotation * position;
 
@@ -160,8 +156,6 @@ void CubeSphere::RenderChunk(Chunk* chunk, Transform* sun, Camera& camera, Shade
 		shader->SetVec3("sunDir", glm::normalize(chunk->mesh.transform->world_position - sun->world_position));
 		shader->SetVec3("centre", chunk->mesh.transform->world_position);
 		shader->SetFloat("radius", chunk->radius);
-		
-
 
 		chunk->mesh.Render();
 	}

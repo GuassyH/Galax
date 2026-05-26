@@ -12,7 +12,6 @@ public:
 	float speed = 8.0f;
 	float sensitivity = 0.002f;
 
-
 	void Move();
 	void Look();
 

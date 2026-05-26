@@ -3,11 +3,10 @@
 #include <cmath>
 #include "core/Maths.h"
 
+#include "universe/UniverseManager.h"
+
 TerrainGenerator::TerrainGenerator() {
 	terrain_compute.Compile("assets/shaders/universe/terrain.comp");
-
-	glGenBuffers(1, &vertBuff);
-	glGenBuffers(1, &craterBuff);
 }
 
 
@@ -17,7 +16,7 @@ static float generate_size(float falloff, float exaggeration) {
 	return 1 + y;
 }
 
-void TerrainGenerator::ComputeBuffers(float radius) {
+void TerrainGenerator::ComputeBuffers(Renderer& renderer, float radius) {
 	craters.clear();
 
 	for (int i = 0; i < numCraters; i++) {
@@ -29,14 +28,46 @@ void TerrainGenerator::ComputeBuffers(float radius) {
 
 		craters.push_back(crater);
 	}
+
+	if (!craterSlice.inPool) {
+		craterSlice.stride = craters.size() * sizeof(Crater);
+
+		renderer.AddToPlanetBuffer(Renderer::PlanetBuffer::Crater, craterSlice, craters.data());
+	}
+
+	if (!noiseSlice.inPool) {
+		noiseSlice.stride = noiseLayers.size() * sizeof(NoiseLayer);
+
+		renderer.AddToPlanetBuffer(Renderer::PlanetBuffer::Noise, noiseSlice, noiseLayers.data());
+	}
 }
 
 // different thread?
-void TerrainGenerator::ApplyTerrain(CubeSphere::Chunk* chunk) {
+void TerrainGenerator::ApplyTerrain(Renderer& renderer, CubeSphere::Chunk* chunk) {
+	Universe::UniverseManager& universeManager = Universe::UniverseManager::Get();
 
-	// POSITIONS
-	GLsizeiptr vertBuffSize = sizeof(Vertex) * chunk->mesh.vertices.size();
-	GLsizeiptr craterBuffSize = sizeof(Crater) * numCraters;
+	// Add chunk vertex data to the big buffer
+	if (!chunk->vertexSlice.inPool) {
+		chunk->vertexSlice.stride = sizeof(Vertex) * chunk->mesh.vertices.size();
+
+		renderer.AddToPlanetBuffer(Renderer::PlanetBuffer::Vertex, chunk->vertexSlice, chunk->mesh.vertices.data());
+	}
+
+	if (!chunk->vertexSlice.inPool || !craterSlice.inPool || !noiseSlice.inPool) {
+		GX_TRACE("TERRAIN FAIL");
+		if (!chunk->vertexSlice.inPool) {
+			GX_TRACE("{}", "Vertex");
+		}
+		if (!craterSlice.inPool) {
+			GX_TRACE("{}", "Crater");
+		}
+		if (!noiseSlice.inPool) {
+			GX_TRACE("{}", "Noise");
+		}
+
+		return;
+	}
+
 
     terrain_compute.Use();
 
@@ -55,46 +86,36 @@ void TerrainGenerator::ApplyTerrain(CubeSphere::Chunk* chunk) {
 	terrain_compute.SetFloat("rimWidth", rimWidth);
 	terrain_compute.SetFloat("smoothingK", smoothingK);
 
-	terrain_compute.SetVec3("noiseCentre", noiseCentre);
-	terrain_compute.SetInt("numLayers", numLayers);
-	terrain_compute.SetFloat("noiseStrength", noiseStrength);
-	terrain_compute.SetFloat("noiseBaseFrequency", noiseBaseFrequency);
-	terrain_compute.SetFloat("noiseHeightShift", noiseHeightShift);
-	terrain_compute.SetFloat("noiseScale", noiseScale);
+	terrain_compute.SetInt("numNoiseLayers", noiseLayers.size());
 
-	// Buffers std430
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, vertBuff);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, vertBuffSize, chunk->mesh.vertices.data(), GL_DYNAMIC_COPY);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, vertBuff); // THIS IS ESSENTIAL
-
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, craterBuff);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, craterBuffSize, craters.data(), GL_DYNAMIC_DRAW);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, craterBuff); // THIS IS ESSENTIAL
-
+	// Bind only the parts needed from each buffer (since they hold all data from all planets)
+	glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 0, renderer.vertexBuffer, chunk->vertexSlice.offset, chunk->vertexSlice.stride); // THIS IS ESSENTIAL
+	glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 1, renderer.craterBuffer, craterSlice.offset, craterSlice.stride); // THIS IS ESSENTIAL
+	glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 2, renderer.noiseBuffer, noiseSlice.offset, noiseSlice.stride); // THIS IS ESSENTIAL
+	
+	// Run compute shader
 	unsigned int workgroupSize = 256; // or 128, 512
 	unsigned int numGroups = (chunk->mesh.vertices.size() + workgroupSize - 1) / workgroupSize;
 	terrain_compute.Run(numGroups, 1, 1);
 
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, vertBuff);
+	// Allow finish
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
-	// Ensure compute shader writes are visible to buffer mapping
-	glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT | GL_SHADER_STORAGE_BARRIER_BIT);
+	// Bind read and write buffer
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, renderer.vertexBuffer);
+	glBindBuffer(GL_COPY_WRITE_BUFFER, renderer.vertexReadbackBuffer);
 
-	// Read data back
-	Vertex* cpuVerts = chunk->mesh.vertices.data();
-	char* gpuData = (char*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-	if (!gpuData) {
-		GX_ERROR("Terrain ApplyTerrain: glMapBuffer returned null");
-	} else {
-		size_t stride = sizeof(Vertex);
-	
-		for (size_t i = 0; i < chunk->mesh.vertices.size(); ++i) {
-			std::memcpy(&cpuVerts[i], gpuData + (i * stride), stride);
-		}
-	}
+	// Copy read buffer (updated verts) to the readback buffer
+	glCopyBufferSubData(GL_SHADER_STORAGE_BUFFER, GL_COPY_WRITE_BUFFER, chunk->vertexSlice.offset, chunk->vertexSlice.offset, chunk->vertexSlice.stride);
 
+	// Bind the write buffer and map the buffer range to data
+	glBindBuffer(GL_COPY_WRITE_BUFFER, renderer.vertexReadbackBuffer);
+	void* data = glMapBufferRange(GL_COPY_WRITE_BUFFER, chunk->vertexSlice.offset, chunk->vertexSlice.stride, GL_MAP_READ_BIT);
 
-	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+	// copy the data 
+	memcpy(chunk->mesh.vertices.data(), data, chunk->vertexSlice.stride);
+	glUnmapBuffer(GL_COPY_WRITE_BUFFER);
+
 
 	chunk->mesh.Calculate();
 }
@@ -104,7 +125,4 @@ TerrainGenerator::~TerrainGenerator() {
 	terrain_compute.Delete();
 
 	craters.clear();
-
-	glDeleteBuffers(1, &vertBuff);
-	glDeleteBuffers(1, &craterBuff);
 }

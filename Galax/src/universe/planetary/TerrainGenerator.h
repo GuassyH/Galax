@@ -3,6 +3,8 @@
 #include "shaders/ComputeShader.h"
 #include "CubeSphere.h"
 
+#include "rendering/Noise.h"
+#include "rendering/Renderer.h"
 
 class TerrainGenerator {
 public:
@@ -15,9 +17,12 @@ public:
 
 	TerrainGenerator();
 	~TerrainGenerator();
+	
+	Renderer::GPUslice craterSlice;
+	Renderer::GPUslice noiseSlice;
 
-	void ComputeBuffers(float radius);
-	void ApplyTerrain(CubeSphere::Chunk* chunk);
+	void ComputeBuffers(Renderer& renderer, float radius);
+	void ApplyTerrain(Renderer& renderer, CubeSphere::Chunk* chunk);
 
 	ComputeShader terrain_compute;
 	/// Fields
@@ -39,14 +44,6 @@ public:
 	float craterHeight = 1.0;
 
 	// Noise
-	glm::vec3 noiseCentre = glm::vec3(0.0f);
-	int numLayers = 6; // Default 6
-	float noiseStrength = 1.0f; // Default 1
-	float noiseBaseFrequency = 0.1f;  // Default 0.1
-	float noiseHeightShift = 0.0f; // Default 0
-	float noiseScale = 1.0f; // bigger value is like zooming in the noise
+	std::vector<NoiseLayer> noiseLayers;
 
-private:
-	GLuint vertBuff = 0;
-	GLuint craterBuff = 0;
 };

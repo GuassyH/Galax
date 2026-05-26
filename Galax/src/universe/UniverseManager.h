@@ -3,8 +3,9 @@
 #include "Camera.h"
 #include "planetary/Planet.h"
 #include "stars/StarSkybox.h"
-#include "atmosphere/Atmosphere.h"
 #include "Player.h"
+
+#include "rendering/Renderer.h"
 
 namespace Universe {
 	class UniverseManager {
@@ -24,10 +25,6 @@ namespace Universe {
 		bool isSimulating = false;
 		float time = 0.0f;
 
-		std::unique_ptr<AtmosphereRenderer> atmosphereRenderer;
-		std::unique_ptr<OceanRenderer> oceanRenderer;
-		std::unique_ptr<StarSkybox> starSkybox;
-
 		std::shared_ptr<Transform> transform;
 
 		void Init(Camera& camera);
@@ -41,8 +38,8 @@ namespace Universe {
 		void ResolveGravity();
 		void SetIdealOrbitVelocity(Planet* planet, Planet* target); // Doesnt work
 		
-		void Update(Player& player);
-		void Render(Camera& camera, Planet* sun);
+		void Update(Renderer& renderer, Player& player);
+		void Render(Renderer& renderer, Camera& camera, Planet* sun);
 
 		void Shutdown();
 		std::vector<std::shared_ptr<Planet>>& GetPlanets() { return planets; }

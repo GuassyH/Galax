@@ -2,6 +2,14 @@
 
 layout(local_size_x = 256) in;
 
+
+
+///////////////////////////////////////////////////////////////
+// Base Settings
+///////////////////////////////////////////////////////////////
+
+
+
 //  64 bytes - layout matches C++ `Vertex` (vec3 + pad, vec3 + pad, vec4, vec2, pad[2])
 struct Vertex {
 	vec3 position;
@@ -18,6 +26,19 @@ layout(std430, binding = 0) buffer Vertices {
 };
 
 
+// Variables
+uniform int resolution;
+uniform float radius;
+uniform int numVerts;
+
+
+
+///////////////////////////////////////////////////////////////
+// Craters
+///////////////////////////////////////////////////////////////
+
+
+
 uniform float craterDepth;
 uniform float craterSteepness;
 uniform float craterWidth;
@@ -27,6 +48,7 @@ uniform float craterHeight;
 uniform float rimSteepness;
 uniform float rimWidth;
 uniform float smoothingK;
+uniform int numCraters;
 
 //  32 bytes
 struct Crater {
@@ -41,31 +63,13 @@ layout(std430, binding = 1) buffer Craters{
 };
 
 
-
-// Variables
-uniform int resolution;
-uniform float radius;
-uniform int numVerts;
-
-// craters
-uniform int numCraters;
-
-// noise
-uniform vec3 noiseCentre;
-uniform int numLayers;
-uniform float noiseStrength;
-uniform float noiseBaseFrequency;
-uniform float noiseHeightShift;
-uniform float noiseScale;
-
-// ===== CRATERS ===== 
-
 float smin( float a, float b, float k )
 {
     k *= 1.0;
     float r = exp2(-a/k) + exp2(-b/k);
     return -k*log2(r);
 }
+
 
 float CraterHeight(float x, Crater crater) {
 	float result = 0.0;
@@ -97,8 +101,29 @@ float CraterInfluence(Vertex vert){
 }
 
 
-// ===== RIDGES ===== 
 
+///////////////////////////////////////////////////////////////
+// Noise
+///////////////////////////////////////////////////////////////
+
+uniform int numNoiseLayers;
+
+struct NoiseLayer {
+	vec3 centre;
+	float pad0;
+	int type; // 0 = perlin, 1 = voronoi
+	float frequency;
+	float intensity;
+	int numLayers;
+	float frequencyFactor;
+	float intensityFactor;
+	float heightShift;
+	float pad1;
+};
+
+layout(std430, binding = 2) buffer NoiseLayers {
+    NoiseLayer noiseLayers[];
+};
 
 
 // ===== PERLIN ===== 
@@ -127,7 +152,7 @@ float noise(vec2 x) {
 	return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
 }
 
-float noise(vec3 x) {
+float PerlinNoise(vec3 x) {
 	const vec3 step = vec3(110, 241, 171);
 
 	vec3 i = floor(x);
@@ -144,35 +169,50 @@ float noise(vec3 x) {
 }
 
 float NoiseInfluence(Vertex vert) {
-    // Precompute base position for noise
-    vec3 pos = vec3(vert.position) + (noiseCentre * radius);
-    pos *= noiseScale;
+    float total_noise = 0.0;
+	
+	for (int i = 0; i < numNoiseLayers; i++){
+		NoiseLayer currentLayer = noiseLayers[i];
 
-    float ni = 0.0;           // Accumulated noise
-    float noiseFreq = noiseBaseFrequency;
-    float strength = noiseStrength;
-    float totalStrength = 0.0; // For normalization
+		// Precompute base position for noise
+		vec3 pos = vec3(vert.position) + (currentLayer.centre * radius);
+		pos *= currentLayer.intensity;
 
-    for (int i = 0; i < numLayers; i++) {
-        // Sample noise at current frequency
-        float n = noise(pos * noiseFreq);
+		float current_noise = 0.0;           // Accumulated noise
 
-        // Accumulate weighted noise
-        ni += n * strength;
+		float freq = currentLayer.frequency;
+		float strength = currentLayer.intensity;
+		float totalStrength = 0.0; // For normalization
 
-        // Track total amplitude
-        totalStrength += strength;
+		for (int i = 0; i < currentLayer.numLayers; i++) {
+			// Sample noise at current frequency
+			float n = 0;
+			if(currentLayer.type == 0){
+				n = PerlinNoise(pos * freq);
+			}else if (currentLayer.type == 1){
+				// do voronoi calc
+			}
 
-        // Prepare for next layer
-        noiseFreq *= 1.25;  // Increase frequency (smaller features)
-        strength *= 0.75;   // Decrease amplitude (finer details contribute less)
-    }
+			// Accumulate weighted noise
+			current_noise += n * strength;
 
-    // Normalize and apply height shift
-    ni = ni - (totalStrength / 2.0) + noiseHeightShift;
+			// Track total amplitude
+			totalStrength += strength;
+
+			// Prepare for next layer
+			freq *= currentLayer.frequencyFactor;  // Increase frequency (smaller features)
+			strength *= currentLayer.intensityFactor;   // Decrease amplitude (finer details contribute less)
+		}
+
+		// Normalize and apply height shift
+		current_noise = current_noise - (totalStrength / 2.0) + currentLayer.heightShift;
+
+		total_noise += current_noise;
+	}
+
 
     // Ensure non-negative output
-    return ni;
+    return total_noise;
 }
 
 
@@ -180,7 +220,13 @@ float NoiseInfluence(Vertex vert) {
 
 
 
-// ===== MAIN ===== 
+
+///////////////////////////////////////////////////////////////
+// Main
+///////////////////////////////////////////////////////////////
+
+
+
 
 vec3 GetPosition(vec3 dir){
 	float d = 0.0;
@@ -211,11 +257,6 @@ vec3 CalculateNormal(vec3 dir, vec3 pos){
 
 	return normal;
 };
-
-
-
-
-
 
 
 void main(){

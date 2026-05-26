@@ -28,3 +28,12 @@ Im going to cleanup the entire project, but after that i have a few ideas.
 -Secondly i want to make it so if you are more than say 100000m from a planet (it will be tiny) it becomes a post process dot, like a star. 
 	since otherwise its hard to see
 -Thirdly i want to add a galaxy gas skybox. I have the procedural stars, but it would be cool to have like a galaxy 
+
+
+
+PROBLEM
+
+Shared SSBOs is not working, race conditions are causing crashes. I don't know how to fix this yet
+
+Possible solution: The renderer has three buffers with ALL the data, all vertices, all craters, all noise layers etc.
+Then the chunks and terrain generators only hold their offset and size in the buffers. 

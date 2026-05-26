@@ -2,7 +2,7 @@
 
 #include "shaders/PlanetShader.h"
 
-std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem() {
+std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& renderer) {
 	std::shared_ptr<PlanetShader> shader = std::make_shared<PlanetShader>("assets/shaders/universe/planet.frag", "assets/shaders/universe/planet.vert");
 	// shader->texture = std::make_shared<Texture>("assets/textures/grid.jpg");
 
@@ -23,17 +23,19 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem() {
 	planet_char->terrainGenerator.smoothingK = 0.1f;
 	planet_char->terrainGenerator.craterHeight = 2.0f;
 
-	planet_char->terrainGenerator.numLayers = 30;
-	planet_char->terrainGenerator.noiseStrength = 80.0f;
-	planet_char->terrainGenerator.noiseHeightShift = -10.0f;
-	planet_char->terrainGenerator.noiseScale = 0.01f;
-	planet_char->terrainGenerator.noiseCentre = glm::vec3(0, 0, 0);
+	NoiseLayer baseLayer;
+	baseLayer.numLayers = 30;
+	baseLayer.intensity = 1.0f;
+	baseLayer.heightShift = -10.0f;
+	baseLayer.frequency = 0.01f;
+	planet_char->terrainGenerator.noiseLayers.push_back(baseLayer);
+
 
 	planet_char->physicsBody.mass = 10000000;
 	planet_char->mpr = 24.0; // x minutes for one rot
 	planet_char->rotation_axis = glm::normalize(glm::vec3(0.2f, 1.0f, 0.2f));
 
-	planet_char->Generate();
+	planet_char->Generate(renderer);
 	planet_char->transform->local_position = glm::vec3(5555000.0f, 0.0f, 0.0f);
 	planet_char->transform->UpdateMatrix();
 
@@ -57,6 +59,7 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem() {
 
 
 
+
 	// Moon
 	std::shared_ptr<Universe::Planet> moon = std::make_shared<Universe::Planet>();
 	moon->name = "Luna";
@@ -68,14 +71,14 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem() {
 	moon->terrainGenerator.numCraters = 2;
 	moon->terrainGenerator.baseSize = 3;
 
-	moon->terrainGenerator.numLayers = 5;
-	moon->terrainGenerator.noiseScale = 0.5f;
+	// moon->terrainGenerator.numLayers = 5;
+	// moon->terrainGenerator.noiseScale = 0.5f;
 
 	moon->mpr = 60;
 	moon->rotation_axis = glm::vec3(0.0, 1.0, 0.0);
 	moon->physicsBody.mass = 70409;
 
-	moon->Generate();
+	moon->Generate(renderer);
 	moon->transform->local_position = planet_char->transform->world_position + glm::vec3(0.0, -1000.0, 20223.0);
 	moon->transform->UpdateMatrix();
 
@@ -88,16 +91,16 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem() {
 	sun->resolution = 50;
 	sun->LODradii = { };
 
-	sun->terrainGenerator.numCraters = 0;
-	sun->terrainGenerator.numLayers = 2;
-	sun->terrainGenerator.noiseStrength = 10.0f;
-	sun->terrainGenerator.noiseHeightShift = 0.0f;
-	sun->terrainGenerator.noiseBaseFrequency = 0.025f;
+	// sun->terrainGenerator.numCraters = 0;
+	// sun->terrainGenerator.numLayers = 2;
+	// sun->terrainGenerator.noiseStrength = 10.0f;
+	// sun->terrainGenerator.noiseHeightShift = 0.0f;
+	// sun->terrainGenerator.noiseBaseFrequency = 0.025f;
 
 	// GIANT mass, since it should basically be stationary
 	sun->physicsBody.mass = 1000000000.0f;
 
-	sun->Generate();
+	sun->Generate(renderer);
 	sun->transform->local_position = glm::vec3(0.0, 0.0f, 0.0f);
 	sun->transform->UpdateMatrix();
 

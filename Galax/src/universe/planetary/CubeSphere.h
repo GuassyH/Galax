@@ -5,10 +5,13 @@
 
 #include "rendering/Vertex.h"
 #include "rendering/Mesh.h"
+#include "rendering/Renderer.h"
 
 class CubeSphere {
 public:
 	static struct Chunk {
+		Renderer::GPUslice vertexSlice;
+
 		glm::quat rotation = glm::identity<glm::quat>();
 		bool hasNodes = false; // Are there child nodes
 		bool isLeaf = true; // Is this the wanted level
@@ -25,6 +28,7 @@ public:
 		Mesh mesh;
 		Chunk* nodes[4] = { nullptr };
 	};
+
 	static struct Face {
 		Chunk* root_chunk = nullptr;
 		bool should_render = true;

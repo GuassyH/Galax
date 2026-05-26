@@ -34,6 +34,7 @@
 #include "gui/PlanetEditorGUI.h"
 
 #include "system_presets/SystemPresets.h"
+#include "rendering/Renderer.h"
 
 void frame_buffer_size_callback(GLFWwindow* window, int width, int height);
 
@@ -56,7 +57,9 @@ int main() {
 
 	if (!InitRenderer(window, monitor)) return -1;
 	
-	bool isFullscreen = true; SetFullscreen(window, true);
+	bool isFullscreen = false; // SetFullscreen(window, true);
+
+	Renderer renderer = Renderer();
 
 	// Create Player
 	Player player;
@@ -72,15 +75,15 @@ int main() {
 	Universe::UniverseManager::Get().Init(player.camera);
 	Universe::UniverseDebug::Get().Init();
 	
-	auto sun = SystemPresets::CreateFirstSystem();
+	auto sun = SystemPresets::CreateFirstSystem(renderer);
 
 	// Update Loop
 	while (!glfwWindowShouldClose(window)) {
 		Galax::Time::Get().update();
 		
 		// Universe
-		Universe::UniverseManager::Get().Update(player);
-		Universe::UniverseManager::Get().Render(player.camera, sun.get());
+		Universe::UniverseManager::Get().Update(renderer, player);
+		Universe::UniverseManager::Get().Render(renderer, player.camera, sun.get());
 		
 		// Debug
 		Universe::UniverseDebug::Get().Update(player);
@@ -106,12 +109,14 @@ int main() {
 			glfwSetWindowShouldClose(window, true);
 
 		Galax::InputManager::Get().Clear(); // Reset inputs
-	
+
+
 		glfwPollEvents();
 		glfwSwapBuffers(window);
 	}
 
 	Universe::UniverseManager::Get().Shutdown();
+
 
 	// End
 	glfwDestroyWindow(window);
@@ -150,6 +155,22 @@ int InitRenderer(GLFWwindow*& window, GLFWmonitor*& monitor) {
 		GX_ERROR("Failed to initialize GLAD");
 		return -1;
 	}
+
+
+	/*
+	glEnable(GL_DEBUG_OUTPUT);
+
+	glDebugMessageCallback([](
+		GLenum source,
+			GLenum type,
+			GLuint id,
+			GLenum severity,
+			GLsizei length,
+			const GLchar* message,
+			const void* userParam) {
+			std::cout << "OpenGL: " << message << std::endl; },
+			nullptr);
+	*/
 
 	// Get the monitors width and height
 	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());

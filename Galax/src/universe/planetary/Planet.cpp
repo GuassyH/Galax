@@ -6,23 +6,23 @@ namespace Universe {
 
 	/// Core
 
-	void Planet::Generate() {
+	void Planet::Generate(Renderer& renderer) {
 		// Delete just incase you are regenerating
 		Delete();
 
 		transform = std::make_shared<Transform>();
 		faces = CubeSphere::ConstructFaces(radius, resolution, transform.get());
 
-		terrainGenerator.ComputeBuffers(radius);
+		terrainGenerator.ComputeBuffers(renderer, radius);
 
 		// For each face apply the terrain through the compute shader
 		for (auto& face : faces) {
-			terrainGenerator.ApplyTerrain(face.root_chunk);
+			terrainGenerator.ApplyTerrain(renderer, face.root_chunk);
 		}
 	}
 
 
-	void Planet::Render(Camera& camera, Planet* sun) {
+	void Planet::Render(Renderer& renderer, Camera& camera, Planet* sun) {
 		for (auto& face : faces) {
 			if (!face.should_render)
 				continue;
@@ -33,12 +33,7 @@ namespace Universe {
 
 	/// Update
 
-	void Planet::Update(Camera& camera, bool isSimulating) {
-		// how many minutes per rotation (mpr)
-		// how many seconds per rotation (mpr / 60.0)
-		// spr = mpr / 60.0
-		// angles to move = (360 / seconds per rotation) * deltatime
-
+	void Planet::Update(Renderer& renderer, Camera& camera, bool isSimulating) {
 		if (isSimulating) {
 			if (mpr != 0.0f) {
 				float spr = mpr * 60.0f;
@@ -50,11 +45,11 @@ namespace Universe {
 		transform->UpdateMatrix();
 
 		if (!LODradii.empty())
-			UpdateAllLODs(camera.transform->world_position);
+			UpdateAllLODs(renderer, camera.transform->world_position);
 	}
 	
 
-	void Planet::UpdateLOD(CubeSphere::Chunk* chunk, glm::vec3& observer_pos) {
+	void Planet::UpdateLOD(Renderer& renderer, CubeSphere::Chunk* chunk, glm::vec3& observer_pos) {
 		// If there isnt a level of detail specified in LODradii just make this the leaf
 		if (chunk->level_of_detail > LODradii.size()) {
 			chunk->isLeaf = true;
@@ -64,8 +59,9 @@ namespace Universe {
 		// If there are no nodes (child chunks), subdivide and apply terrain
 		if (!chunk->hasNodes) {
 			CubeSphere::SubdivideChunk(chunk);
+
 			for (auto node : chunk->nodes) {
-				terrainGenerator.ApplyTerrain(node);
+				terrainGenerator.ApplyTerrain(renderer, node);
 			}
 		}
 
@@ -95,7 +91,7 @@ namespace Universe {
 				CubeSphere::DestroyChunkNodes(node);
 			}
 			else if (targetLOD > node->level_of_detail) {
-				UpdateLOD(node, observer_pos);
+				UpdateLOD(renderer, node, observer_pos);
 			}
 			else { // if (targetLOD < node->level_of_detail) 
 				node->isLeaf = false;
@@ -105,7 +101,7 @@ namespace Universe {
 	}
 
 	// Should this be on another thread?
-	void Planet::UpdateAllLODs(glm::vec3 observer_pos) {
+	void Planet::UpdateAllLODs(Renderer& renderer, glm::vec3 observer_pos) {
 		glm::vec3 dir_to_planet = glm::normalize(transform->world_position - observer_pos);
 		float range = LODradii[0] * radius;
 
@@ -120,7 +116,7 @@ namespace Universe {
 
 			// If you are within the maximum distance THEN check updateLOD
 			if (glm::distance2((transform->world_rotation * face.root_chunk->origo) + transform->world_position, observer_pos) < range * range) {
-				UpdateLOD(face.root_chunk, observer_pos);
+				UpdateLOD(renderer, face.root_chunk, observer_pos);
 			}
 			else {
 				face.root_chunk->isLeaf = true;

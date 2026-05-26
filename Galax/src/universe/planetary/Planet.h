@@ -12,6 +12,7 @@
 
 #include "universe/atmosphere/Atmosphere.h"
 #include "universe/ocean/Ocean.h"
+#include "rendering/Renderer.h"
 
 namespace Universe {
 	class Planet {
@@ -21,12 +22,12 @@ namespace Universe {
 		/// Core
 		Planet() = default;
 		~Planet() = default;
-		void Generate();
+		void Generate(Renderer& renderer);
 	
-		void Update(Camera& camera, bool isSimulating);
-		void UpdateLOD(CubeSphere::Chunk* chunk, glm::vec3& observer_pos);
-		void UpdateAllLODs(glm::vec3 observer_pos);
-		void Render(Camera& camera, Planet* sun);
+		void Update(Renderer& renderer, Camera& camera, bool isSimulating);
+		void UpdateLOD(Renderer& renderer, CubeSphere::Chunk* chunk, glm::vec3& observer_pos);
+		void UpdateAllLODs(Renderer& renderer, glm::vec3 observer_pos);
+		void Render(Renderer& renderer, Camera& camera, Planet* sun);
 	
 		void Delete();
 
