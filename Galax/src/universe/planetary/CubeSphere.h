@@ -41,4 +41,6 @@ public:
 	static void DestroyChunk(Chunk* inChunk); // Destroy given chunk and its children
 	static void DestroyChunkNodes(Chunk* inChunk); // Destroys the given chunks' children, not the given chunk
 	static void DestroyFace(Face& inFace); // Destroy all chunks within the face
+
+	// static void ForEachNode(Renderer& renderer, Chunk* parent, std::function<void(Renderer&, Chunk*)> func);
 };

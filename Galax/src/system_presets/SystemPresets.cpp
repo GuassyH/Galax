@@ -71,8 +71,6 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	moon->terrainGenerator.numCraters = 2;
 	moon->terrainGenerator.baseSize = 3;
 
-	// moon->terrainGenerator.numLayers = 5;
-	// moon->terrainGenerator.noiseScale = 0.5f;
 
 	moon->mpr = 60;
 	moon->rotation_axis = glm::vec3(0.0, 1.0, 0.0);
@@ -91,11 +89,6 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	sun->resolution = 10;
 	sun->LODradii = { };
 
-	// sun->terrainGenerator.numCraters = 0;
-	// sun->terrainGenerator.numLayers = 2;
-	// sun->terrainGenerator.noiseStrength = 10.0f;
-	// sun->terrainGenerator.noiseHeightShift = 0.0f;
-	// sun->terrainGenerator.noiseBaseFrequency = 0.025f;
 
 	// GIANT mass, since it should basically be stationary
 	sun->physicsBody.mass = 1000000000.0f;

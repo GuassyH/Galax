@@ -50,20 +50,15 @@ void Player::Move() {
 	
 
 	glm::vec3 localMoveDir = glm::vec3(0.0);
+	moveDir = camera.transform->right * horizontal + camera.transform->forward * vertical;
+	moveDir = glm::length(moveDir) != 0 ? glm::normalize(moveDir) : glm::vec3(0);
+	moveDir += camera.transform->up * skywards;
 
 	// if you are close to the ground, SDF?
 	if (transform->HasParent()) {
-		moveDir = camera.transform->right * horizontal + camera.transform->forward * vertical;
-		moveDir = glm::length(moveDir) != 0 ? glm::normalize(moveDir) : glm::vec3(0);
-		moveDir += camera.transform->up * skywards;
-
 		localMoveDir = glm::inverse(transform->parent->world_rotation) * moveDir;
 	}
 	else {
-		moveDir = camera.transform->right * horizontal + camera.transform->forward * vertical;
-		moveDir = glm::length(moveDir) != 0 ? glm::normalize(moveDir) : glm::vec3(0);
-		moveDir += camera.transform->up * skywards;
-
 		localMoveDir = moveDir;
 	}
 

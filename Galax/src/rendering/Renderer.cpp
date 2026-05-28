@@ -74,7 +74,7 @@ bool Renderer::GetBufferFreeSlice(PlanetBuffer buffer, GPUslice& slice, FreeSlic
 		FreeSlice& freeSlice = freeList[i];
 
 		// Check if the slice fits in the free slice, if it does check what the remainder is. 
-		if (freeSlice.stride < slice.stride) { GX_TRACE("{} < {}", freeSlice.stride, slice.stride); continue; }
+		if (freeSlice.stride < slice.stride) { continue; }
 
 		float strideDiff = freeSlice.stride - slice.stride;
 
@@ -145,11 +145,13 @@ void Renderer::FreePlanetBufferSlice(PlanetBuffer buffer, GPUslice& slice) {
 
 	// For every free space check if it is directly adjacent to the slice
 	for (int i = 0; i < freeList.size(); i++) {
-		if (freeList[i].offset == rightBounds) {
+		if (freeList[i].offset == slice.offset + slice.stride) {
 			rightSliceI = i;
+			rightBounds = freeList[i].offset + freeList[i].stride;
 		}
-		if (freeList[i].offset + slice.stride == slice.offset) {
+		else if (freeList[i].offset + freeList[i].stride == slice.offset) {
 			leftSliceI = i;
+			leftBounds = freeList[i].offset;
 		}
 
 		// Both are set
@@ -158,17 +160,11 @@ void Renderer::FreePlanetBufferSlice(PlanetBuffer buffer, GPUslice& slice) {
 		}
 	}
 
-	// Set the left and right bounds
+	// Copy list without from left bound to right bound
 	std::vector<FreeSlice> newList;
 	for (int i = 0; i < freeList.size(); i++) {
-		if (i == leftSliceI) {
-			leftBounds = freeList[i].offset + freeList[i].stride;
+		if (i == leftSliceI || i == rightSliceI)
 			continue;
-		}
-		else if (i == rightSliceI) {
-			rightBounds = freeList[i].offset;
-			continue;
-		}
 		
 		newList.push_back(freeList[i]);
 	}
@@ -181,9 +177,11 @@ void Renderer::FreePlanetBufferSlice(PlanetBuffer buffer, GPUslice& slice) {
 	newList.push_back(newSlice);
 
 	freeList.swap(newList);
+
+	slice.inPool = false;
 }
 
-
+// i think it might be updating slices even if theyre in the pool
 bool Renderer::AddToPlanetBuffer(PlanetBuffer buffer, GPUslice& slice, const void* data) {
 	GLuint s_buffer = (buffer == PlanetBuffer::VertexBuffer ? vertexBuffer : (buffer == PlanetBuffer::CraterBuffer ? craterBuffer : noiseBuffer));
 
@@ -199,6 +197,11 @@ bool Renderer::AddToPlanetBuffer(PlanetBuffer buffer, GPUslice& slice, const voi
 	FreeSlice freeSlice;
 	if (GetBufferFreeSlice(buffer, slice, freeSlice, true)) {
 		slice.offset = freeSlice.offset;
+
+		if (slice.inPool) {
+			GX_TRACE("APSODS");
+		}
+
 		slice.inPool = true;
 		
 		glBufferSubData(GL_SHADER_STORAGE_BUFFER, slice.offset, slice.stride, data);

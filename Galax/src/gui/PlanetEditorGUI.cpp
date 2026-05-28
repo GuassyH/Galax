@@ -13,6 +13,7 @@ namespace GUI {
 		ImGui::Spacing();	ImGui::Spacing();	ImGui::Spacing();
 	}
 
+
 	void PlanetEditor::DrawPlanetEditor(Player& player) {
 		Universe::UniverseManager& universeManager = Universe::UniverseManager::Get();
 
@@ -42,6 +43,21 @@ namespace GUI {
 				ImGui::Text("Body");
 				ImGui::DragFloat(("Radius" + id + "_radius").c_str(), &planet->radius);
 
+
+				Spacing();
+
+				ImGui::Text("Noise Settings");
+
+
+				Spacing();
+
+				ImGui::Text("Crater Settings");
+
+				Spacing();
+
+				if (ImGui::Button(("Rebuild Body" + id + "_rebuild_body").c_str())) {
+					GX_TRACE("Rebuild {}, not implemented", planet->name);
+				}
 
 				// Debug Settings
 				Spacing();

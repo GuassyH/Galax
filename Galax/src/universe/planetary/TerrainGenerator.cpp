@@ -49,21 +49,17 @@ void TerrainGenerator::ApplyTerrain(Renderer& renderer, CubeSphere::Chunk* chunk
 	// Add chunk vertex data to the big buffer
 	if (!chunk->vertexSlice.inPool) {
 		chunk->vertexSlice.stride = sizeof(Vertex) * chunk->mesh.vertices.size();
-
 		renderer.AddToPlanetBuffer(Renderer::PlanetBuffer::VertexBuffer, chunk->vertexSlice, chunk->mesh.vertices.data());
 	}
 
 	if (!chunk->vertexSlice.inPool || !craterSlice.inPool || !noiseSlice.inPool) {
-		GX_TRACE("TERRAIN FAIL");
-		if (!chunk->vertexSlice.inPool) {
-			GX_TRACE("{}", "Vertex");
-		}
-		if (!craterSlice.inPool) {
-			GX_TRACE("{}", "Crater");
-		}
-		if (!noiseSlice.inPool) {
-			GX_TRACE("{}", "Noise");
-		}
+		GX_TRACE("Terrain generation failed due to unpooled buffer(s):");
+		if (!chunk->vertexSlice.inPool) 
+			GX_TRACE("-{}", "Vertex");
+		if (!craterSlice.inPool) 
+			GX_TRACE("-{}", "Crater");
+		if (!noiseSlice.inPool) 
+			GX_TRACE("-{}", "Noise");
 
 		return;
 	}

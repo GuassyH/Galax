@@ -257,3 +257,19 @@ void CubeSphere::DestroyChunkNodes(Chunk* inChunk) {
 void CubeSphere::DestroyFace(Face& inFace) {
 	DestroyChunk(inFace.root_chunk);
 }
+
+
+/*
+void CubeSphere::ForEachNode(Renderer& renderer, Chunk* parent, std::function<void(Renderer&, Chunk*)> func) {
+	if (!func || !parent) return;
+
+	for (auto node : parent->nodes) {
+		if (!node) continue;
+		
+		if (node->hasNodes)
+			ForEachNode(renderer, parent, func);
+
+		func(renderer, node);
+	}
+}
+*/

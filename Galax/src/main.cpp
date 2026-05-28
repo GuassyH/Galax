@@ -57,7 +57,7 @@ int main() {
 
 	if (!InitRenderer(window, monitor)) return -1;
 	
-	bool isFullscreen = false; // SetFullscreen(window, true);
+	bool isFullscreen = true;	SetFullscreen(window, true);
 
 	Renderer renderer = Renderer();
 

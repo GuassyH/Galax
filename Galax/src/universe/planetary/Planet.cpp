@@ -47,7 +47,18 @@ namespace Universe {
 		if (!LODradii.empty())
 			UpdateAllLODs(renderer, camera.transform->world_position);
 	}
-	
+
+
+	void RemoveNodesFromVSSBO(Renderer& renderer, CubeSphere::Chunk* chunk) {
+		for (auto child : chunk->nodes) {
+			if (!child) continue;
+
+			if (child->hasNodes)
+				RemoveNodesFromVSSBO(renderer, child);
+
+			renderer.FreePlanetBufferSlice(Renderer::VertexBuffer, child->vertexSlice);
+		}
+	}
 
 	void Planet::UpdateLOD(Renderer& renderer, CubeSphere::Chunk* chunk, glm::vec3& observer_pos) {
 		// If there isnt a level of detail specified in LODradii just make this the leaf
@@ -88,6 +99,7 @@ namespace Universe {
 
 			if (node->level_of_detail == targetLOD) {
 				node->isLeaf = true;
+				RemoveNodesFromVSSBO(renderer, node);
 				CubeSphere::DestroyChunkNodes(node);
 			}
 			else if (targetLOD > node->level_of_detail) {

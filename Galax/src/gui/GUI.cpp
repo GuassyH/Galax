@@ -58,7 +58,8 @@ namespace GUI {
 
 
 	void GUI::Render(Renderer& renderer, GLFWwindow* window, Player& player) {
-		if (ImGui::Begin("tinker box")) {
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		if (ImGui::Begin("tinker box", nullptr, ImGuiWindowFlags_NoMove)) {
 			Header("Simulation");
 
 			ImGui::Checkbox("Simulate", &Universe::UniverseManager::Get().isSimulating);
@@ -68,10 +69,9 @@ namespace GUI {
 			Header("Bodies");
 
 			PlanetEditor::DrawPlanetEditor(player);
-		}
-		ImGui::End();
 
-		if (ImGui::Begin("Resources")) {
+
+
 			Header("Vertex SSBO");
 
 			float used_vtx = (MAX_VERTICES * sizeof(Vertex));
@@ -101,7 +101,6 @@ namespace GUI {
 
 			std::ostringstream crtr_ssbo_info; crtr_ssbo_info << "Crater SSBO: " << crtr_prc << "%%";
 			ImGui::Text(crtr_ssbo_info.str().c_str());
-
 
 
 
