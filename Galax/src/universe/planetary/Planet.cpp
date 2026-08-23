@@ -23,12 +23,17 @@ namespace Universe {
 
 
 	void Planet::Render(Renderer& renderer, Camera& camera, Planet* sun) {
+
+
+	
 		for (auto& face : faces) {
 			if (!face.should_render)
 				continue;
 
-			CubeSphere::RenderChunk(face.root_chunk, sun->transform.get(), camera, shader.get());
+		
+			CubeSphere::RenderChunk(face.root_chunk, sun->transform.get(), camera, renderer, &shader);
 		}
+
 	}
 
 	/// Update
@@ -49,7 +54,7 @@ namespace Universe {
 	}
 
 
-	void RemoveNodesFromVSSBO(Renderer& renderer, CubeSphere::Chunk* chunk) {
+	void Planet::RemoveNodesFromVSSBO(Renderer& renderer, CubeSphere::Chunk* chunk) {
 		for (auto child : chunk->nodes) {
 			if (!child) continue;
 

@@ -12,12 +12,16 @@ uniform vec3 origo;
 out vec3 vStarWorldPos;
 out vec2 texCoord;
 
+uniform float fov;
+
 void main()
 {
     vec3 right = vec3(view[0][0], view[1][0], view[2][0]);
     vec3 up    = vec3(view[0][1], view[1][1], view[2][1]);
 
-    vec3 worldPos = instancePos + aPos.x * instanceSize * right + aPos.y * instanceSize * up;
+
+    float size = (fov / 80) * instanceSize; // Crude resize
+    vec3 worldPos = instancePos + aPos.x * size * right + aPos.y * size * up;
     worldPos += origo;
 
     // The actual star position in world space

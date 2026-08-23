@@ -10,7 +10,6 @@ enum class NoiseType {
 
 struct NoiseLayer {
 	glm::vec3 centre = glm::vec3(0.0f); // The of the noise
-	float pad0;
 	NoiseType type = NoiseType::Perlin;
 	float frequency = 1.0f;			// Like zooming in and out
 	float intensity = 1.0f;			// How strong the value is
@@ -18,5 +17,20 @@ struct NoiseLayer {
 	float frequencyFactor = 1.25f;	// Each layer will be multiplied by this value, recommended > 1
 	float intensityFactor = 0.75f;	// Each layer will be multiplied by this value, recommended < 1
 	float heightShift = 0.0f;		// Added to the result of the noise
-	float pad1;
+	float wobble = 0.0f;
+	float power = 1.0f;				// In voronoi it raises to this power, thereby making it sharper. Otherwise its a pad
 };
+
+inline NoiseLayer NewNoiseLayer(
+	glm::vec3 centre = glm::vec3(0.0f),
+	NoiseType type = NoiseType::Perlin,
+	float frequency = 1.0f, 
+	float intensity = 1.0f, 
+	int numLayers = 1, 
+	float frequencyFactor = 1.25f, 
+	float intensityFactor = 0.75f, 
+	float heightShift = 0.0f,
+	float wobble = 0.0f,
+	float power = 0.0f) {
+	return NoiseLayer{ centre, type, frequency, intensity, numLayers, frequencyFactor, intensityFactor, heightShift, wobble, power };
+}

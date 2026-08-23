@@ -4,6 +4,12 @@ layout(local_size_x = 256) in;
 
 
 
+
+
+
+// Create model of the solar system of when pangea existed
+//
+
 ///////////////////////////////////////////////////////////////
 // Base Settings
 ///////////////////////////////////////////////////////////////
@@ -29,7 +35,6 @@ layout(std430, binding = 0) buffer Vertices {
 uniform int resolution;
 uniform float radius;
 uniform int numVerts;
-
 
 
 ///////////////////////////////////////////////////////////////
@@ -109,7 +114,6 @@ uniform int numNoiseLayers;
 
 struct NoiseLayer {
 	vec3 centre;
-	float pad0;
 	int type; // 0 = perlin, 1 = voronoi
 	float frequency;
 	float intensity;
@@ -117,7 +121,8 @@ struct NoiseLayer {
 	float frequencyFactor;
 	float intensityFactor;
 	float heightShift;
-	float pad1;
+	float wobble;
+	float power;
 };
 
 layout(std430, binding = 2) buffer NoiseLayers {
@@ -129,11 +134,12 @@ layout(std430, binding = 2) buffer NoiseLayers {
 
 float hash(float n) { return fract(sin(n) * 1e4); }
 float hash(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }
+vec3 hash(vec3 p) {   return fract(sin(vec3(dot(p, vec3(1.0, 57.0, 113.0)), dot(p, vec3(57.0, 113.0, 1.0)), dot(p, vec3(113.0, 1.0, 57.0)))) * 43758.5453); }
 
 float noise(float x) {
 	float i = floor(x);
 	float f = fract(x);
-	float u = f * f * (3.0 - 2.0 * f);
+	float u = f * f * (3.0 - 2.0 * f); // good way to do seed??
 	return mix(hash(i), hash(i + 1.0), u);
 }
 
@@ -161,10 +167,44 @@ float PerlinNoise(vec3 x) {
     float n = dot(i, step);
 
 	vec3 u = f * f * (3.0 - 2.0 * f);
-	return mix(mix(mix( hash(n + dot(step, vec3(0, 0, 0))), hash(n + dot(step, vec3(1, 0, 0))), u.x),
+	float result = mix(mix(mix( hash(n + dot(step, vec3(0, 0, 0))), hash(n + dot(step, vec3(1, 0, 0))), u.x),
                    mix( hash(n + dot(step, vec3(0, 1, 0))), hash(n + dot(step, vec3(1, 1, 0))), u.x), u.y),
                mix(mix( hash(n + dot(step, vec3(0, 0, 1))), hash(n + dot(step, vec3(1, 0, 1))), u.x),
                    mix( hash(n + dot(step, vec3(0, 1, 1))), hash(n + dot(step, vec3(1, 1, 1))), u.x), u.y), u.z);
+
+	return result;
+}
+
+
+// https://github.com/MaxBittker/glsl-voronoi-noise/blob/master/3d.glsl
+float VoronoiNoise(vec3 x){
+	vec3 p = floor(x);
+	vec3 f = fract(x);
+
+	float id = 0.0;
+	vec2 res = vec2(100.0);
+	for (int k = -1; k <= 1; k++) {
+		for (int j = -1; j <= 1; j++) {
+			for (int i = -1; i <= 1; i++) {
+				vec3 b = vec3(float(i), float(j), float(k));
+				vec3 r = vec3(b) - f + hash(p + b);
+				float d = dot(r, r);
+
+				float cond = max(sign(res.x - d), 0.0);
+				float nCond = 1.0 - cond;
+
+				float cond2 = nCond * max(sign(res.y - d), 0.0);
+				float nCond2 = 1.0 - cond2;
+
+				id = (dot(p + b, vec3(1.0, 57.0, 113.0)) * cond) + (id * nCond);
+				res = vec2(d, res.x) * cond + res * nCond;
+
+				res.y = cond2 * d + nCond2 * res.y;
+			}
+		}
+	}
+
+	return pow(res.x, 3);
 }
 
 float NoiseInfluence(Vertex vert) {
@@ -175,7 +215,7 @@ float NoiseInfluence(Vertex vert) {
 
 		// Precompute base position for noise
 		vec3 pos = vec3(vert.position) + (currentLayer.centre * radius);
-		pos *= currentLayer.intensity;
+
 
 		float current_noise = 0.0;           // Accumulated noise
 
@@ -185,11 +225,18 @@ float NoiseInfluence(Vertex vert) {
 
 		for (int i = 0; i < currentLayer.numLayers; i++) {
 			// Sample noise at current frequency
+
+			float randx = noise(currentLayer.wobble);
+			float randy = noise(randx);
+			float randz = noise(randy);
+
+			vec3 wobble_noise = normalize(vec3((2 * randx) - 1, (2*randy) - 1, (2*randz) - 1)) * currentLayer.wobble * radius;
+
 			float n = 0;
 			if(currentLayer.type == 0){
-				n = PerlinNoise(pos * freq);
+				n = PerlinNoise((pos + wobble_noise) * freq);
 			}else if (currentLayer.type == 1){
-				// do voronoi calc
+				n = VoronoiNoise((pos + wobble_noise) * freq);
 			}
 
 			// Accumulate weighted noise
@@ -204,7 +251,8 @@ float NoiseInfluence(Vertex vert) {
 		}
 
 		// Normalize and apply height shift
-		current_noise = current_noise - (totalStrength / 2.0) + currentLayer.heightShift;
+		// current_noise = current_noise - (totalStrength / 2.0) + currentLayer.heightShift;
+		current_noise += currentLayer.heightShift;
 
 		total_noise += current_noise;
 	}

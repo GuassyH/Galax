@@ -3,7 +3,6 @@
 #include "shaders/PlanetShader.h"
 
 std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& renderer) {
-	std::shared_ptr<PlanetShader> shader = std::make_shared<PlanetShader>("assets/shaders/universe/planet.frag", "assets/shaders/universe/planet.vert");
 	// shader->texture = std::make_shared<Texture>("assets/textures/grid.jpg");
 
 	std::shared_ptr<FragShader> unlit = std::make_shared<FragShader>("assets/shaders/default_unlit.frag", "assets/shaders/default_unlit.vert");
@@ -11,7 +10,7 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	// Charley planetary system
 	std::shared_ptr<Universe::Planet> planet_char = std::make_shared<Universe::Planet>();
 	planet_char->name = "Charley Planet";
-	planet_char->shader = shader;
+	planet_char->shader = PlanetShader("assets/shaders/universe/planet.frag", "assets/shaders/universe/planet.vert");
 	planet_char->radius = 2500;
 	planet_char->resolution = 100;
 	planet_char->LODradii = { 6.0f, 4.5, 3.0f, 1.5f, 1.0f };
@@ -23,12 +22,9 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	planet_char->terrainGenerator.smoothingK = 0.1f;
 	planet_char->terrainGenerator.craterHeight = 2.0f;
 
-	NoiseLayer baseLayer;
-	baseLayer.numLayers = 30;
-	baseLayer.intensity = 80.0f;
-	baseLayer.heightShift = -10.0f;
-	baseLayer.frequency = 0.00001f;
-	planet_char->terrainGenerator.noiseLayers.push_back(baseLayer);
+
+	planet_char->terrainGenerator.noiseLayers.push_back(NewNoiseLayer(glm::vec3(0.0f), NoiseType::Perlin, 0.001f, 80.0f, 30, 1.25f, 0.75f, -178.0f));
+	planet_char->terrainGenerator.noiseLayers.push_back(NewNoiseLayer(glm::vec3(0.0f), NoiseType::Voronoi, 0.001f, 100.0f, 1, 1.25f, 0.75f, 0.0f, 0.0f, 3));
 
 
 	planet_char->physicsBody.mass = 10000000;
@@ -57,20 +53,21 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	planet_char->ocean_config.normalStrength = 0.2f;
 	planet_char->ocean_config.triplanarBlend = 2.5f;
 
-
+	planet_char->shader.colorMaps.push_back( { glm::vec4(0.3f, 0.5f, 0.2f, 1.0), glm::vec4(1.0f), 0.0f, 0.0f} );
 
 
 	// Moon
 	std::shared_ptr<Universe::Planet> moon = std::make_shared<Universe::Planet>();
 	moon->name = "Luna";
-	moon->shader = shader;
+	moon->shader = PlanetShader("assets/shaders/universe/planet.frag", "assets/shaders/universe/planet.vert");
 	moon->radius = 460;
 	moon->resolution = 50;
 	moon->LODradii = { 6.0, 3.0, 1.5, 1.0 };
 
-	moon->terrainGenerator.numCraters = 2;
+	moon->terrainGenerator.numCraters = 20;
 	moon->terrainGenerator.baseSize = 3;
 
+	moon->terrainGenerator.noiseLayers.push_back(NewNoiseLayer({}, {}, 0.01f, 14.0f, 6));
 
 	moon->mpr = 60;
 	moon->rotation_axis = glm::vec3(0.0, 1.0, 0.0);
@@ -80,15 +77,20 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	moon->transform->local_position = planet_char->transform->world_position + glm::vec3(0.0, -1000.0, 20223.0);
 	moon->transform->UpdateMatrix();
 
+	moon->shader.colorMaps.push_back( { glm::vec4(0.3f), glm::vec4(1.0f), 0.0f, 0.0f } );
 
 	// Sun
 	std::shared_ptr<Universe::Planet> sun = std::make_shared<Universe::Planet>();
 	sun->name = "Luxia";
-	sun->shader = unlit;
+	sun->shader = PlanetShader("assets/shaders/universe/planet.frag", "assets/shaders/universe/planet.vert");
 	sun->radius = 20000;
-	sun->resolution = 10;
+	sun->resolution = 40;
 	sun->LODradii = { };
 
+	sun->shader.colorMaps.push_back( { glm::vec4(1.0f), glm::vec4(1.0f), 0.0f, 0.0f } );
+	sun->shader.lit = false;
+
+	sun->terrainGenerator.noiseLayers.push_back(NewNoiseLayer(glm::vec3(0.0f), NoiseType::Perlin, 0.0001f, 200.0f, 6));
 
 	// GIANT mass, since it should basically be stationary
 	sun->physicsBody.mass = 1000000000.0f;
@@ -103,7 +105,6 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 
 	Universe::UniverseManager::Get().PushPlanet(moon);
 	Universe::UniverseManager::Get().PushPlanet(planet_char);
-
 
 	planet_char->physicsBody.debug_centre = sun.get();
 	moon->physicsBody.debug_centre = planet_char.get();

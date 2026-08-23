@@ -18,6 +18,7 @@ public:
 	TerrainGenerator();
 	~TerrainGenerator();
 	
+
 	Renderer::GPUslice craterSlice;
 	Renderer::GPUslice noiseSlice;
 

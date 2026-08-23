@@ -7,7 +7,7 @@
 #include "CubeSphere.h"
 #include "Transform.h"
 #include "shaders/ComputeShader.h"
-#include "shaders/FragShader.h"
+#include "shaders/PlanetShader.h"
 #include "TerrainGenerator.h"
 
 #include "universe/atmosphere/Atmosphere.h"
@@ -15,6 +15,8 @@
 #include "rendering/Renderer.h"
 
 namespace Universe {
+
+
 	class Planet {
 	public:
 		const char* name = "new_planet";
@@ -24,6 +26,7 @@ namespace Universe {
 		~Planet() = default;
 		void Generate(Renderer& renderer);
 	
+		void RemoveNodesFromVSSBO(Renderer& renderer, CubeSphere::Chunk* chunk);
 		void Update(Renderer& renderer, Camera& camera, bool isSimulating);
 		void UpdateLOD(Renderer& renderer, CubeSphere::Chunk* chunk, glm::vec3& observer_pos);
 		void UpdateAllLODs(Renderer& renderer, glm::vec3 observer_pos);
@@ -41,7 +44,7 @@ namespace Universe {
 		std::shared_ptr<Transform> transform;
 
 		// Material stuff
-		std::shared_ptr<Shader> shader;
+		PlanetShader shader;
 		float ambient = 0.0f;
 
 		// Body
@@ -55,4 +58,6 @@ namespace Universe {
 		bool hasOcean = false;
 		OceanConfig ocean_config;
 	};
+
+
 }

@@ -6,6 +6,8 @@ uniform vec3 sunDir;
 uniform vec3 centre;
 uniform float radius;
 
+uniform bool lit;
+
 in vec3 normal;
 in vec3 localPos;
 in vec3 localNorm;
@@ -13,11 +15,25 @@ in vec3 crntPos;
 in vec2 texCoord;
 in vec4 vertColor;
 
+uniform int numColorMaps;
+
+//  64 bytes - layout matches C++ `Vertex` (vec3 + pad, vec3 + pad, vec4, vec2, pad[2])
+struct ColorMap {
+	vec4 color;
+	vec4 steepCol;
+	float height;
+	float steepness; // match CPU padding
+};
+
+layout(std430, binding = 0) buffer ColorMaps {
+    ColorMap colorMaps[];
+};
+
+
 
 /////////////////////////////////////
 // Tri Planar
 /////////////////////////////////////
-
 
 
 vec3 getTriPlanarBlend(vec3 _wNorm){
@@ -54,31 +70,36 @@ float directionalLight(){
 };
 
 
-
 /////////////////////////////////////
 // Main
 /////////////////////////////////////
 
 
-
 out vec4 fragCol;
 void main(){
-
-	float relative_dot = dot(normalize(crntPos - centre), normal);
-	// fragCol = vertColor;
-	vec4 color;
-
-	if(relative_dot > 0.97){
-		color = vec4(0.396, 0.58, 0.306, 1.0);
-	}else{
-		color = vec4(0.569, 0.498, 0.286, 1.0);
+	if (numColorMaps == 0){
+		fragCol.rgb = vec3(0.0, 0.0, 0.0);
+		return;
 	}
 
-	fragCol = color;
-	if(distance(crntPos, centre) <= radius + 1)
-		fragCol.rgb = vec3(0.7, 0.6, 0.2);
+	float relative_dot = dot(normalize(crntPos - centre), normal);
+
+	bool foundHeight = false;
+	for (int i = 0; i < numColorMaps; i++){
+		if ((length(localPos) - radius) > colorMaps[(numColorMaps - 1) - i].height) {
+			fragCol.rgb = colorMaps[(numColorMaps - 1) - i].color.rgb;
+			foundHeight = true;
+			break;
+		}
+	}
+
+	if (!foundHeight) {
+		fragCol.rgb = colorMaps[0].color.rgb;
+	}
 
 
-	fragCol *= directionalLight();
+	if(lit)
+		fragCol *= directionalLight();
+	
 	fragCol.a = 1.0;
 }

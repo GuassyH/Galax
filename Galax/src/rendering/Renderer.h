@@ -50,9 +50,11 @@ public:
 	GLuint vertexBuffer;	std::vector<FreeSlice> freeVertexSlices;
 	GLuint craterBuffer;	std::vector<FreeSlice> freeCraterSlices;
 	GLuint noiseBuffer;		std::vector<FreeSlice> freeNoiseSlices;
+	GLuint colorMapBuffer;
 };
 
 // 128, 8, 4 megabyte of memory per buffer
 #define MAX_VERTICES floor(((128 * 1E7) / 48) + 1)
 #define MAX_CRATERS floor(((8 * 1E6) / 32) + 1)
 #define MAX_NOISE_LAYERS floor(((4 * 1E6) / 48) + 1)
+#define MAX_COLOR_MAPS floor(((4 * 1E6) / 48) + 1)

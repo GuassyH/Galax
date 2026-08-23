@@ -14,7 +14,7 @@ namespace GUI {
 	}
 
 
-	void PlanetEditor::DrawPlanetEditor(Player& player) {
+	void PlanetEditor::DrawPlanetEditor(Renderer& renderer, Player& player) {
 		Universe::UniverseManager& universeManager = Universe::UniverseManager::Get();
 
 		for (auto planet : universeManager.GetPlanets()) {
@@ -43,11 +43,27 @@ namespace GUI {
 				ImGui::Text("Body");
 				ImGui::DragFloat(("Radius" + id + "_radius").c_str(), &planet->radius);
 
-
 				Spacing();
 
 				ImGui::Text("Noise Settings");
 
+				for (int i = 0; i < planet->terrainGenerator.noiseLayers.size(); i++) {
+					ImGui::Text("NoiseLayer %i", i);
+					ImGui::Indent();
+					NoiseLayer& noiseLayer = planet->terrainGenerator.noiseLayers[i];
+
+					ImGui::DragFloat3(("Centre" + id + "_noise_layer_" + std::to_string(i) + "_centre").c_str(), &noiseLayer.centre.x);
+					ImGui::DragFloat(("Frequency" + id + "_noise_layer_" + std::to_string(i) + "_frequency").c_str(), &noiseLayer.frequency);
+					ImGui::DragFloat(("Frequency Factor" + id + "_noise_layer_" + std::to_string(i) + "_frequencyFactor").c_str(), &noiseLayer.frequencyFactor);
+					ImGui::DragFloat(("Intensity" + id + "_noise_layer_" + std::to_string(i) + "_intensity").c_str(), &noiseLayer.intensity);
+					ImGui::DragFloat(("Intensity Factor" + id + "_noise_layer_" + std::to_string(i) + "_intensityFactor").c_str(), &noiseLayer.intensityFactor);
+					ImGui::DragFloat(("Height Shift" + id + "_noise_layer_" + std::to_string(i) + "_heightShift").c_str(), &noiseLayer.heightShift);
+					ImGui::DragFloat(("Wobble" + id + "_noise_layer_" + std::to_string(i) + "_wobble").c_str(), &noiseLayer.wobble);
+					if (noiseLayer.type == NoiseType::Voronoi)
+						ImGui::DragFloat(("Power" + id + "_noise_layer_" + std::to_string(i) + "_power").c_str(), &noiseLayer.power);
+
+					ImGui::Unindent();
+				}
 
 				Spacing();
 
@@ -57,6 +73,17 @@ namespace GUI {
 
 				if (ImGui::Button(("Rebuild Body" + id + "_rebuild_body").c_str())) {
 					GX_TRACE("Rebuild {}, not implemented", planet->name);
+
+					// NOT FINISHED
+					for (auto face : planet->faces) {
+						planet->RemoveNodesFromVSSBO(renderer, face.root_chunk);
+					}
+
+					for (auto face : planet->faces) {
+						CubeSphere::DestroyChunkNodes(face.root_chunk);
+					}
+
+					planet->terrainGenerator.ComputeBuffers(renderer, planet->radius);
 				}
 
 				// Debug Settings

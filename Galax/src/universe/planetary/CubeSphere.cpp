@@ -1,5 +1,4 @@
 #include "CubeSphere.h"
-
 /// Generation
 
 void ConstructChunk(CubeSphere::Chunk* inChunk, Transform* base_transform) {
@@ -142,12 +141,13 @@ void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
 }
 
 
-void CubeSphere::RenderChunk(Chunk* chunk, Transform* sun, Camera& camera, Shader* shader) {
+void CubeSphere::RenderChunk(Chunk* chunk, Transform* sun, Camera& camera, Renderer& renderer, PlanetShader* shader) {
 	if (!chunk)
 		return;
 
 	if (chunk->isLeaf) {
 		shader->Use();
+
 		shader->SetMat4("model", chunk->mesh.transform->GetMatrix());
 		shader->SetMat4("view", camera.GetView());
 		shader->SetMat4("proj", camera.GetProj());
@@ -156,13 +156,24 @@ void CubeSphere::RenderChunk(Chunk* chunk, Transform* sun, Camera& camera, Shade
 		shader->SetVec3("sunDir", glm::normalize(chunk->mesh.transform->world_position - sun->world_position));
 		shader->SetVec3("centre", chunk->mesh.transform->world_position);
 		shader->SetFloat("radius", chunk->radius);
+		shader->SetBool("lit", shader->lit);
+
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, renderer.colorMapBuffer);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(ColorMap) * shader->colorMaps.size(), shader->colorMaps.data(), GL_DYNAMIC_DRAW);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, renderer.colorMapBuffer); // THIS IS ESSENTIAL
+
+		shader->SetInt("numColorMaps", static_cast<int>(shader->colorMaps.size()));
 
 		chunk->mesh.Render();
+
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+
 	}
 	else if (chunk->hasNodes) {
 		for (auto node : chunk->nodes) {
 			if(node)
-				RenderChunk(node, sun, camera, shader);
+				RenderChunk(node, sun, camera, renderer, shader);
 		}
 	}
 }

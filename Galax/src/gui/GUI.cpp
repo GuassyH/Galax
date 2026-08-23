@@ -68,7 +68,7 @@ namespace GUI {
 	
 			Header("Bodies");
 
-			PlanetEditor::DrawPlanetEditor(player);
+			PlanetEditor::DrawPlanetEditor(renderer, player);
 
 
 

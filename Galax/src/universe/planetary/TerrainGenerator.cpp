@@ -29,15 +29,22 @@ void TerrainGenerator::ComputeBuffers(Renderer& renderer, float radius) {
 		craters.push_back(crater);
 	}
 
+
+	if (craterSlice.inPool) {
+		renderer.FreePlanetBufferSlice(Renderer::PlanetBuffer::CraterBuffer, craterSlice);
+	}
+
 	if (!craterSlice.inPool) {
 		craterSlice.stride = craters.size() * sizeof(Crater);
-
 		renderer.AddToPlanetBuffer(Renderer::PlanetBuffer::CraterBuffer, craterSlice, craters.data());
+	}
+
+	if (noiseSlice.inPool) {
+		renderer.FreePlanetBufferSlice(Renderer::PlanetBuffer::NoiseBuffer, noiseSlice);
 	}
 
 	if (!noiseSlice.inPool) {
 		noiseSlice.stride = noiseLayers.size() * sizeof(NoiseLayer);
-
 		renderer.AddToPlanetBuffer(Renderer::PlanetBuffer::NoiseBuffer, noiseSlice, noiseLayers.data());
 	}
 }

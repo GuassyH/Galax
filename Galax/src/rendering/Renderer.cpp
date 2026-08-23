@@ -13,6 +13,7 @@ Renderer::Renderer() {
 	glGenBuffers(1, &vertexReadbackBuffer);
 	glGenBuffers(1, &craterBuffer);
 	glGenBuffers(1, &noiseBuffer);
+	glGenBuffers(1, &colorMapBuffer);
 
 	glBindBuffer(GL_COPY_WRITE_BUFFER, vertexReadbackBuffer);
 	glBufferData(GL_COPY_WRITE_BUFFER, MAX_VERTICES * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
@@ -49,7 +50,7 @@ Renderer::Renderer() {
 
 
 
-/// KEY RULES
+/// KEY RULE
 // Only align when creating a slice
 
 
@@ -83,10 +84,6 @@ bool Renderer::GetBufferFreeSlice(PlanetBuffer buffer, GPUslice& slice, FreeSlic
 			bestFit = i;
 			bestSize = strideDiff;
 		}
-		else {
-			GX_TRACE("{} > {}", strideDiff, bestSize);
-		}
-
 	}
 
 	if (bestFit == -1) {
@@ -256,4 +253,5 @@ Renderer::~Renderer() {
 	glDeleteBuffers(1, &vertexBuffer);
 	glDeleteBuffers(1, &craterBuffer);
 	glDeleteBuffers(1, &noiseBuffer);
+	glDeleteBuffers(1, &colorMapBuffer);
 }

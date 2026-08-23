@@ -75,6 +75,7 @@ namespace Universe {
 		starShader.SetMat4("view", camera.GetView());
 		starShader.SetMat4("proj", camera.GetProj());
 		starShader.SetVec3("origo", camera.transform->world_position);
+		starShader.SetFloat("fov", camera.fovDeg);
 
 		// Draw
 		quad.vao.Bind();
