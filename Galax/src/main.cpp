@@ -72,7 +72,7 @@ int main() {
 
 	// Initialise the system
 	GUI::GUI gui; gui.Init(window);
-	Universe::UniverseManager::Get().Init(player.camera);
+	Universe::UniverseManager::Get().Init(renderer, player.camera);
 	Universe::UniverseDebug::Get().Init();
 	
 	auto sun = SystemPresets::CreateFirstSystem(renderer);

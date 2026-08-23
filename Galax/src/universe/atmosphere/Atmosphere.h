@@ -6,6 +6,7 @@
 
 #include "Camera.h"
 #include "shaders/FragShader.h"
+#include "shaders/ComputeShader.h"
 #include "rendering/Mesh.h"
 
 
@@ -32,6 +33,8 @@ namespace Universe {
 
 			wavelengthScatter = glm::vec3(scatterR, scatterG, scatterB);
 		}
+
+		GLuint BakedOpticalTexture;
 	};
 
 
@@ -44,10 +47,12 @@ namespace Universe {
 		int numOpticalDepthPoints = 8;
 
 		void Render(Camera& camera, Universe::Planet* sun, Universe::Planet* planet, AtmosphereConfig& atmos_config, GLuint screenTex, GLuint depthTex);
+		void BakeOpticalDepth(AtmosphereConfig& atmosphereConfig, float planetRadius);
 
 	private:
 		Mesh quad;
 
+		ComputeShader opticalBakeComp;
 		FragShader atmosphereShader;
 	};
 

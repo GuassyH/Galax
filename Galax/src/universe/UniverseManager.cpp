@@ -7,10 +7,9 @@
 
 namespace Universe {
 
-	void UniverseManager::Init(Camera& camera) {
+	void UniverseManager::Init(Renderer& renderer, Camera& camera) {
 		transform = std::make_shared<Transform>();
 		transform->UpdateMatrix(false);
-
 
 		composite_quad = Mesh(Quad::vertices, Quad::indices);
 		composite_shader = std::make_unique<FragShader>("assets/shaders/composite.frag", "assets/shaders/composite.vert");

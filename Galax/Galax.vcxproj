@@ -213,6 +213,7 @@
     <None Include="assets\shaders\default.vert" />
     <None Include="assets\shaders\default_unlit.frag" />
     <None Include="assets\shaders\default_unlit.vert" />
+    <None Include="assets\shaders\universe\bakeOpticalDepth.comp" />
     <None Include="assets\shaders\universe\ocean.frag" />
     <None Include="assets\shaders\universe\ocean.vert" />
     <None Include="assets\shaders\universe\planet.frag" />

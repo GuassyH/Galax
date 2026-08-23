@@ -1,0 +1,121 @@
+﻿#version 460 core
+
+
+// TAKEN FROM SEBASTIAN LAGUE
+// (While learning)
+
+layout(local_size_x = 8, local_size_y = 8) in;
+
+
+layout(rgba32f, binding = 0) uniform image2D bakedOpticalTexture;
+
+uniform int texSize;
+uniform int numOutScatteringSteps;
+uniform float atmosphereRadius;
+uniform float densityFalloff;
+uniform float planetRadius;
+
+
+
+// Check what the density at a point would be
+float densityAtPoint(vec2 samplePoint) {
+	float heightAbove = length(samplePoint) - planetRadius;
+	float height01 = heightAbove / (atmosphereRadius - planetRadius);
+	height01 = clamp(height01, 0.0, 1.0);
+
+	if (height01 == 0)
+		return 1.0;
+
+	float localDensity = exp(-height01 * densityFalloff) * (1.0 - height01);
+
+	return localDensity;
+}
+
+
+float opticalDepth(vec2 rayOrigin, vec2 rayDir, float rayLength){
+	vec2 densitySamplePoint = rayOrigin;
+	float stepSize = rayLength / (numOutScatteringSteps - 1);
+	float opticalDepth = 0;
+
+	for(int i = 0; i < numOutScatteringSteps; i++){
+		float localDensity = densityAtPoint(densitySamplePoint);
+		opticalDepth += localDensity * stepSize;
+		densitySamplePoint += rayDir * stepSize;
+	}
+
+	return opticalDepth;
+}
+
+
+
+float calculateOutScattering(vec2 inPoint, vec2 outPoint) {
+	float skinWidth = planetRadius / 1000.0;
+	
+
+	float lightTravelDst = length(outPoint - inPoint);
+	vec2 outScatterPoint = inPoint;
+	vec2 rayDir = (outPoint - inPoint) / lightTravelDst;
+	float stepSize = (lightTravelDst - skinWidth) / (numOutScatteringSteps);
+	
+	float outScatterAmount = 0;
+
+	for (int i = 0; i < numOutScatteringSteps; i ++) {
+		outScatterPoint += rayDir * stepSize;
+
+		// height at planet surface = 0, at furthest extent of atmosphere = 1
+		float height = length(outScatterPoint - 0) - planetRadius;//
+		
+		float height01 = clamp(height / (atmosphereRadius - planetRadius), 0, 1);
+
+		if (height01 == 0)
+			outScatterAmount += 1 * stepSize;
+		else
+			outScatterAmount += exp(-height01 * densityFalloff) * stepSize;
+		
+	}
+
+	return outScatterAmount;
+}
+
+// Check if a ray intersects with a sphere
+vec2 raySphere (float sphereRadius, vec3 rayOrigin, vec3 rayDir) {
+    const float a = 1.0; // set to dot(rayDir, rayDir) if rayDir might be unnormalized
+    float b = 2.0 * dot (rayOrigin, rayDir);
+    float c = dot (rayOrigin, rayOrigin) - sphereRadius * sphereRadius;
+
+    float discriminant = b * b - 4.0 * a * c;
+
+    // No intersections: discriminant < 0	1 intersection: discriminant == 0	2 intersections: discriminant > 0
+    if (discriminant > 0) {
+        float s = sqrt(discriminant);
+        float dstToSphereNear = max (0.0, (-b - s) / (2.0 * a));
+        float dstToSphereFar = (-b + s) / (2.0 * a);
+
+        if (dstToSphereFar >= 0.0) {
+            return vec2 (dstToSphereNear, dstToSphereFar - dstToSphereNear);
+        }
+    }
+    return vec2(0,0);
+}
+
+
+void main()
+{
+	vec2 uv = clamp(vec2(gl_GlobalInvocationID.xy) / float(texSize), 0, 1);
+	float height01 = uv.y;
+	float angle = uv.x * 3.141592653;
+
+	vec2 dir = vec2(sin(angle), cos(angle));
+	float y = -2.0 * uv.x + 1.0;
+	float x = sin(acos(y));
+	dir = vec2(x,y);
+	
+	vec2 inPoint = vec2(0, mix(planetRadius, atmosphereRadius, height01));
+	float dstThroughAtmosphere = raySphere(atmosphereRadius, vec3(inPoint,0), vec3(dir,0)).y;
+	vec2 outPoint = inPoint + dir * raySphere(atmosphereRadius, vec3(inPoint,0), vec3(dir,0)).y;
+	float outScattering = opticalDepth(inPoint + dir * 0.0001, dir, dstThroughAtmosphere-0.0002);
+
+	// imageStore(bakedOpticalTexture, ivec2(gl_GlobalInvocationID.xy), vec4(outScattering, outScattering, outScattering, outScattering));
+	imageStore(bakedOpticalTexture, ivec2(gl_GlobalInvocationID.xy), vec4(uv.x, uv.y, outScattering, outScattering));
+
+}

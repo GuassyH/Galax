@@ -39,7 +39,7 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	planet_char->atmosphere_config.atmosphereHeight = 600.0f;
 	planet_char->atmosphere_config.scatteringCoefficient = 200.0f;
 	planet_char->atmosphere_config.wavelengths = glm::vec3(700.0f, 550.0f, 440.0f);
-	planet_char->atmosphere_config.scatteringStrength = 0.15f;
+	planet_char->atmosphere_config.scatteringStrength = 128.150f;
 	planet_char->atmosphere_config.intensity = 0.9f;
 	planet_char->atmosphere_config.UpdateWavelengthScatter();
 	planet_char->hasAtmosphere = true;
@@ -53,7 +53,7 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	planet_char->ocean_config.normalStrength = 0.2f;
 	planet_char->ocean_config.triplanarBlend = 2.5f;
 
-	planet_char->shader.colorMaps.push_back( { glm::vec4(0.3f, 0.5f, 0.2f, 1.0), glm::vec4(1.0f), 0.0f, 0.0f} );
+	planet_char->shader.colorMaps.push_back({ glm::vec4(0.3f, 0.5f, 0.2f, 1.0), glm::vec4(1.0f), 0.0f, 0.0f });
 
 
 	// Moon
@@ -113,6 +113,10 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	planet_char->physicsBody.velocity = glm::vec3(0.0f, 0.0f, -3.55f);
 
 	// Universe::UniverseManager::Get().SetIdealOrbitVelocity(planet_char.get(), sun.get());
+
+	for (auto planet : Universe::UniverseManager::Get().GetPlanets()) {
+		renderer.atmosphereRenderer->BakeOpticalDepth(planet->atmosphere_config, planet->radius);
+	}
 
 	return sun;
 }

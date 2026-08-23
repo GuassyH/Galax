@@ -27,7 +27,7 @@ namespace Universe {
 
 		std::shared_ptr<Transform> transform;
 
-		void Init(Camera& camera);
+		void Init(Renderer& renderer, Camera& camera);
 
 		void PushPlanet(std::shared_ptr<Planet> planet) {
 			planets.push_back(planet);

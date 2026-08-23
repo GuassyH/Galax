@@ -1,5 +1,7 @@
 #version 460 core
 
+// TAKEN FROM SEBASTIAN LAGUE
+// (While learning)
 
 // Atmosphere
 uniform float planetRadius;
@@ -8,10 +10,9 @@ uniform float intensity;
 uniform float densityFalloff;
 
 uniform vec3 centre;
-uniform vec3 wavelengths;
 uniform vec3 wavelengthScatter;
 
-uniform float scatteringStrength;
+uniform sampler2D bakedOpticalTexture;
 
 uniform mat4 invProjMat;
 
@@ -75,30 +76,37 @@ float densityAtPoint(float atmosphereRadius, vec3 samplePoint){
 	float height01 = heightAbove / (atmosphereRadius - planetRadius);
 	height01 = clamp(height01, 0.0, 1.0);
 
+	if (height01 == 0)
+		return 1.0;
+	
 	float localDensity = exp(-height01 * densityFalloff) * (1 - height01);
 
 	return localDensity;
 }
 
+float opticalDepthBaked(vec3 rayOrigin, vec3 rayDir, float atmosphereRadius) {
+	float height = length(rayOrigin - centre) - planetRadius;
+	float height01 = clamp(height / (atmosphereRadius - planetRadius), 0, 1);
 
-
-
-// Light coming from the sun to the point
-float opticalDepth(float atmosphereRadius, vec3 rayOrigin, vec3 rayDir, float sunRayLength){
-	vec3 densitySamplePoint = rayOrigin;
-	float stepSize = sunRayLength / (numOpticalDepthPoints - 1);
-	float opticalDepth = 0;
-
-	for(int i = 0; i < numOpticalDepthPoints; i++){
-		float localDensity = densityAtPoint(atmosphereRadius, densitySamplePoint);
-		opticalDepth += localDensity * stepSize;
-		densitySamplePoint += rayDir * stepSize;
-	}
-
-	return opticalDepth;
+	float uvX = 1 - (dot(normalize(rayOrigin - centre), rayDir) * 0.5 + 0.5);
+	return textureLod(bakedOpticalTexture, vec2(uvX, height01), 0).a;
 }
 
+float opticalDepthBaked2(vec3 rayOrigin, vec3 rayDir, float rayLength, float atmosphereRadius) {
+	vec3 endPoint = rayOrigin + rayDir * rayLength;
+	float d = dot(rayDir, normalize(rayOrigin-centre));
+	float opticalDepth = 0;
 
+	const float blendStrength = 1.5;
+	float w = clamp(d * blendStrength + .5, 0, 1);
+				
+	float d1 = opticalDepthBaked(rayOrigin, rayDir, atmosphereRadius) - opticalDepthBaked(endPoint, rayDir, atmosphereRadius);
+	float d2 = opticalDepthBaked(endPoint, -rayDir, atmosphereRadius) - opticalDepthBaked(rayOrigin, -rayDir, atmosphereRadius);
+
+	opticalDepth = mix(d2, d1, w);
+	return opticalDepth;
+}
+			
 
 /////////////////////////////////////
 // Calculation 
@@ -118,24 +126,31 @@ vec3 calculateLight(float atmosphereRadius, vec3 rayOrigin, vec3 rayDir, float d
 	vec3 dirToSun = normalize(sunPos - centre);
 	
 	for(int i = 0; i < numInScatteringPoints; i++){
-		
-		float sunRayLength = raySphere(centre, atmosphereRadius, inScatterPoint, dirToSun).y;
-		float sunRayOpticalDepth = opticalDepth(atmosphereRadius, inScatterPoint, dirToSun, sunRayLength);
-		viewRayOpticalDepth = opticalDepth(atmosphereRadius, inScatterPoint, -rayDir, stepSize * i);
-		vec3 transmittance = exp(-(sunRayOpticalDepth + viewRayOpticalDepth) * wavelengthScatter);
-		float localDensity = densityAtPoint(atmosphereRadius, inScatterPoint);
+		// float sunRayLength = raySphere(centre, atmosphereRadius, inScatterPoint, dirToSun).y;
+		float sunRayOpticalDepth = opticalDepthBaked(inScatterPoint, dirToSun, atmosphereRadius);
 
-		// inScatteredLight += localDensity * transmittance;
-		inScatteredLight += localDensity * transmittance * wavelengthScatter * stepSize;
+		float localDensity = densityAtPoint(atmosphereRadius, inScatterPoint);
+		viewRayOpticalDepth = opticalDepthBaked2(rayOrigin, rayDir, stepSize * i, atmosphereRadius);
+		vec3 transmittance = exp(-(sunRayOpticalDepth + viewRayOpticalDepth) * wavelengthScatter);
+					
+		inScatteredLight += localDensity * transmittance;
 		inScatterPoint += rayDir * stepSize;
 	}
 
-	// inScatteredLight *= wavelengthScatter * intensity * stepSize / planetRadius;
-	inScatteredLight *= intensity;
-	float originalColTransmittance = exp(-viewRayOpticalDepth);
+	inScatteredLight *= wavelengthScatter * intensity * stepSize / planetRadius;
+	
+	const float brightnessAdaptionStrength = 0.15;
+	const float reflectedLightOutScatterStrength = 3;
+	float brightnessAdaption = dot (inScatteredLight, vec3(1)) * brightnessAdaptionStrength;
+	float brightnessSum = viewRayOpticalDepth * intensity * reflectedLightOutScatterStrength + brightnessAdaption;
+	float reflectedLightStrength = exp(-brightnessSum);
+	float hdrStrength = clamp(((dot(originalCol, vec3(1)) / 3) -1), 0, 1);
+	reflectedLightStrength = mix(reflectedLightStrength, 1, hdrStrength);
+	vec3 reflectedLight = originalCol * reflectedLightStrength;
 
-	// return viewRayOpticalDepth == 0 ? inScatteredLight : (originalCol * originalColTransmittance) + inScatteredLight;
-	return inScatteredLight;
+	vec3 finalCol = reflectedLight + inScatteredLight;
+
+	return finalCol;
 }
 
 
@@ -206,9 +221,9 @@ void main(){
 		if(dstThrough > 0.0) {
 			const float epsilon = 0.001;
 			vec3 entryPoint = (rayDir * (dstTo + epsilon));
-			vec3 light = calculateLight(atmosphereRadius, entryPoint + camPos, rayDir, dstThrough - (epsilon * 2), vec3(fragColor));
+			vec3 light = calculateLight(atmosphereRadius, entryPoint + camPos, rayDir, dstThrough - (epsilon * 2), fragColor.rgb);
 
-			fragColor += vec4(light, 0.0);
+			fragColor = vec4(light, 1.0);
 		}
 	}
 } 
