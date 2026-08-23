@@ -88,7 +88,7 @@ float opticalDepthBaked(vec3 rayOrigin, vec3 rayDir, float atmosphereRadius) {
 	float height = length(rayOrigin - centre) - planetRadius;
 	float height01 = clamp(height / (atmosphereRadius - planetRadius), 0, 1);
 
-	float uvX = 1 - (dot(normalize(rayOrigin - centre), rayDir) * 0.5 + 0.5);
+	float uvX = 1 - clamp(dot(normalize(rayOrigin - centre), rayDir) * 0.5 + 0.5, 0.001, 0.999);
 	return textureLod(bakedOpticalTexture, vec2(uvX, height01), 0).a;
 }
 
