@@ -85,14 +85,14 @@ void main(){
 		return;
 	}
 
-	float angle = acos(dot(normalize(crntPos - centre), normal));
+	float angle = acos(dot(normalize(crntPos), normal));
 
 	bool foundHeight = false;
 	for (int i = 0; i < numColorMaps; i++){
 		int id = (numColorMaps - 1) - i;
 		if ((length(localPos) - radius) + (colNoise * colorMaps[id].heightSharpness) > colorMaps[id].height) {
 
-			if (angle >= colorMaps[id].steepness && colorMaps[id].steepness != 0.0)
+			if (angle >= colorMaps[id].steepness + (colNoise * colorMaps[id].steepSharpness) && colorMaps[id].steepness != 0.0)
 				fragCol.rgb = colorMaps[id].steepCol.rgb;
 			else
 				fragCol.rgb = colorMaps[id].color.rgb;

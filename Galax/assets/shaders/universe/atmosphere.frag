@@ -88,9 +88,9 @@ float opticalDepthBaked(vec3 rayOrigin, vec3 rayDir, float atmosphereRadius) {
 	float height = length(rayOrigin - centre) - planetRadius;
 	float height01 = clamp(height / (atmosphereRadius - planetRadius), 0, 1);
 
-	// Theres a weird precision error in the creation of the opticaldepth tex. Therefore clamping is needed
+	// Theres a weird precision error in the creation of the opticaldepth tex. Therefore clamping is needed The border pixels arent rendered CHECK OPTICAL DEPTH BAKER
 	float uvX = 1 - clamp(dot(normalize(rayOrigin - centre), rayDir) * 0.5 + 0.5, 0.001, 0.999);
-	return textureLod(bakedOpticalTexture, vec2(uvX, height01), 0).a;
+	return textureLod(bakedOpticalTexture, vec2(uvX, clamp(height01, 0.001, 0.999)), 0).a;
 }
 
 float opticalDepthBaked2(vec3 rayOrigin, vec3 rayDir, float rayLength, float atmosphereRadius) {
@@ -190,7 +190,8 @@ vec3 ReconstructViewPos(vec2 uv, float depth)
 
 
 void main(){
-	fragColor = texture(screenTexture, texCoord);
+
+	vec4 originalCol = texture(screenTexture, texCoord);
 
 	// Get Raydir
 	vec2 rayCoord = texCoord * 2.0 - 1.0;
@@ -222,9 +223,12 @@ void main(){
 		if(dstThrough > 0.0) {
 			const float epsilon = 0.001;
 			vec3 entryPoint = (rayDir * (dstTo + epsilon));
-			vec3 light = calculateLight(atmosphereRadius, entryPoint + camPos, rayDir, dstThrough - (epsilon * 2), fragColor.rgb);
+			vec3 light = calculateLight(atmosphereRadius, entryPoint + camPos, rayDir, dstThrough - (epsilon * 2), originalCol.rgb);
 
 			fragColor = vec4(light, 1.0);
+			return;
 		}
 	}
+
+	fragColor = originalCol;
 } 

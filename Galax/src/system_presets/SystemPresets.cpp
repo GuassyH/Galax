@@ -37,9 +37,9 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 
 	planet_char->atmosphere_config.densityFalloff = 3.5f;
 	planet_char->atmosphere_config.atmosphereHeight = 1000.0f;
-	planet_char->atmosphere_config.scatteringCoefficient = 200.0f;
+	planet_char->atmosphere_config.scatteringCoefficient = 300.0f;
 	planet_char->atmosphere_config.wavelengths = glm::vec3(700.0f, 550.0f, 440.0f);
-	planet_char->atmosphere_config.scatteringStrength = 128.150f;
+	planet_char->atmosphere_config.scatteringStrength = 50.150f;
 	planet_char->atmosphere_config.intensity = 1.0f;
 	planet_char->atmosphere_config.UpdateWavelengthScatter();
 	planet_char->hasAtmosphere = true;
