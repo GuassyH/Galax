@@ -101,7 +101,7 @@ namespace Universe {
 	
 
 		opticalBakeComp.SetInt("texSize", textureWidth);
-		opticalBakeComp.SetInt("numOutScatteringSteps", numInScatteringPoints);
+		opticalBakeComp.SetInt("numOutScatteringSteps", numOpticalDepthPoints);
 		opticalBakeComp.SetFloat("densityFalloff", atmosphereConfig.densityFalloff);
 		opticalBakeComp.SetFloat("atmosphereRadius", (atmosphereConfig.atmosphereHeight + planetRadius) / planetRadius);
 		opticalBakeComp.SetFloat("planetRadius", 1.0);

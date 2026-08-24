@@ -7,6 +7,6 @@ namespace GUI {
 
 	class PlanetEditor {
 	public:
-		static void DrawPlanetEditor(Renderer& renderer, Player& player);
+		static void DrawPlanetEditor(Renderer& renderer, Player& player, Universe::Planet* planet);
 	};
 };

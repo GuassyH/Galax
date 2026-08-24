@@ -9,8 +9,10 @@
 struct ColorMap {
 	glm::vec4 col = glm::vec4(0.0f);
 	glm::vec4 steepCol = glm::vec4(0.0f);
-	float height = 0.0f;
-	float steep = 0.0f;
+	float height;
+	float steepness; // match CPU padding
+	float heightSharpness = 0.0f;
+	float steepSharpness = 0.0f;
 };
 
 class PlanetShader : public Shader {

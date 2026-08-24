@@ -35,7 +35,8 @@ void ConstructChunk(CubeSphere::Chunk* inChunk, Transform* base_transform) {
 			vert.normal = glm::normalize(spherePos);
 
 			glm::vec2 coord = glm::vec2((static_cast<float>(x) / static_cast<float>(inChunk->resolution)), (static_cast<float>(y) / static_cast<float>(inChunk->resolution)));
-			vert.texCoord = coord;
+			vert.params.x = coord.x;
+			vert.params.y = coord.y;
 
 			vertices.push_back(vert);
 		}

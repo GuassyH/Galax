@@ -2,7 +2,7 @@
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
-layout (location = 2) in vec2 aTexCoord;
+layout (location = 2) in vec4 aParams;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -14,6 +14,7 @@ out vec3 normal;
 out vec3 crntPos;
 out vec2 texCoord;
 out vec4 vertColor;
+out float colNoise;
 void main(){
 	mat3 normalMat = mat3(transpose(inverse(model)));
 
@@ -23,7 +24,8 @@ void main(){
 	crntPos = vec3(model * vec4(aPos, 1.0));
 	gl_Position = proj * view * vec4(crntPos, 1.0);
 
-	texCoord = aTexCoord;
+	texCoord = aParams.xy;
+	colNoise = aParams.z;
 
 	normal = normalize(normalMat * aNormal);
 	vertColor = vec4(1.0);

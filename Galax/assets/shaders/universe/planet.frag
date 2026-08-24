@@ -14,6 +14,7 @@ in vec3 localNorm;
 in vec3 crntPos;
 in vec2 texCoord;
 in vec4 vertColor;
+in float colNoise;
 
 uniform int numColorMaps;
 
@@ -23,6 +24,8 @@ struct ColorMap {
 	vec4 steepCol;
 	float height;
 	float steepness; // match CPU padding
+	float heightSharpness;
+	float steepSharpness;
 };
 
 layout(std430, binding = 0) buffer ColorMaps {
@@ -82,12 +85,18 @@ void main(){
 		return;
 	}
 
-	float relative_dot = dot(normalize(crntPos - centre), normal);
+	float angle = acos(dot(normalize(crntPos - centre), normal));
 
 	bool foundHeight = false;
 	for (int i = 0; i < numColorMaps; i++){
-		if ((length(localPos) - radius) > colorMaps[(numColorMaps - 1) - i].height) {
-			fragCol.rgb = colorMaps[(numColorMaps - 1) - i].color.rgb;
+		int id = (numColorMaps - 1) - i;
+		if ((length(localPos) - radius) + (colNoise * colorMaps[id].heightSharpness) > colorMaps[id].height) {
+
+			if (angle >= colorMaps[id].steepness && colorMaps[id].steepness != 0.0)
+				fragCol.rgb = colorMaps[id].steepCol.rgb;
+			else
+				fragCol.rgb = colorMaps[id].color.rgb;
+
 			foundHeight = true;
 			break;
 		}
@@ -102,4 +111,5 @@ void main(){
 		fragCol *= directionalLight();
 	
 	fragCol.a = 1.0;
+
 }

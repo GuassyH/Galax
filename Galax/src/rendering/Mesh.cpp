@@ -24,7 +24,7 @@ bool Mesh::Calculate() {
 
 	vao.LinkAttrib(0, 3, GL_FLOAT, sizeof(Vertex), 0);
 	vao.LinkAttrib(1, 3, GL_FLOAT, sizeof(Vertex), offsetof(Vertex, normal));
-	vao.LinkAttrib(2, 2, GL_FLOAT, sizeof(Vertex), offsetof(Vertex, texCoord));
+	vao.LinkAttrib(2, 4, GL_FLOAT, sizeof(Vertex), offsetof(Vertex, params));
 
 	ebo.BindBufferData(sizeof(GLuint) * indices.size(), indices.data());
 

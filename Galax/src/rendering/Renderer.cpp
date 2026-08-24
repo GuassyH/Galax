@@ -243,7 +243,7 @@ void Renderer::CreateFBOSet(GLuint* framebuffer, GLuint* screentex, GLuint* dept
 
 	// Check framebuffer
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		GX_ERROR("Atmosphere Framebuffer incomplete");
+		GX_ERROR("Framebuffer incomplete");
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

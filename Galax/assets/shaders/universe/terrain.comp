@@ -22,8 +22,7 @@ struct Vertex {
 	float pad1; // match CPU padding
 	vec3 normal;
 	float pad2; // match CPU padding
-	vec2 texCoords;
-	float pad[2];
+	vec4 params; // Tex X, Tex Y, Noise, ??
 };
 
 layout(std430, binding = 0) buffer Vertices {
@@ -123,6 +122,10 @@ struct NoiseLayer {
 	float heightShift;
 	float wobble;
 	float power;
+	float minMask;
+	float pad1;
+	float pad2;
+	float pad3;
 };
 
 layout(std430, binding = 2) buffer NoiseLayers {
@@ -252,7 +255,15 @@ float NoiseInfluence(Vertex vert) {
 
 		// Normalize and apply height shift
 		// current_noise = current_noise - (totalStrength / 2.0) + currentLayer.heightShift;
-		current_noise += currentLayer.heightShift;
+		// current_noise += currentLayer.heightShift;
+
+		// current_noise += clamp(currentLayer.heightShift, -radius + currentLayer.minMask + total_noise, currentLayer.heightShift);
+
+		if (radius + total_noise + current_noise + currentLayer.heightShift < currentLayer.minMask){
+			current_noise += currentLayer.minMask - radius;
+		}else{
+			current_noise += currentLayer.heightShift;
+		}
 
 		total_noise += current_noise;
 	}
@@ -327,6 +338,7 @@ void main(){
 
 	vert.position = pos;
 	vert.normal = normal;
+	vert.params.z = PerlinNoise(pos) * 2 - 1;
 
 	// assign it back
 	vertices[vertID] = vert;

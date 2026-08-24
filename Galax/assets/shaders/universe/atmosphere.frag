@@ -88,6 +88,7 @@ float opticalDepthBaked(vec3 rayOrigin, vec3 rayDir, float atmosphereRadius) {
 	float height = length(rayOrigin - centre) - planetRadius;
 	float height01 = clamp(height / (atmosphereRadius - planetRadius), 0, 1);
 
+	// Theres a weird precision error in the creation of the opticaldepth tex. Therefore clamping is needed
 	float uvX = 1 - clamp(dot(normalize(rayOrigin - centre), rayDir) * 0.5 + 0.5, 0.001, 0.999);
 	return textureLod(bakedOpticalTexture, vec2(uvX, height01), 0).a;
 }
@@ -120,14 +121,14 @@ vec3 calculateLight(float atmosphereRadius, vec3 rayOrigin, vec3 rayDir, float d
 	vec3 inScatterPoint = rayOrigin;
 	vec3 inScatteredLight = vec3(0.0);
 	
-	float stepSize = dstThrough / (numInScatteringPoints - 1);
+	float stepSize = dstThrough / (numInScatteringPoints + 1);
 	float viewRayOpticalDepth = 0.0;
 
 	vec3 dirToSun = normalize(sunPos - centre);
 	
 	for(int i = 0; i < numInScatteringPoints; i++){
-		// float sunRayLength = raySphere(centre, atmosphereRadius, inScatterPoint, dirToSun).y;
-		float sunRayOpticalDepth = opticalDepthBaked(inScatterPoint, dirToSun, atmosphereRadius);
+		float sunRayLength = raySphere(centre, atmosphereRadius, inScatterPoint, dirToSun).y;
+		float sunRayOpticalDepth = opticalDepthBaked2(inScatterPoint, dirToSun, sunRayLength, atmosphereRadius);
 
 		float localDensity = densityAtPoint(atmosphereRadius, inScatterPoint);
 		viewRayOpticalDepth = opticalDepthBaked2(rayOrigin, rayDir, stepSize * i, atmosphereRadius);

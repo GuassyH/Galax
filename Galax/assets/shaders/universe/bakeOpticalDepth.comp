@@ -34,7 +34,7 @@ float densityAtPoint(vec2 samplePoint) {
 
 float opticalDepth(vec2 rayOrigin, vec2 rayDir, float rayLength){
 	vec2 densitySamplePoint = rayOrigin;
-	float stepSize = rayLength / (numOutScatteringSteps - 1);
+	float stepSize = rayLength / (numOutScatteringSteps + 1);
 	float opticalDepth = 0;
 
 	for(int i = 0; i < numOutScatteringSteps; i++){

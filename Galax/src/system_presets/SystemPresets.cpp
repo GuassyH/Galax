@@ -11,7 +11,7 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	std::shared_ptr<Universe::Planet> planet_char = std::make_shared<Universe::Planet>();
 	planet_char->name = "Charley Planet";
 	planet_char->shader = PlanetShader("assets/shaders/universe/planet.frag", "assets/shaders/universe/planet.vert");
-	planet_char->radius = 2500;
+	planet_char->radius = 5000;
 	planet_char->resolution = 100;
 	planet_char->LODradii = { 6.0f, 4.5, 3.0f, 1.5f, 1.0f };
 
@@ -23,8 +23,8 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	planet_char->terrainGenerator.craterHeight = 2.0f;
 
 
-	planet_char->terrainGenerator.noiseLayers.push_back(NewNoiseLayer(glm::vec3(0.0f), NoiseType::Perlin, 0.001f, 80.0f, 30, 1.25f, 0.75f, -178.0f));
-	planet_char->terrainGenerator.noiseLayers.push_back(NewNoiseLayer(glm::vec3(0.0f), NoiseType::Voronoi, 0.001f, 100.0f, 1, 1.25f, 0.75f, 0.0f, 0.0f, 3));
+	planet_char->terrainGenerator.noiseLayers.push_back(NewNoiseLayer(glm::vec3(0.0f), NoiseType::Voronoi, 0.0005f, 523.0f, 2, 1.25f, 0.5f, -1050.0f, 100.0f, 9, planet_char->radius));
+	planet_char->terrainGenerator.noiseLayers.push_back(NewNoiseLayer(glm::vec3(0.0f), NoiseType::Perlin, 0.001f, 50.0f, 30, 1.25f, 0.75f, -118.0f));
 
 
 	planet_char->physicsBody.mass = 10000000;
@@ -35,12 +35,12 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	planet_char->transform->local_position = glm::vec3(5555000.0f, 0.0f, 0.0f);
 	planet_char->transform->UpdateMatrix();
 
-	planet_char->atmosphere_config.densityFalloff = 6.5f;
-	planet_char->atmosphere_config.atmosphereHeight = 600.0f;
+	planet_char->atmosphere_config.densityFalloff = 3.5f;
+	planet_char->atmosphere_config.atmosphereHeight = 1000.0f;
 	planet_char->atmosphere_config.scatteringCoefficient = 200.0f;
 	planet_char->atmosphere_config.wavelengths = glm::vec3(700.0f, 550.0f, 440.0f);
 	planet_char->atmosphere_config.scatteringStrength = 128.150f;
-	planet_char->atmosphere_config.intensity = 0.9f;
+	planet_char->atmosphere_config.intensity = 1.0f;
 	planet_char->atmosphere_config.UpdateWavelengthScatter();
 	planet_char->hasAtmosphere = true;
 
@@ -53,7 +53,10 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	planet_char->ocean_config.normalStrength = 0.2f;
 	planet_char->ocean_config.triplanarBlend = 2.5f;
 
-	planet_char->shader.colorMaps.push_back({ glm::vec4(0.3f, 0.5f, 0.2f, 1.0), glm::vec4(1.0f), 0.0f, 0.0f });
+	planet_char->shader.colorMaps.push_back({ glm::vec4(0.7f, 0.7f, 0.25f, 1.0), glm::vec4(0.3f, 0.5f, 0.2f, 1.0), 0.0f, 15.0f });
+	planet_char->shader.colorMaps.push_back({ glm::vec4(0.3f, 0.5f, 0.2f, 1.0), glm::vec4(1.0f), 1.0f, 0.0f, 0.4f });
+	planet_char->shader.colorMaps.push_back({ glm::vec4(0.25f, 0.25f, 0.25f, 1.0), glm::vec4(1.0f), 50.0f, 0.0f, 6.0f });
+	planet_char->shader.colorMaps.push_back({ glm::vec4(0.8f, 0.8f, 0.8f, 1.0), glm::vec4(1.0f), 170.0f, 0.0f, 90.0f });
 
 
 	// Moon
@@ -67,7 +70,7 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	moon->terrainGenerator.numCraters = 20;
 	moon->terrainGenerator.baseSize = 3;
 
-	moon->terrainGenerator.noiseLayers.push_back(NewNoiseLayer({}, {}, 0.01f, 14.0f, 6));
+	moon->terrainGenerator.noiseLayers.push_back(NewNoiseLayer({}, {}, 0.01f, 14.0f, 20));
 
 	moon->mpr = 60;
 	moon->rotation_axis = glm::vec3(0.0, 1.0, 0.0);
@@ -87,7 +90,7 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	sun->resolution = 40;
 	sun->LODradii = { };
 
-	sun->shader.colorMaps.push_back( { glm::vec4(1.0f), glm::vec4(1.0f), 0.0f, 0.0f } );
+	sun->shader.colorMaps.push_back( { glm::vec4(0.99f, 0.99f, 0.8f, 1.0f), glm::vec4(1.0f), 0.0f, 0.0f } );
 	sun->shader.lit = false;
 
 	sun->terrainGenerator.noiseLayers.push_back(NewNoiseLayer(glm::vec3(0.0f), NoiseType::Perlin, 0.0001f, 200.0f, 6));

@@ -2,8 +2,11 @@
 #include "universe/UniverseManager.h"
 #include "core/Time.h"
 #include "PlanetEditorGUI.h"
+#include "core/Input.h"
 
 namespace GUI {
+
+	int selectedPlanet = 0;
 
 	void GUI::Init(GLFWwindow* window) {
 		IMGUI_CHECKVERSION();
@@ -26,13 +29,13 @@ namespace GUI {
 
 		int seconds = glm::mod(raw_time, spm);
 		int minutes = glm::mod(raw_minutes, mph);
-		int hours	= glm::mod(raw_hours, hpd);
-		int days	= glm::mod(raw_days, dpy);
-		int years	= raw_years;
+		int hours = glm::mod(raw_hours, hpd);
+		int days = glm::mod(raw_days, dpy);
+		int years = raw_years;
 
 		std::ostringstream time_text; time_text << "Time: ";
 
-		if (years > 0) 
+		if (years > 0)
 			time_text << years << "y ";
 		if (days > 0)
 			time_text << days << "d ";
@@ -58,19 +61,33 @@ namespace GUI {
 
 
 	void GUI::Render(Renderer& renderer, GLFWwindow* window, Player& player) {
+
+		const std::vector<std::shared_ptr<Universe::Planet>>& planets = Universe::UniverseManager::Get().GetPlanets();
+
+		ImGui::SetNextWindowSize(ImVec2(300, Galax::InputManager::Get().windowSize.y));
 		ImGui::SetNextWindowPos(ImVec2(0, 0));
-		if (ImGui::Begin("tinker box", nullptr, ImGuiWindowFlags_NoMove)) {
+		if (ImGui::Begin("Play ground", nullptr, ImGuiWindowFlags_NoMove)) {
 			Header("Simulation");
 
 			ImGui::Checkbox("Simulate", &Universe::UniverseManager::Get().isSimulating);
 			ImGui::DragFloat("TimeScale", &Galax::Time::Get().timeScale);
 			DrawTime(Universe::UniverseManager::Get().time, 60, 60, 24, 365);
-	
+
 			Header("Bodies");
 
-			PlanetEditor::DrawPlanetEditor(renderer, player);
+			for (int i = 0; i < planets.size(); i++) {
+				if (ImGui::Selectable(std::string(planets[i]->name + std::string("##selectable_planet_") + std::to_string(i)).c_str(), selectedPlanet == i, ImGuiSelectableFlags_None)){
+					selectedPlanet = i;
+				}
+			}
 
+			Header("Atmosphere");
 
+			ImGui::InputInt("In Scatter Points", &renderer.atmosphereRenderer->numInScatteringPoints);
+			if (ImGui::InputInt("Optical Depth Points", &renderer.atmosphereRenderer->numOpticalDepthPoints)) {
+				for (auto planet : planets)
+					renderer.atmosphereRenderer->BakeOpticalDepth(planet->atmosphere_config, planet->radius);
+			}
 
 			Header("Vertex SSBO");
 
@@ -86,8 +103,6 @@ namespace GUI {
 			std::ostringstream vtx_ssbo_info; vtx_ssbo_info << "Vertex SSBO: " << vtx_prc << "%%";
 			ImGui::Text(vtx_ssbo_info.str().c_str());
 
-
-
 			Header("Crater SSBO");
 
 			float used_crtr = MAX_CRATERS * sizeof(TerrainGenerator::Crater);
@@ -101,8 +116,6 @@ namespace GUI {
 
 			std::ostringstream crtr_ssbo_info; crtr_ssbo_info << "Crater SSBO: " << crtr_prc << "%%";
 			ImGui::Text(crtr_ssbo_info.str().c_str());
-
-
 
 			Header("NoiseLayer SSBO");
 
@@ -120,6 +133,14 @@ namespace GUI {
 
 		}
 		ImGui::End();
+
+		ImGui::SetNextWindowSize(ImVec2(300, Galax::InputManager::Get().windowSize.y));
+		ImGui::SetNextWindowPos(ImVec2(Galax::InputManager::Get().windowSize.x - 300, 0));
+		if (ImGui::Begin("tinker box", nullptr, ImGuiWindowFlags_NoMove)) {
+			if (planets.size() > selectedPlanet)
+				PlanetEditor::DrawPlanetEditor(renderer, player, planets[selectedPlanet].get());
+
+		}ImGui::End();
 	}
 
 	void GUI::NewFrame(GLFWwindow* window) {
