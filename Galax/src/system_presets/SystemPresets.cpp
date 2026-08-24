@@ -53,11 +53,10 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	planet_char->ocean_config.normalStrength = 0.2f;
 	planet_char->ocean_config.triplanarBlend = 2.5f;
 
-	planet_char->shader.colorMaps.push_back({ glm::vec4(0.7f, 0.7f, 0.25f, 1.0), glm::vec4(0.3f, 0.5f, 0.2f, 1.0), 0.0f, 15.0f });
-	planet_char->shader.colorMaps.push_back({ glm::vec4(0.3f, 0.5f, 0.2f, 1.0), glm::vec4(1.0f), 1.0f, 0.0f, 0.4f });
-	planet_char->shader.colorMaps.push_back({ glm::vec4(0.25f, 0.25f, 0.25f, 1.0), glm::vec4(1.0f), 50.0f, 0.0f, 6.0f });
-	planet_char->shader.colorMaps.push_back({ glm::vec4(0.8f, 0.8f, 0.8f, 1.0), glm::vec4(1.0f), 170.0f, 0.0f, 90.0f });
-
+	planet_char->shader.colorMaps.push_back(NewColorMap(glm::vec4(0.7f, 0.7f, 0.25f, 1.0), glm::vec4(0.3f, 0.5f, 0.2f, 1.0), 0.0f, 0.0f, 0.0f, 15.0f));
+	planet_char->shader.colorMaps.push_back(NewColorMap(glm::vec4(0.3f, 0.5f, 0.2f, 1.0), {}, 1.0f, 0.4f));
+	planet_char->shader.colorMaps.push_back(NewColorMap(glm::vec4(0.3f, 0.5f, 0.2f, 1.0), glm::vec4(0.25f, 0.25f, 0.25f, 1.0), 50.0f, 6.0f, 0.0f, 0.09f, 0.0f, 0.0f));
+	planet_char->shader.colorMaps.push_back(NewColorMap(glm::vec4(0.8f, 0.8f, 0.8f, 1.0), glm::vec4(1.0), 170.0f, 90.0f));
 
 	// Moon
 	std::shared_ptr<Universe::Planet> moon = std::make_shared<Universe::Planet>();
@@ -67,7 +66,7 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	moon->resolution = 50;
 	moon->LODradii = { 6.0, 3.0, 1.5, 1.0 };
 
-	moon->terrainGenerator.numCraters = 20;
+	moon->terrainGenerator.numCraters = 80;
 	moon->terrainGenerator.baseSize = 3;
 
 	moon->terrainGenerator.noiseLayers.push_back(NewNoiseLayer({}, {}, 0.01f, 14.0f, 20));
@@ -80,7 +79,7 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	moon->transform->local_position = planet_char->transform->world_position + glm::vec3(0.0, -1000.0, 20223.0);
 	moon->transform->UpdateMatrix();
 
-	moon->shader.colorMaps.push_back( { glm::vec4(0.3f), glm::vec4(1.0f), 0.0f, 0.0f } );
+	moon->shader.colorMaps.push_back(NewColorMap(glm::vec4(0.3f), glm::vec4(0.23f), 0.0f, 0.0f, 0.0f, 0.2f, 0.25f, 0.0f));
 
 	// Sun
 	std::shared_ptr<Universe::Planet> sun = std::make_shared<Universe::Planet>();
@@ -90,7 +89,7 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	sun->resolution = 40;
 	sun->LODradii = { };
 
-	sun->shader.colorMaps.push_back( { glm::vec4(0.99f, 0.99f, 0.8f, 1.0f), glm::vec4(1.0f), 0.0f, 0.0f } );
+	sun->shader.colorMaps.push_back(NewColorMap(glm::vec4(0.99f, 0.99f, 0.8f, 1.0f)));
 	sun->shader.lit = false;
 
 	sun->terrainGenerator.noiseLayers.push_back(NewNoiseLayer(glm::vec3(0.0f), NoiseType::Perlin, 0.0001f, 200.0f, 6));

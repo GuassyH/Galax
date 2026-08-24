@@ -23,9 +23,12 @@ struct ColorMap {
 	vec4 color;
 	vec4 steepCol;
 	float height;
-	float steepness; // match CPU padding
+	float heightDither;
 	float heightSharpness;
+	float steepness; // match CPU padding
+	float steepDither;
 	float steepSharpness;
+	float pad[2];
 };
 
 layout(std430, binding = 0) buffer ColorMaps {
@@ -85,14 +88,15 @@ void main(){
 		return;
 	}
 
-	float angle = acos(dot(normalize(crntPos), normal));
+	float angle = acos(dot(normalize(localPos), normal));
 
+	// Add mix??
 	bool foundHeight = false;
 	for (int i = 0; i < numColorMaps; i++){
 		int id = (numColorMaps - 1) - i;
-		if ((length(localPos) - radius) + (colNoise * colorMaps[id].heightSharpness) > colorMaps[id].height) {
+		if ((length(localPos) - radius) + (colNoise * colorMaps[id].heightDither) > colorMaps[id].height) {
 
-			if (angle >= colorMaps[id].steepness + (colNoise * colorMaps[id].steepSharpness) && colorMaps[id].steepness != 0.0)
+			if (angle >= colorMaps[id].steepness + (colNoise * colorMaps[id].steepDither) && colorMaps[id].steepness != 0.0)
 				fragCol.rgb = colorMaps[id].steepCol.rgb;
 			else
 				fragCol.rgb = colorMaps[id].color.rgb;

@@ -79,11 +79,13 @@ namespace GUI {
 				ImGui::Text("Color Map %i", i);
 				ImGui::DragFloat4(("Color" + id + "_color_map_" + std::to_string(i) + "_col").c_str(), &planet->shader.colorMaps[i].col.x);
 				ImGui::DragFloat(("Height" + id + "_color_map_" + std::to_string(i) + "_height").c_str(), &planet->shader.colorMaps[i].height);
+				ImGui::DragFloat(("Height Dither" + id + "_color_map_" + std::to_string(i) + "_height_dither").c_str(), &planet->shader.colorMaps[i].heightDither);
 				ImGui::DragFloat(("Height Sharpness" + id + "_color_map_" + std::to_string(i) + "_height_sharpness").c_str(), &planet->shader.colorMaps[i].heightSharpness);
 
 
 				ImGui::DragFloat4(("Steep Color" + id + "_color_map_" + std::to_string(i) + "_steepness").c_str(), &planet->shader.colorMaps[i].steepCol.x);
 				ImGui::DragFloat(("Steep" + id + "_color_map_" + std::to_string(i) + "_Steep").c_str(), &planet->shader.colorMaps[i].steepness);
+				ImGui::DragFloat(("Steep Dither" + id + "_color_map_" + std::to_string(i) + "_steep_dither").c_str(), &planet->shader.colorMaps[i].steepDither);
 				ImGui::DragFloat(("Steep Sharpness" + id + "_color_map_" + std::to_string(i) + "_Steep_sharpness").c_str(), &planet->shader.colorMaps[i].steepSharpness);
 
 			}
