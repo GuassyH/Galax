@@ -58,6 +58,7 @@ namespace GUI {
 				ImGui::DragFloat(("Intensity Factor" + id + "_noise_layer_" + std::to_string(i) + "_intensityFactor").c_str(), &noiseLayer.intensityFactor);
 				ImGui::DragFloat(("Height Shift" + id + "_noise_layer_" + std::to_string(i) + "_heightShift").c_str(), &noiseLayer.heightShift);
 				ImGui::DragFloat(("Wobble" + id + "_noise_layer_" + std::to_string(i) + "_wobble").c_str(), &noiseLayer.wobble);
+				ImGui::DragFloat(("Wobble Scale" + id + "_noise_layer_" + std::to_string(i) + "_wobble_scale").c_str(), &noiseLayer.wobble_scale);
 				if (noiseLayer.type == NoiseType::Voronoi)
 					ImGui::DragFloat(("Power" + id + "_noise_layer_" + std::to_string(i) + "_power").c_str(), &noiseLayer.power);
 				ImGui::DragFloat(("Min Mask" + id + "_noise_layer_" + std::to_string(i) + "_min_mask").c_str(), &noiseLayer.minMask);

@@ -18,9 +18,9 @@ struct NoiseLayer {
 	float intensityFactor = 0.75f;	// Each layer will be multiplied by this value, recommended < 1
 	float heightShift = 0.0f;		// Added to the result of the noise
 	float wobble = 0.0f;
+	float wobble_scale = 0.0f;
 	float power = 1.0f;				// In voronoi it raises to this power, thereby making it sharper. Otherwise its a pad
 	float minMask = 0.0f;			// dst to centre, not surf
-	float pad1;
 	float pad2;
 	float pad3;
 };
@@ -35,7 +35,8 @@ inline NoiseLayer NewNoiseLayer(
 	float intensityFactor = 0.75f, 
 	float heightShift = 0.0f,
 	float wobble = 0.0f,
+	float wobble_scale = 0.0f,
 	float power = 0.0f,
 	float minMask = 0.0f) {
-	return NoiseLayer{ centre, type, frequency, intensity, numLayers, frequencyFactor, intensityFactor, heightShift, wobble, power, minMask };
+	return NoiseLayer{ centre, type, frequency, intensity, numLayers, frequencyFactor, intensityFactor, heightShift, wobble, wobble_scale, power, minMask };
 }

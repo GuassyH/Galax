@@ -10,3 +10,8 @@ public:
 	static std::vector<GLuint> indices;
 };
 
+class Cube {
+public:
+	static std::vector<Vertex> vertices;
+	static std::vector<GLuint> indices;
+};

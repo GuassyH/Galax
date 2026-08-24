@@ -111,8 +111,8 @@ vec3 directionalLight(vec3 norm, vec3 sunDir, vec3 rayDir, vec3 baseColor, float
 
     float specAmount = pow(max(dot(-rayDir, reflectionDirection), 0.0), normalFactor);
 
-    float specularStrength = 0.5;
-    vec3 specular = vec3(specAmount * specularStrength) * fresnel;
+    float specularStrength = 1.0;
+    vec3 specular = vec3(specAmount * specularStrength);
 
     return ambient + (baseColor * diffuse) + specular;
 }
@@ -302,6 +302,7 @@ void main()
 
     vec3 viewSpacePos = entryPoint;
     float camDepth = dot(viewSpacePos, camForward);
+
 
     gl_FragDepth = DepthBufferFromLinear(max(camDepth, camNearPlane), camNearPlane);
 }

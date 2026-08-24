@@ -121,9 +121,9 @@ struct NoiseLayer {
 	float intensityFactor;
 	float heightShift;
 	float wobble;
+	float wobble_scale;
 	float power;
 	float minMask;
-	float pad1;
 	float pad2;
 	float pad3;
 };
@@ -159,6 +159,8 @@ float noise(vec2 x) {
 	vec2 u = f * f * (3.0 - 2.0 * f);
 	return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
 }
+
+
 
 float PerlinNoise(vec3 x) {
 	const vec3 step = vec3(110, 241, 171);
@@ -210,6 +212,17 @@ float VoronoiNoise(vec3 x){
 	return pow(res.x, 3);
 }
 
+vec3 Warp(vec3 p, float strength)
+{
+    vec3 offset = vec3(
+        PerlinNoise(p + vec3(17.1,  3.7, 11.2)),
+        PerlinNoise(p + vec3( 5.3, 19.4,  7.8)),
+        PerlinNoise(p + vec3(13.7,  9.1, 23.6))
+    );
+
+    return (offset * 2.0 - 1.0) * strength;
+}
+
 float NoiseInfluence(Vertex vert) {
     float total_noise = 0.0;
 	
@@ -218,7 +231,7 @@ float NoiseInfluence(Vertex vert) {
 
 		// Precompute base position for noise
 		vec3 pos = vec3(vert.position) + (currentLayer.centre * radius);
-
+		vec3 distortion = pos + Warp(pos * currentLayer.wobble_scale, currentLayer.wobble);
 
 		float current_noise = 0.0;           // Accumulated noise
 
@@ -229,17 +242,13 @@ float NoiseInfluence(Vertex vert) {
 		for (int i = 0; i < currentLayer.numLayers; i++) {
 			// Sample noise at current frequency
 
-			float randx = noise(currentLayer.wobble);
-			float randy = noise(randx);
-			float randz = noise(randy);
-
-			vec3 wobble_noise = normalize(vec3((2 * randx) - 1, (2*randy) - 1, (2*randz) - 1)) * currentLayer.wobble * radius;
-
 			float n = 0;
 			if(currentLayer.type == 0){
-				n = PerlinNoise((pos + wobble_noise) * freq);
+				n = PerlinNoise(distortion * freq);
+				// n = PerlinNoise((pos + Warp(pos, currentLayer.wobble)) * freq);
 			}else if (currentLayer.type == 1){
-				n = VoronoiNoise((pos + wobble_noise) * freq);
+				n = VoronoiNoise(distortion * freq);
+				// n = VoronoiNoise((pos + Warp(pos, currentLayer.wobble)) * freq);
 			}
 
 			// Accumulate weighted noise

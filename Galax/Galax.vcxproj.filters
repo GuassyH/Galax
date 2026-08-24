@@ -257,6 +257,8 @@
     <None Include="assets\shaders\debug\debug_path.frag" />
     <None Include="assets\shaders\debug\debug_path.vert" />
     <None Include="assets\shaders\universe\bakeOpticalDepth.comp" />
+    <None Include="assets\shaders\universe\skybox.vert" />
+    <None Include="assets\shaders\universe\skybox.frag" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\Diary.txt" />

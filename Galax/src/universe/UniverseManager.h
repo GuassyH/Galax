@@ -51,6 +51,10 @@ namespace Universe {
 		GLuint baseTexture;
 		GLuint baseDepth;
 
+		GLuint skyboxFBO;
+		GLuint skyboxTexture;
+		GLuint skyboxDepth;
+
 		GLuint starFBO; // for planets and stuff
 		GLuint starTexture;
 		GLuint starDepth;

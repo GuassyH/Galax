@@ -68,6 +68,7 @@ namespace Universe {
 		if (window_size.x != last_width || window_size.y != last_height) {
 			renderer.CreateFBOSet(&baseFBO, &baseTexture, &baseDepth);
 			renderer.CreateFBOSet(&starFBO, &starTexture, &starDepth);
+			renderer.CreateFBOSet(&skyboxFBO, &skyboxTexture, &skyboxDepth);
 
 			last_width = window_size.x;
 			last_height = window_size.y;
@@ -103,6 +104,17 @@ namespace Universe {
 			if (planet->hasAtmosphere) renderer.atmosphereRenderer->Render(camera, sun, planet.get(), planet->atmosphere_config, baseTexture, baseDepth);
 
 		// DRAW STARS
+		glBindFramebuffer(GL_FRAMEBUFFER, skyboxFBO);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_FALSE);
+		glDepthFunc(GL_GREATER);
+
+		renderer.starSkybox->RenderSkybox(camera, baseTexture, baseDepth);
+
+		// DRAW STARS
 		glBindFramebuffer(GL_FRAMEBUFFER, starFBO);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -111,7 +123,7 @@ namespace Universe {
 		glDepthMask(GL_FALSE);
 		glDepthFunc(GL_GREATER);
 
-		renderer.starSkybox->Render(camera, baseTexture, baseDepth);
+		renderer.starSkybox->RenderStars(camera, baseTexture, baseDepth);
 
 		// COMPOSITE
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -134,6 +146,10 @@ namespace Universe {
 		glBindTexture(GL_TEXTURE_2D, starTexture);
 		composite_shader->SetInt("starTexture", 2);
 
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, skyboxTexture);
+		composite_shader->SetInt("skyboxTexture", 3);
+
 		composite_quad.Render();
 	}
 
@@ -150,6 +166,11 @@ namespace Universe {
 		if (starFBO) glDeleteFramebuffers(1, &starFBO);
 		if (starTexture) glDeleteTextures(1, &starTexture);
 		if (starDepth) glDeleteTextures(1, &starDepth);
+
+
+		if (skyboxFBO) glDeleteFramebuffers(1, &skyboxFBO);
+		if (skyboxTexture) glDeleteTextures(1, &skyboxTexture);
+		if (skyboxDepth) glDeleteTextures(1, &skyboxDepth);
 
 		composite_quad.Delete();
 		composite_shader->Delete();

@@ -218,6 +218,8 @@
     <None Include="assets\shaders\universe\ocean.vert" />
     <None Include="assets\shaders\universe\planet.frag" />
     <None Include="assets\shaders\universe\planet.vert" />
+    <None Include="assets\shaders\universe\skybox.frag" />
+    <None Include="assets\shaders\universe\skybox.vert" />
     <None Include="assets\shaders\universe\stars.frag" />
     <None Include="assets\shaders\universe\stars.vert" />
     <None Include="assets\shaders\universe\terrain.comp" />

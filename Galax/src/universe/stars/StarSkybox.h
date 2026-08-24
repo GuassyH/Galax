@@ -18,7 +18,8 @@ namespace Universe {
 
 		void Generate(int numStars, float starSize, float sizeVariability, float starDistance);
 		void Update(Transform* origin);
-		void Render(Camera& camera, GLuint screenTex, GLuint depthTex); // Instanced
+		void RenderStars(Camera& camera, GLuint screenTex, GLuint depthTex); // Instanced
+		void RenderSkybox(Camera& camera, GLuint screenTex, GLuint depthTex); // Instanced
 
 		std::shared_ptr<Transform> transform;
 
@@ -29,7 +30,13 @@ namespace Universe {
 
 	private:
 		FragShader starShader;
+		FragShader skyboxShader;
+
+
 		VBO instanceVBO;
 		Mesh quad;
+		Mesh skyboxCube;
+
+		GLuint skyboxCubemap;
 	};
 };
