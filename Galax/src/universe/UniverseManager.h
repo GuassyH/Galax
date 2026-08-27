@@ -41,7 +41,7 @@ namespace Universe {
 		void Update(Renderer& renderer, Player& player);
 		void Render(Renderer& renderer, Camera& camera, Planet* sun);
 
-		void Shutdown();
+		void Shutdown(Renderer& renderer);
 		std::vector<std::shared_ptr<Planet>>& GetPlanets() { return planets; }
 
 	private:

@@ -54,13 +54,7 @@ void Player::Move() {
 	moveDir = glm::length(moveDir) != 0 ? glm::normalize(moveDir) : glm::vec3(0);
 	moveDir += camera.transform->up * skywards;
 
-	// if you are close to the ground, SDF?
-	if (transform->HasParent()) {
-		localMoveDir = glm::inverse(transform->parent->world_rotation) * moveDir;
-	}
-	else {
-		localMoveDir = moveDir;
-	}
+	localMoveDir = moveDir;
 
 	transform->local_position += localMoveDir * speed * Galax::Time::Get().deltaTime;
 
@@ -169,21 +163,26 @@ void Player::AllignToPlanet(Universe::Planet* planet, float _0_1_val) {
 	}
 
 	if (parent_planet) {
-
 		glm::vec3 up = glm::normalize(transform->world_position - parent_planet->transform->world_position);
 
-
-		// Keep forward but make it tangent
 		glm::vec3 forward = camera.transform->forward;
-		forward = glm::normalize(forward - up * glm::dot(forward, up));
 
-		// Rebuild basis
+		if (glm::length2(forward) < 0.000001f) {
+			// Camera is looking almost straight along the surface normal.
+			// Choose another tangent direction.
+			forward = camera.transform->right;
+			forward -= up * glm::dot(forward, up);
+		}
+
+		forward = glm::normalize(forward);
+
 		glm::vec3 right = glm::normalize(glm::cross(forward, up));
 		forward = glm::normalize(glm::cross(up, right));
 
 
 		glm::mat3 rot(right, up, -forward);
 		glm::quat new_rot_quat = glm::quat_cast(rot);
+
 		this->transform->SetWorldRotation(new_rot_quat);
 
 		transform->UpdateMatrix();

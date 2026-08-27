@@ -32,7 +32,7 @@ namespace Universe {
 		void UpdateAllLODs(Renderer& renderer, glm::vec3 observer_pos);
 		void Render(Renderer& renderer, Camera& camera, Planet* sun);
 	
-		void Delete();
+		void Delete(Renderer& renderer);
 
 		// Mesh stuff
 		float radius = 10.0f;

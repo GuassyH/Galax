@@ -25,7 +25,7 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 
 	planet_char->terrainGenerator.noiseLayers.push_back(NewNoiseLayer(glm::vec3(0.0f), NoiseType::Voronoi, 0.0005f, 523.0f, 2, 1.25f, 0.5f, -1050.0f, 14.0f, 0.03f, 9, planet_char->radius));
 	planet_char->terrainGenerator.noiseLayers.push_back(NewNoiseLayer(glm::vec3(0.0f), NoiseType::Perlin, 0.001f, 50.0f, 30, 1.25f, 0.75f, -118.0f));
-	planet_char->terrainGenerator.noiseLayers.push_back(NewNoiseLayer(glm::vec3(1000, 200, 0.0f), NoiseType::Voronoi, 0.002f, -123.0f, 2, 1.25f, 0.5f, 0.0f, 71.0f, 0.01f, 9, 0.0f));
+	planet_char->terrainGenerator.noiseLayers.push_back(NewNoiseLayer(glm::vec3(1000, 200, 0.0f), NoiseType::Voronoi, 0.002f, -54.0f, 2, 1.25f, 0.5f, 0.0f, 71.0f, 0.01f, 9, 0.0f));
 	//planet_char->terrainGenerator.noiseLayers.push_back(NewNoiseLayer(glm::vec3(20), NoiseType::Perlin, 0.05f, 0.5f));
 
 	planet_char->physicsBody.mass = 10000000;
@@ -40,7 +40,7 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	planet_char->atmosphere_config.atmosphereHeight = 1000.0f;
 	planet_char->atmosphere_config.scatteringCoefficient = 300.0f;
 	planet_char->atmosphere_config.wavelengths = glm::vec3(700.0f, 550.0f, 440.0f);
-	planet_char->atmosphere_config.scatteringStrength = 50.150f;
+	planet_char->atmosphere_config.scatteringStrength = 100.0f;
 	planet_char->atmosphere_config.intensity = 1.0f;
 	planet_char->atmosphere_config.UpdateWavelengthScatter();
 	planet_char->hasAtmosphere = true;
@@ -95,6 +95,7 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	sun->shader.lit = false;
 
 	sun->terrainGenerator.noiseLayers.push_back(NewNoiseLayer(glm::vec3(0.0f), NoiseType::Perlin, 0.0001f, 200.0f, 6));
+	sun->terrainGenerator.numCraters = 1;
 
 	// GIANT mass, since it should basically be stationary
 	sun->physicsBody.mass = 1000000000.0f;

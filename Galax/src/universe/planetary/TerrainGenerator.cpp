@@ -49,9 +49,65 @@ void TerrainGenerator::ComputeBuffers(Renderer& renderer, float radius) {
 	}
 }
 
+void TerrainGenerator::AddToQueue(CubeSphere::Chunk* chunk) {
+	if (chunk) {
+		dispatchChunkQueue.push_back(chunk);
+	}
+}
+
+void TerrainGenerator::RemoveFromQueue(CubeSphere::Chunk* chunk){
+	int i;
+	bool found = false;
+	for (i = 0; i < dispatchChunkQueue.size(); i++) {
+		if (dispatchChunkQueue[i] == chunk) {
+			dispatchChunkQueue.erase(dispatchChunkQueue.begin() + i);
+			found = true;
+		}
+	}
+
+	if (found)
+		return;
+
+	for (i = 0; i < readbackChunkQueue.size(); i++) {
+		if (readbackChunkQueue[i] == chunk)
+			readbackChunkQueue.erase(readbackChunkQueue.begin() + i);
+	}
+}
+
+// Only updates the FIRST one in queue, this is to avoid stalling the CPU
+void TerrainGenerator::ApplyQueue(Renderer& renderer) {
+	// Check Readback Queue
+	if (readbackChunkQueue.size() != 0) {
+		while (!readbackChunkQueue.back() && readbackChunkQueue.size() > 0)
+			readbackChunkQueue.pop_back();
+
+		if (readbackChunkQueue.size() != 0) {
+			if (ReadbackCompute(renderer, readbackChunkQueue.back()))
+				readbackChunkQueue.pop_back();
+		}
+
+	}
+
+	// Check Dispatch Queue
+	if (dispatchChunkQueue.size() == 0)
+		return;
+
+	while (!dispatchChunkQueue.back() && dispatchChunkQueue.size() > 0)
+		dispatchChunkQueue.pop_back();
+
+	if (dispatchChunkQueue.size() == 0)
+		return;
+
+	if (DispatchCompute(renderer, dispatchChunkQueue.back())) {
+		readbackChunkQueue.push_back(dispatchChunkQueue.back());
+		dispatchChunkQueue.pop_back();
+	}
+
+}
+
 // different thread?
-void TerrainGenerator::ApplyTerrain(Renderer& renderer, CubeSphere::Chunk* chunk) {
-	Universe::UniverseManager& universeManager = Universe::UniverseManager::Get();
+bool TerrainGenerator::DispatchCompute(Renderer& renderer, CubeSphere::Chunk* chunk) {
+	chunk->hasTerrain = false;
 
 	// Add chunk vertex data to the big buffer
 	if (!chunk->vertexSlice.inPool) {
@@ -68,7 +124,7 @@ void TerrainGenerator::ApplyTerrain(Renderer& renderer, CubeSphere::Chunk* chunk
 		if (!noiseSlice.inPool) 
 			GX_TRACE("-{}", "Noise");
 
-		return;
+		return false;
 	}
 
 
@@ -101,8 +157,21 @@ void TerrainGenerator::ApplyTerrain(Renderer& renderer, CubeSphere::Chunk* chunk
 	unsigned int numGroups = (chunk->mesh.vertices.size() + workgroupSize - 1) / workgroupSize;
 	terrain_compute.Run(numGroups, 1, 1);
 
-	// Allow finish
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	chunk->computeFence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+
+	return true;
+}
+
+bool TerrainGenerator::ReadbackCompute(Renderer& renderer, CubeSphere::Chunk* chunk) {
+
+	GLenum result = glClientWaitSync(chunk->computeFence, 0, 0);
+	if (result != GL_ALREADY_SIGNALED && result != GL_CONDITION_SATISFIED) 
+		return false;
+	
+	glDeleteSync(chunk->computeFence);
+	chunk->computeFence = nullptr;
+
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
 
 	// Bind read and write buffer
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, renderer.vertexBuffer);
@@ -115,14 +184,20 @@ void TerrainGenerator::ApplyTerrain(Renderer& renderer, CubeSphere::Chunk* chunk
 	glBindBuffer(GL_COPY_WRITE_BUFFER, renderer.vertexReadbackBuffer);
 	void* data = glMapBufferRange(GL_COPY_WRITE_BUFFER, chunk->vertexSlice.offset, chunk->vertexSlice.stride, GL_MAP_READ_BIT);
 
+	if (!data) {
+		GX_ERROR("TerrainGenerator::Readback data null");
+		return false;
+	}
+
 	// copy the data 
 	memcpy(chunk->mesh.vertices.data(), data, chunk->vertexSlice.stride);
 	glUnmapBuffer(GL_COPY_WRITE_BUFFER);
 
-
 	chunk->mesh.Calculate();
-}
+	chunk->hasTerrain = true;
 
+	return true;
+}
 
 TerrainGenerator::~TerrainGenerator() {
 	terrain_compute.Delete();

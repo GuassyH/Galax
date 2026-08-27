@@ -23,10 +23,13 @@ public:
 	Renderer::GPUslice noiseSlice;
 
 	void ComputeBuffers(Renderer& renderer, float radius);
-	void ApplyTerrain(Renderer& renderer, CubeSphere::Chunk* chunk);
+	void AddToQueue(CubeSphere::Chunk* chunk);
+	void RemoveFromQueue(CubeSphere::Chunk* chunk);
+	void ApplyQueue(Renderer& renderer);
+	bool DispatchCompute(Renderer& renderer, CubeSphere::Chunk* chunk);
+	bool ReadbackCompute(Renderer& renderer, CubeSphere::Chunk* chunk);
 
 	ComputeShader terrain_compute;
-	/// Fields
 
 	// Craters
 	std::vector<Crater> craters;
@@ -47,4 +50,7 @@ public:
 	// Noise
 	std::vector<NoiseLayer> noiseLayers;
 
+private:
+	std::vector<CubeSphere::Chunk*> dispatchChunkQueue;
+	std::vector<CubeSphere::Chunk*> readbackChunkQueue;
 };

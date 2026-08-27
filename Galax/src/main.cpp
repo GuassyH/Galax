@@ -117,7 +117,7 @@ int main() {
 		glfwSwapBuffers(window);
 	}
 
-	Universe::UniverseManager::Get().Shutdown();
+	Universe::UniverseManager::Get().Shutdown(renderer);
 
 
 	// End

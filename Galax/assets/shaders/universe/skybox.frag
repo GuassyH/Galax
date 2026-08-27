@@ -29,7 +29,7 @@ void main()
 
     vec3 baseColor = texture(baseTexture, uv).rgb;
     float weighted_brightness = clamp((1 - (length(baseColor.rgb) * 4)), 0, 1);
-    fragColor = texture(skybox, texCoord) * weighted_brightness * 0.4;
+    fragColor = texture(skybox, texCoord) * weighted_brightness * 0.55;
 
     gl_FragDepth = 0.0;
 }

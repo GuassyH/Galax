@@ -230,5 +230,6 @@ void main(){
 		}
 	}
 
+
 	fragColor = originalCol;
 } 

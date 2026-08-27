@@ -180,6 +180,7 @@ void Renderer::FreePlanetBufferSlice(PlanetBuffer buffer, GPUslice& slice) {
 
 // i think it might be updating slices even if theyre in the pool
 bool Renderer::AddToPlanetBuffer(PlanetBuffer buffer, GPUslice& slice, const void* data) {
+
 	GLuint s_buffer = (buffer == PlanetBuffer::VertexBuffer ? vertexBuffer : (buffer == PlanetBuffer::CraterBuffer ? craterBuffer : noiseBuffer));
 
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, s_buffer);

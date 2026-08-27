@@ -84,7 +84,7 @@ namespace Universe {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glViewport(0, 0, window_size.x, window_size.y);
-
+		
 		// DRAW PLANETS
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
@@ -92,7 +92,7 @@ namespace Universe {
 		for (auto& planet : planets)
 			planet->Render(renderer, camera, sun);
 
-		// DRAW OCEAMS
+		// DRAW OCEANS
 		for (auto& planet : planets)
 			if (planet->hasOcean) renderer.oceanRenderer->Render(camera, sun, planet.get(), planet->ocean_config, baseTexture, baseDepth);
 

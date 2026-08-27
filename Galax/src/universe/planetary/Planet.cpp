@@ -7,31 +7,27 @@ namespace Universe {
 	/// Core
 
 	void Planet::Generate(Renderer& renderer) {
-		// Delete just incase you are regenerating
-		Delete();
+		Delete(renderer);
 
 		transform = std::make_shared<Transform>();
 		faces = CubeSphere::ConstructFaces(radius, resolution, transform.get());
 
 		terrainGenerator.ComputeBuffers(renderer, radius);
 
-		// For each face apply the terrain through the compute shader
 		for (auto& face : faces) {
-			terrainGenerator.ApplyTerrain(renderer, face.root_chunk);
+			terrainGenerator.AddToQueue(face.root_chunk.get());
 		}
 	}
 
 
 	void Planet::Render(Renderer& renderer, Camera& camera, Planet* sun) {
-
-
 	
 		for (auto& face : faces) {
 			if (!face.should_render)
 				continue;
 
 		
-			CubeSphere::RenderChunk(face.root_chunk, sun->transform.get(), camera, renderer, &shader);
+			CubeSphere::RenderChunk(face.root_chunk.get(), sun->transform.get(), camera, renderer, &shader);
 		}
 
 	}
@@ -55,17 +51,22 @@ namespace Universe {
 
 
 	void Planet::RemoveNodesFromVSSBO(Renderer& renderer, CubeSphere::Chunk* chunk) {
-		for (auto child : chunk->nodes) {
+		for (auto& child : chunk->nodes) {
 			if (!child) continue;
 
-			if (child->hasNodes)
-				RemoveNodesFromVSSBO(renderer, child);
+			if (child->hasNodes) {
+				RemoveNodesFromVSSBO(renderer, child.get());
+			}
 
+			terrainGenerator.RemoveFromQueue(child.get());
 			renderer.FreePlanetBufferSlice(Renderer::VertexBuffer, child->vertexSlice);
 		}
 	}
 
 	void Planet::UpdateLOD(Renderer& renderer, CubeSphere::Chunk* chunk, glm::vec3& observer_pos) {
+		if (!chunk)
+			return;
+
 		// If there isnt a level of detail specified in LODradii just make this the leaf
 		if (chunk->level_of_detail > LODradii.size()) {
 			chunk->isLeaf = true;
@@ -76,15 +77,25 @@ namespace Universe {
 		if (!chunk->hasNodes) {
 			CubeSphere::SubdivideChunk(chunk);
 
-			for (auto node : chunk->nodes) {
-				terrainGenerator.ApplyTerrain(renderer, node);
+			for (auto& node : chunk->nodes) {
+				terrainGenerator.AddToQueue(node.get());
 			}
 		}
 
-		chunk->isLeaf = false;
+		bool allNodesVisible = true;
+		for (auto& node : chunk->nodes) {
+			if (!node->hasTerrain) {
+				allNodesVisible = false;
+				break;
+			}
+		}
+
+		chunk->isLeaf = allNodesVisible ? false : true;
+		if (chunk->isLeaf)
+			return;
 
 		// could be optimised
-		for (auto node : chunk->nodes) {
+		for (auto& node : chunk->nodes) {
 			if (!node) {
 				GX_ERROR("Planet UpdateLOD: Null node");
 				continue;
@@ -94,7 +105,7 @@ namespace Universe {
 			float dist_sqr = glm::distance2((transform->world_rotation * node->origo) + transform->world_position, observer_pos);
 			float falloff = static_cast<float>(node->level_of_detail) + 1.0f; // arbitrary value for distance calcs
 
-			// i need a better way to check
+			// Arbitrary LOD decider (could be better)
 			for (int i = 0; i < LODradii.size(); i++) {
 				float range_sqr = ((LODradii[i] * radius) / falloff) * ((LODradii[i] * radius) / falloff);
 				if (dist_sqr <= range_sqr)
@@ -104,13 +115,14 @@ namespace Universe {
 
 			if (node->level_of_detail == targetLOD) {
 				node->isLeaf = true;
-				RemoveNodesFromVSSBO(renderer, node);
-				CubeSphere::DestroyChunkNodes(node);
+				
+				RemoveNodesFromVSSBO(renderer, node.get());
+				CubeSphere::DestroyChunkNodes(node.get());
 			}
 			else if (targetLOD > node->level_of_detail) {
-				UpdateLOD(renderer, node, observer_pos);
+				UpdateLOD(renderer, node.get(), observer_pos);
 			}
-			else { // if (targetLOD < node->level_of_detail) 
+			else { // targetLOD < node->level_of_detail 
 				node->isLeaf = false;
 				chunk->isLeaf = true;
 			}
@@ -119,6 +131,7 @@ namespace Universe {
 
 	// Should this be on another thread?
 	void Planet::UpdateAllLODs(Renderer& renderer, glm::vec3 observer_pos) {
+
 		glm::vec3 dir_to_planet = glm::normalize(transform->world_position - observer_pos);
 		float range = LODradii[0] * radius;
 
@@ -133,19 +146,27 @@ namespace Universe {
 
 			// If you are within the maximum distance THEN check updateLOD
 			if (glm::distance2((transform->world_rotation * face.root_chunk->origo) + transform->world_position, observer_pos) < range * range) {
-				UpdateLOD(renderer, face.root_chunk, observer_pos);
+				UpdateLOD(renderer, face.root_chunk.get(), observer_pos);
 			}
 			else {
 				face.root_chunk->isLeaf = true;
 				continue;
 			}
 		}
+
+		terrainGenerator.ApplyQueue(renderer);
 	}
 
 
 	/// Delete
-	void Planet::Delete() {
+	void Planet::Delete(Renderer& renderer) {
 		for (auto& face : faces) {
+
+			RemoveNodesFromVSSBO(renderer, face.root_chunk.get());
+
+			terrainGenerator.RemoveFromQueue(face.root_chunk.get());
+			renderer.FreePlanetBufferSlice(Renderer::VertexBuffer, face.root_chunk->vertexSlice);
+
 			CubeSphere::DestroyFace(face);
 		}
 

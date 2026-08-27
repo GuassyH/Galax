@@ -70,7 +70,7 @@ namespace GUI {
 		Spacing();
 
 		if (ImGui::CollapsingHeader("Crater Settings")) {
-
+			ImGui::DragInt(("Num Craters" + id + "_num_craters").c_str(), &planet->terrainGenerator.numCraters);
 		}
 
 		Spacing();
@@ -98,12 +98,12 @@ namespace GUI {
 			GX_TRACE("Rebuild {}, not implemented", planet->name);
 
 			// NOT FINISHED
-			for (auto face : planet->faces) {
-				planet->RemoveNodesFromVSSBO(renderer, face.root_chunk);
+			for (auto& face : planet->faces) {
+				planet->RemoveNodesFromVSSBO(renderer, face.root_chunk.get());
 			}
 
-			for (auto face : planet->faces) {
-				CubeSphere::DestroyChunkNodes(face.root_chunk);
+			for (auto& face : planet->faces) {
+				CubeSphere::DestroyChunkNodes(face.root_chunk.get());
 			}
 
 			planet->terrainGenerator.ComputeBuffers(renderer, planet->radius);

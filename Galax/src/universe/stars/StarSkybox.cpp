@@ -11,12 +11,12 @@
 namespace Universe {
 	
 	std::vector<std::string> cubemap_faces{
-		"assets/textures/GalaxyBackdrop2/right.png",
-		"assets/textures/GalaxyBackdrop2/left.png",
-		"assets/textures/GalaxyBackdrop2/top.png",
-		"assets/textures/GalaxyBackdrop2/bottom.png",
-		"assets/textures/GalaxyBackdrop2/front.png",
-		"assets/textures/GalaxyBackdrop2/back.png",
+		"assets/textures/GalaxyBackdrop3/right.png",
+		"assets/textures/GalaxyBackdrop3/left.png",
+		"assets/textures/GalaxyBackdrop3/top.png",
+		"assets/textures/GalaxyBackdrop3/bottom.png",
+		"assets/textures/GalaxyBackdrop3/front.png",
+		"assets/textures/GalaxyBackdrop3/back.png",
 	};
 
 	StarSkybox::StarSkybox() {

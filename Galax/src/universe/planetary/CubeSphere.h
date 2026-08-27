@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 #include <glad/glad.h>
 
 #include "rendering/Vertex.h"
@@ -16,6 +17,9 @@ public:
 		glm::quat rotation = glm::identity<glm::quat>();
 		bool hasNodes = false; // Are there child nodes
 		bool isLeaf = true; // Is this the wanted level
+		bool hasTerrain = false; // Is the terrain applied
+		GLsync computeFence = 0;
+		
 		int resolution = 10;
 		float radius = 5.0f;
 		
@@ -27,20 +31,20 @@ public:
 		glm::vec3 origo;
 
 		Mesh mesh;
-		Chunk* nodes[4] = { nullptr };
+		std::vector<std::unique_ptr<CubeSphere::Chunk>> nodes;
 	};
 
 	static struct Face {
-		Chunk* root_chunk = nullptr;
+		std::unique_ptr<CubeSphere::Chunk> root_chunk = nullptr;
 		bool should_render = true;
 	};
 
 	static std::vector<Face> ConstructFaces(float radius, int resolution, Transform* base_transform = nullptr);
 	static void RenderChunk(Chunk* chunk, Transform* sun, Camera& camera, Renderer& renderer, PlanetShader* shader);
 
-	static void SubdivideChunk(Chunk* chunk);
-	static void DestroyChunk(Chunk* inChunk); // Destroy given chunk and its children
-	static void DestroyChunkNodes(Chunk* inChunk); // Destroys the given chunks' children, not the given chunk
+	static void SubdivideChunk(CubeSphere::Chunk* chunk);
+	static void DestroyChunk(CubeSphere::Chunk* inChunk); // Destroy given chunk and its children
+	static void DestroyChunkNodes(CubeSphere::Chunk* inChunk); // Destroys the given chunks' children, not the given chunk
 	static void DestroyFace(Face& inFace); // Destroy all chunks within the face
 
 	// static void ForEachNode(Renderer& renderer, Chunk* parent, std::function<void(Renderer&, Chunk*)> func);

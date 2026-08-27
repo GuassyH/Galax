@@ -84,15 +84,7 @@ namespace Universe {
 		glCreateTextures(GL_TEXTURE_2D, 1, &atmosphereConfig.BakedOpticalTexture);
 		glTextureStorage2D(atmosphereConfig.BakedOpticalTexture, 1, GL_RGBA32F, textureWidth, textureWidth);
 
-		glBindImageTexture(
-			0,											// image unit
-			atmosphereConfig.BakedOpticalTexture,       // texture
-			0,											// mip level
-			GL_FALSE,									// layered
-			0,											// layer
-			GL_WRITE_ONLY,								// access
-			GL_RGBA32F									// format
-		);
+		glBindImageTexture(0, atmosphereConfig.BakedOpticalTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);

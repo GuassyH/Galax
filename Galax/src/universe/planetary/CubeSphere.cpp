@@ -1,7 +1,11 @@
 #include "CubeSphere.h"
+
+#include <memory>
+#include <utility>
 /// Generation
 
 void ConstructChunk(CubeSphere::Chunk* inChunk, Transform* base_transform) {
+
 	std::vector<Vertex> vertices;
 	std::vector<GLuint> indices;
 
@@ -77,12 +81,14 @@ void ConstructChunk(CubeSphere::Chunk* inChunk, Transform* base_transform) {
 }
 
 void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
+	chunk->nodes.clear();
+	chunk->nodes.reserve(4);
 
 	glm::vec2 mid = (chunk->minUV + chunk->maxUV) * 0.5f;
 
 	// Top Left
-	chunk->nodes[0] = new CubeSphere::Chunk;
-	auto tl = chunk->nodes[0];
+	chunk->nodes.push_back(std::make_unique<CubeSphere::Chunk>());
+	auto tl = chunk->nodes[0].get();
 	tl->isLeaf = true;
 	tl->minUV = chunk->minUV;
 	tl->maxUV = mid;
@@ -91,9 +97,11 @@ void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
 	tl->resolution = chunk->resolution;
 	tl->level_of_detail = chunk->level_of_detail + 1;
 
+
+
 	// Top Right
-	chunk->nodes[1] = new CubeSphere::Chunk;
-	auto tr = chunk->nodes[1];
+	chunk->nodes.push_back(std::make_unique<CubeSphere::Chunk>());
+	auto tr = chunk->nodes[1].get();
 	tr->isLeaf = true;
 	tr->minUV = glm::vec2(mid.x, chunk->minUV.y);
 	tr->maxUV = glm::vec2(chunk->maxUV.x, mid.y);
@@ -103,8 +111,8 @@ void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
 	tr->level_of_detail = chunk->level_of_detail + 1;
 
 	// Bottom Left
-	chunk->nodes[2] = new CubeSphere::Chunk;
-	auto bl = chunk->nodes[2];
+	chunk->nodes.push_back(std::make_unique<CubeSphere::Chunk>());
+	auto bl = chunk->nodes[2].get();
 	bl->isLeaf = true;
 	bl->minUV = glm::vec2(chunk->minUV.x, mid.y);
 	bl->maxUV = glm::vec2(mid.x, chunk->maxUV.y);
@@ -114,8 +122,8 @@ void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
 	bl->level_of_detail = chunk->level_of_detail + 1;
 
 	// Bottom Right
-	chunk->nodes[3] = new CubeSphere::Chunk;
-	auto br = chunk->nodes[3];
+	chunk->nodes.push_back(std::make_unique<CubeSphere::Chunk>());
+	auto br = chunk->nodes[3].get();
 	br->isLeaf = true;
 	br->minUV = mid;
 	br->maxUV = chunk->maxUV;
@@ -127,8 +135,8 @@ void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
 
 	// Construct
 	ConstructChunk(tl, chunk->mesh.transform.get());
-	ConstructChunk(tr, chunk->mesh.transform.get());
 	ConstructChunk(bl, chunk->mesh.transform.get());
+	ConstructChunk(tr, chunk->mesh.transform.get());
 	ConstructChunk(br, chunk->mesh.transform.get());
 
 	// Ensure transforms are updated so child meshes have correct world matrices/positions
@@ -143,8 +151,10 @@ void CubeSphere::SubdivideChunk(CubeSphere::Chunk* chunk) {
 
 
 void CubeSphere::RenderChunk(Chunk* chunk, Transform* sun, Camera& camera, Renderer& renderer, PlanetShader* shader) {
-	if (!chunk)
+	if (!chunk || !sun || !shader) {
+		GX_INFO("CubeSphere::Chunk null pointer check");
 		return;
+	}
 
 	if (chunk->isLeaf) {
 		shader->Use();
@@ -172,21 +182,23 @@ void CubeSphere::RenderChunk(Chunk* chunk, Transform* sun, Camera& camera, Rende
 
 	}
 	else if (chunk->hasNodes) {
-		for (auto node : chunk->nodes) {
+		for (auto& node : chunk->nodes) {
 			if(node)
-				RenderChunk(node, sun, camera, renderer, shader);
+				RenderChunk(node.get(), sun, camera, renderer, shader);
 		}
 	}
 }
 
-// Create all Faces
-std::vector<CubeSphere::Face> CubeSphere::ConstructFaces(float radius, int resolution, Transform* base_transform) {
+std::vector<CubeSphere::Face>
+CubeSphere::ConstructFaces(float radius, int resolution, Transform* base_transform) {
+
 	std::vector<Face> faces;
+	faces.reserve(6);
 
 	glm::vec3 euler_rad;
 
-	for (int i = 0; i < 6; i++){
-		// Get correct rotation for each face
+	for (int i = 0; i < 6; i++) {
+
 		switch (i)
 		{
 		case 0: // z+ face
@@ -207,23 +219,25 @@ std::vector<CubeSphere::Face> CubeSphere::ConstructFaces(float radius, int resol
 		case 5: // y- face
 			euler_rad = glm::radians(glm::vec3(270.0f, 0.0f, 0.0f));
 			break;
-		default: 
+		default:
 			break;
 		}
 
-		// Construct plane for each face with correct rotation
-		Face newFace; 
-		newFace.root_chunk = new Chunk;
+		Face newFace;
+
+		newFace.root_chunk = std::make_unique<CubeSphere::Chunk>();
+
 		newFace.root_chunk->rotation = glm::normalize(glm::quat(euler_rad));
+
 		newFace.root_chunk->isLeaf = true;
 		newFace.root_chunk->minUV = { 0.0f, 0.0f };
 		newFace.root_chunk->maxUV = { 1.0f, 1.0f };
 		newFace.root_chunk->radius = radius;
 		newFace.root_chunk->resolution = resolution;
 
-		ConstructChunk(newFace.root_chunk, base_transform);
 
-		// Add face to list (move because Face is non-copyable due to unique_ptrs)
+		ConstructChunk(newFace.root_chunk.get(), base_transform);
+
 		faces.push_back(std::move(newFace));
 	}
 
@@ -233,41 +247,38 @@ std::vector<CubeSphere::Face> CubeSphere::ConstructFaces(float radius, int resol
 
 /// Deletion
 
-void CubeSphere::DestroyChunk(Chunk* inChunk) {
+void CubeSphere::DestroyChunk(CubeSphere::Chunk* inChunk) {
 	if (!inChunk)
 		return;
 
-	for (auto node : inChunk->nodes) {
-		DestroyChunk(node);
+	for (auto& node : inChunk->nodes) {
+		DestroyChunk(node.get());
 	}
 	
 	inChunk->mesh.transform->SetParent(nullptr);
 	inChunk->mesh.Delete();
-	delete inChunk;
+
 	inChunk = nullptr;
 }
 
-void CubeSphere::DestroyChunkNodes(Chunk* inChunk) {
+void CubeSphere::DestroyChunkNodes(CubeSphere::Chunk* inChunk) {
 	if (!inChunk)
 		return;
 
 	if (!inChunk->hasNodes)
 		return;
 
-	for (auto node : inChunk->nodes) {
-		DestroyChunk(node);
+	for (auto& node : inChunk->nodes) {
+		DestroyChunk(node.get());
 	}
 
-	inChunk->nodes[0] = nullptr;
-	inChunk->nodes[1] = nullptr;
-	inChunk->nodes[2] = nullptr;
-	inChunk->nodes[3] = nullptr;
+	inChunk->nodes.clear();
 
 	inChunk->hasNodes = false;
 }
 
 void CubeSphere::DestroyFace(Face& inFace) {
-	DestroyChunk(inFace.root_chunk);
+	DestroyChunk(inFace.root_chunk.get());
 }
 
 
