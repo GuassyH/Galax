@@ -153,9 +153,9 @@ namespace Universe {
 		composite_quad.Render();
 	}
 
-	void UniverseManager::Shutdown() {
+	void UniverseManager::Shutdown(Renderer& renderer) {
 		for (auto& planet : planets) {
-			planet->Delete();
+			planet->Delete(renderer);
 		}
 
 		if (baseFBO) glDeleteFramebuffers(1, &baseFBO);

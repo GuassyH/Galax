@@ -194,11 +194,6 @@ bool Renderer::AddToPlanetBuffer(PlanetBuffer buffer, GPUslice& slice, const voi
 	FreeSlice freeSlice;
 	if (GetBufferFreeSlice(buffer, slice, freeSlice, true)) {
 		slice.offset = freeSlice.offset;
-
-		if (slice.inPool) {
-			GX_TRACE("APSODS");
-		}
-
 		slice.inPool = true;
 		
 		glBufferSubData(GL_SHADER_STORAGE_BUFFER, slice.offset, slice.stride, data);
