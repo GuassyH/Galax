@@ -29,11 +29,28 @@ Im going to cleanup the entire project, but after that i have a few ideas.
 	since otherwise its hard to see
 -Thirdly i want to add a galaxy gas skybox. I have the procedural stars, but it would be cool to have like a galaxy 
 
-
-
-PROBLEM
-
 Shared SSBOs is not working, race conditions are causing crashes. I don't know how to fix this yet
 
 Possible solution: The renderer has three buffers with ALL the data, all vertices, all craters, all noise layers etc.
 Then the chunks and terrain generators only hold their offset and size in the buffers. 
+
+
+POTENTIAL CHANGES
+
+- Planet vertices contain a lot of unneeded information. Such as normal vector in vec3 and tex params etc
+	it is currently 48 bytes per vertex
+	if i instead use this format
+		struct Vertex {
+			float posx;
+			float posy;
+			float posz;
+			float norm_theta;
+			float norm_phi;
+			float noise;
+		};
+	it is then 24 bytes / vert. In theory this allows for twice the number of vertices. So a mesh of 10x10 could become 14x14 (ish)
+
+TODO
+
+- Add audio
+	Jonathans song sick epic awesome sauce

@@ -69,9 +69,16 @@ namespace GUI {
 		if (ImGui::Begin("Play ground", nullptr, ImGuiWindowFlags_NoMove)) {
 			Header("Simulation");
 
+			ImGui::Text("Speed: %.1f", player.speed);
 			ImGui::Checkbox("Simulate", &Universe::UniverseManager::Get().isSimulating);
 			ImGui::DragFloat("TimeScale", &Galax::Time::Get().timeScale);
 			DrawTime(Universe::UniverseManager::Get().time, 60, 60, 24, 365);
+
+			Header("Player");
+
+			bool isAlign = player.alignMode == Player::AlignMode::AlignToPlanet;
+			if(ImGui::Checkbox("Align To Planet", &isAlign))
+				player.alignMode = isAlign ? Player::AlignMode::AlignToPlanet : Player::AlignMode::Free;
 
 			Header("Bodies");
 
@@ -142,6 +149,7 @@ namespace GUI {
 
 		}ImGui::End();
 	}
+
 
 	void GUI::NewFrame(GLFWwindow* window) {
 		ImGui_ImplOpenGL3_NewFrame();

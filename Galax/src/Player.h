@@ -4,6 +4,8 @@
 #include "Transform.h"
 #include "universe/planetary/Planet.h"
 
+
+
 class Player {
 public:
 	Player();
@@ -17,6 +19,9 @@ public:
 
 	void AllignToPlanet(Universe::Planet* planet, float _0_1_val);
 
+	enum AlignMode { Free, AlignToPlanet };
+
+	AlignMode alignMode = AlignMode::AlignToPlanet;
 
 	std::shared_ptr<Transform> transform;
 	Camera camera;

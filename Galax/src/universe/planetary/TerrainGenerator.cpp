@@ -162,6 +162,7 @@ bool TerrainGenerator::DispatchCompute(Renderer& renderer, CubeSphere::Chunk* ch
 	return true;
 }
 
+// This needs to be done more effectively. the biggest bottleneck
 bool TerrainGenerator::ReadbackCompute(Renderer& renderer, CubeSphere::Chunk* chunk) {
 
 	GLenum result = glClientWaitSync(chunk->computeFence, 0, 0);

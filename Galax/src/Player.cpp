@@ -104,17 +104,10 @@ void Player::Look() {
 	float rotY = deltaX * sensitivity * 100.0f;
 	
 	// Apply rotations to Euler angles
-	if (parent_planet) {
-		camera.transform->AddRotationAroundAxis(glm::vec3(1.0f, 0.0f, 0.0), -rotX * fov_scalar, true); // pitch
-		this->transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0), -rotY * fov_scalar, true); // yaw
-		// Change nearplane when close to planet
-		camera.nearPlane = 0.03f;
-	}
-	else {
-		camera.transform->AddRotationAroundAxis(glm::vec3(1.0f, 0.0f, 0.0), -rotX * fov_scalar, false); // pitch
-		this->transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0f), -rotY * fov_scalar, false); // yaw
-		camera.nearPlane = 100.0f;
-	}
+	camera.transform->AddRotationAroundAxis(glm::vec3(1.0f, 0.0f, 0.0), -rotX * fov_scalar, (bool)parent_planet && (alignMode == AlignMode::AlignToPlanet)); // pitch
+	this->transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0), -rotY * fov_scalar, (bool)parent_planet && (alignMode == AlignMode::AlignToPlanet)); // yaw
+
+	camera.nearPlane = parent_planet ? 0.03f : 100.0f;
 
 	// Clamp pitch to avoid flipping
 	glm::vec3 euler = camera.transform->GetEulerAngles();
@@ -162,15 +155,15 @@ void Player::AllignToPlanet(Universe::Planet* planet, float _0_1_val) {
 		}
 	}
 
-	if (parent_planet) {
+	if (parent_planet && alignMode == AlignMode::AlignToPlanet) {
 		glm::vec3 up = glm::normalize(transform->world_position - parent_planet->transform->world_position);
 
-		glm::vec3 forward = camera.transform->forward;
+		glm::vec3 forward = transform->forward;
 
 		if (glm::length2(forward) < 0.000001f) {
 			// Camera is looking almost straight along the surface normal.
 			// Choose another tangent direction.
-			forward = camera.transform->right;
+			forward = transform->right;
 			forward -= up * glm::dot(forward, up);
 		}
 

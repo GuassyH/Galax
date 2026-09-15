@@ -66,13 +66,13 @@ namespace GUI {
 				ImGui::Unindent();
 			}
 		}
-
+		
 		Spacing();
 
 		if (ImGui::CollapsingHeader("Crater Settings")) {
 			ImGui::DragInt(("Num Craters" + id + "_num_craters").c_str(), &planet->terrainGenerator.numCraters);
 		}
-
+ 
 		Spacing();
 
 		if (ImGui::CollapsingHeader("Color Settings")) {
