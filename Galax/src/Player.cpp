@@ -70,6 +70,8 @@ float last_mouse_fov = 0.0;
 glm::quat desiredRotation;
 glm::quat offsetRotation;
 
+glm::vec3 lastPlanetPos;
+glm::quat lastPlanetRot;
 
 void Player::Look() {
 	glm::vec2 mouse_pos = Galax::Input::GetMousePosition();
@@ -110,10 +112,10 @@ void Player::Look() {
 	// Apply rotations to Euler angles
 	camera.transform->AddRotationAroundAxis(glm::vec3(1.0f, 0.0f, 0.0), -rotX * fov_scalar, (bool)parent_planet && (alignMode == AlignMode::AlignToPlanet)); // pitch
 	this->transform->AddRotationAroundAxis(glm::vec3(0.0f, 1.0f, 0.0), -rotY * fov_scalar, (bool)parent_planet && (alignMode == AlignMode::AlignToPlanet)); // yaw
-	if (!parent_planet)
-		desiredRotation = glm::quatLookAt(transform->forward, glm::vec3(0.0, 1.0, 0.0));
-	else
+	if (parent_planet && alignMode == AlignMode::AlignToPlanet)
 		desiredRotation = glm::quatLookAt(transform->forward, glm::normalize(transform->local_position));
+	else
+		desiredRotation = glm::quatLookAt(transform->forward, glm::vec3(0.0, 1.0, 0.0));
 
 
 
@@ -134,10 +136,10 @@ void Player::Look() {
 // Allign to planet, also makes sure you have to be closer to the planet to 
 // get alligned to it than unalligned to stop edge-cases
 void Player::AllignToPlanet(Universe::Planet* planet, float _0_1_val) {	
-	// If the planet is changed to nullptr
+
+	// If left planet
 	if (parent_planet != planet && planet == nullptr) {
 		parent_planet = nullptr;
-		transform->SetParent(nullptr, true);
 
 		glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0);
 
@@ -156,16 +158,37 @@ void Player::AllignToPlanet(Universe::Planet* planet, float _0_1_val) {
 
 		return;
 	}
+	// If entered planet
 	else if (parent_planet != planet && planet != nullptr) {
 		if (_0_1_val <= 0.9f) {
 			parent_planet = planet;
-			transform->SetParent(parent_planet->transform.get(), true);
+
+			lastPlanetPos = parent_planet->transform->world_position;
+			lastPlanetRot = parent_planet->transform->world_rotation;
 		}
+
 	}
 
+
+	// Drifting?
+	if (parent_planet) {
+
+		glm::vec3 planetPos = parent_planet->transform->world_position;
+		glm::quat planetRot = parent_planet->transform->world_rotation;
+
+		glm::quat deltaRot = planetRot * glm::conjugate(lastPlanetRot);
+		glm::vec3 deltaPos = transform->world_position - planetPos;
+
+		transform->local_position = planetPos + (deltaRot * deltaPos);
+
+		lastPlanetPos = planetPos;
+		lastPlanetRot = planetRot;
+	}
+
+
+	// Align
 	if (parent_planet && alignMode == AlignMode::AlignToPlanet) {
 		glm::vec3 up = glm::normalize(transform->world_position - parent_planet->transform->world_position);
-
 		glm::vec3 forward = transform->forward;
 
 		if (glm::length2(forward) < 0.000001f) {
@@ -176,16 +199,14 @@ void Player::AllignToPlanet(Universe::Planet* planet, float _0_1_val) {
 		}
 
 		forward = glm::normalize(forward);
-
 		glm::vec3 right = glm::normalize(glm::cross(forward, up));
 		forward = glm::normalize(glm::cross(up, right));
 
-
 		glm::mat3 rot(right, up, -forward);
-		glm::quat new_rot_quat = glm::quat_cast(rot);
-
-		desiredRotation = new_rot_quat;
+		desiredRotation = glm::quat_cast(rot);
 	}
 
-	transform->SetWorldRotation(glm::slerp(transform->local_rotation, desiredRotation, Galax::Time::Get().deltaTime * 10));
+	float ts = Galax::Time::Get().timeScale;
+	float a = Galax::Time::Get().deltaTime * 10 * (ts != 0 ? glm::fclamp(Galax::Time::Get().timeScale, 0.0f, 1.0f) : 1.0f);
+	transform->local_rotation = (glm::normalize(glm::slerp(transform->local_rotation, desiredRotation, a)));
 }

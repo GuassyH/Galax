@@ -83,6 +83,32 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 
 	moon->shader.colorMaps.push_back(NewColorMap(glm::vec4(0.3f), glm::vec4(0.23f), 0.0f, 0.0f, 1.0f, 0.2f, 0.25f, 0.0f));
 
+	// Purple 
+
+	std::shared_ptr<Universe::Planet> purple = std::make_shared<Universe::Planet>();
+	purple->name = "Purple Planet";
+	purple->shader = PlanetShader("assets/shaders/universe/planet.frag", "assets/shaders/universe/planet.vert");
+	purple->radius = 8000;
+	purple->resolution = 140;
+	purple->LODradii = { 6.0f, 4.5, 3.0f, 1.5f, 1.0f };
+	purple->mpr = 60;
+
+	purple->physicsBody.mass = 16000000;
+
+	purple->hasAtmosphere = false;
+
+	purple->terrainGenerator.noiseLayers.push_back(NewNoiseLayer({}, {}, 0.0005f, 100.0f, 8));
+	purple->terrainGenerator.noiseLayers.push_back(NewNoiseLayer({}, {}, 0.001f, 50.0f, 10));
+	purple->terrainGenerator.noiseLayers.push_back(NewNoiseLayer({}, NoiseType::Voronoi, 0.0005f, 600, 1, {}, {}, {}, 200, 0.005f, 4));
+
+
+	purple->shader.colorMaps.push_back(NewColorMap(glm::vec4(0.5f, 0.043f, 0.83f, 1.0f)));
+
+	purple->Generate(renderer);
+	purple->transform->local_position = glm::vec3(15555000.0f, 0.0f, 0.0f);
+	purple->transform->UpdateMatrix();
+
+
 	// Sun
 	std::shared_ptr<Universe::Planet> sun = std::make_shared<Universe::Planet>();
 	sun->name = "Luxia";
@@ -110,12 +136,15 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 
 	Universe::UniverseManager::Get().PushPlanet(moon);
 	Universe::UniverseManager::Get().PushPlanet(planet_char);
+	Universe::UniverseManager::Get().PushPlanet(purple);
 
 	planet_char->physicsBody.debug_centre = sun.get();
 	moon->physicsBody.debug_centre = planet_char.get();
 
 	moon->physicsBody.velocity = glm::vec3(5.83f, 0.0f, -3.03f);
 	planet_char->physicsBody.velocity = glm::vec3(0.0f, 0.0f, -3.55f);
+	purple->physicsBody.velocity = glm::vec3(0.0f, 0.0f, -2.1f);
+
 
 	// Universe::UniverseManager::Get().SetIdealOrbitVelocity(planet_char.get(), sun.get());
 
