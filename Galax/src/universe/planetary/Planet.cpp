@@ -21,12 +21,14 @@ namespace Universe {
 
 
 	void Planet::Render(Renderer& renderer, Camera& camera, Planet* sun) {
-	
+		if (isFarClip)
+			return;
+
 		for (auto& face : faces) {
 			if (!face.should_render)
 				continue;
 
-		
+			
 			CubeSphere::RenderChunk(face.root_chunk.get(), sun->transform.get(), camera, renderer, &shader);
 		}
 
@@ -134,6 +136,14 @@ namespace Universe {
 
 		glm::vec3 dir_to_planet = glm::normalize(transform->world_position - observer_pos);
 		float range = LODradii[0] * radius;
+
+		// Dont even render if too far (arbitrary value right now)
+		if (glm::distance2(transform->world_position, observer_pos) > (radius * radius * 1000000)){
+			isFarClip = true;
+			return;
+		}
+		else	isFarClip = false;
+
 
 		for (auto& face : faces) {
 			// Only update if required, simple occlusion culling needs to be better, maybe checking distance from normal to camera pos?

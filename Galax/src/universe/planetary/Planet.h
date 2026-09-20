@@ -13,6 +13,7 @@
 #include "universe/atmosphere/Atmosphere.h"
 #include "universe/ocean/Ocean.h"
 #include "rendering/Renderer.h"
+#include "universe/clouds/Cloud.h"
 
 namespace Universe {
 
@@ -38,6 +39,7 @@ namespace Universe {
 		float radius = 10.0f;
 		int resolution = 10;
 		std::vector<float> LODradii = { 4.8f, 3.4f, 2.2f, 1.6f, 1.2f }; // How many radii until the next LOD, at 4.8*r we subdivide once, at 3.4*r we do again
+		bool isFarClip = false; // If it is, dont render mesh, instead render as bright point (easier to see and more efficient)
 
 		TerrainGenerator terrainGenerator;
 		std::vector<CubeSphere::Face> faces;
@@ -57,6 +59,9 @@ namespace Universe {
 
 		bool hasOcean = false;
 		OceanConfig ocean_config;
+
+		bool hasClouds = false;
+		CloudConfig cloud_config;
 	};
 
 

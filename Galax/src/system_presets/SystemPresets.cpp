@@ -109,18 +109,24 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	purple->transform->UpdateMatrix();
 
 
+	purple->hasOcean = true;
+	purple->ocean_config.radius = 8265.000;
+	purple->ocean_config.oceanColor = glm::vec4(0.6f, 0.2f, 0.8f, 1.0f);
+	purple->ocean_config.fresnelColor = glm::vec4(0.5f, 0.1f, 0.7f, 1.0f);
+
+
 	// Sun
 	std::shared_ptr<Universe::Planet> sun = std::make_shared<Universe::Planet>();
 	sun->name = "Luxia";
 	sun->shader = PlanetShader("assets/shaders/universe/planet.frag", "assets/shaders/universe/planet.vert");
 	sun->radius = 20000;
-	sun->resolution = 40;
+	sun->resolution = 80;
 	sun->LODradii = { };
 
 	sun->shader.colorMaps.push_back(NewColorMap(glm::vec4(0.99f, 0.99f, 0.8f, 1.0f)));
 	sun->shader.lit = false;
 
-	sun->terrainGenerator.noiseLayers.push_back(NewNoiseLayer(glm::vec3(0.0f), NoiseType::Perlin, 0.0001f, 200.0f, 6));
+	sun->terrainGenerator.noiseLayers.push_back(NewNoiseLayer(glm::vec3(0.0f), NoiseType::Perlin, 0.001f, 2000.0f, 6));
 	sun->terrainGenerator.numCraters = 1;
 
 	// GIANT mass, since it should basically be stationary

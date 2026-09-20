@@ -41,6 +41,7 @@ Renderer::Renderer() {
 	
 	atmosphereRenderer = std::make_unique<Universe::AtmosphereRenderer>();
 	oceanRenderer = std::make_unique<Universe::OceanRenderer>();
+	cloudRenderer = std::make_unique<Universe::CloudRenderer>();
 	starSkybox = std::make_unique<Universe::StarSkybox>();
 	starSkybox->Generate(6000, 2, 0.2f, 1000.0f);
 

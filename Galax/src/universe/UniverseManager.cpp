@@ -94,15 +94,14 @@ namespace Universe {
 
 		// DRAW OCEANS
 		for (auto& planet : planets)
-			if (planet->hasOcean) renderer.oceanRenderer->Render(camera, sun, planet.get(), planet->ocean_config, baseTexture, baseDepth);
+			if (planet->hasOcean && !planet->isFarClip) renderer.oceanRenderer->Render(camera, sun, planet.get(), planet->ocean_config, baseTexture, baseDepth);
 
 		// DRAW ATMOSPHERES
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE);
 		glDepthFunc(GL_NEVER); // always
 		for (auto& planet : planets)
-			if (planet->hasAtmosphere) renderer.atmosphereRenderer->Render(camera, sun, planet.get(), planet->atmosphere_config, baseTexture, baseDepth);
-
+			if (planet->hasAtmosphere && !planet->isFarClip) renderer.atmosphereRenderer->Render(camera, sun, planet.get(), planet->atmosphere_config, baseTexture, baseDepth);
 		// DRAW STARS
 		glBindFramebuffer(GL_FRAMEBUFFER, skyboxFBO);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -124,6 +123,16 @@ namespace Universe {
 		glDepthFunc(GL_GREATER);
 
 		renderer.starSkybox->RenderStars(camera, baseTexture, baseDepth);
+
+		// DRAW CLOUDS
+		glBindFramebuffer(GL_FRAMEBUFFER, baseFBO);
+		glViewport(0, 0, window_size.x, window_size.y);
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_FALSE);
+		glDepthFunc(GL_NEVER); // always
+
+		for (auto& planet : planets)
+			if (planet->hasClouds && !planet->isFarClip && planet->hasAtmosphere) renderer.cloudRenderer->Render(camera, sun, planet.get(), planet->cloud_config, planet->atmosphere_config.BakedOpticalTexture, baseTexture, baseDepth);
 
 		// COMPOSITE
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);

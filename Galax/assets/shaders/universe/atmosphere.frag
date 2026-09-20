@@ -171,11 +171,7 @@ float LinearizeDepth(float d, float nearPlane)
 
 vec3 ReconstructViewPos(vec2 uv, float depth)
 {
-    vec4 clip = vec4(
-        uv * 2.0 - 1.0,
-        depth,
-        1.0
-    );
+    vec4 clip = vec4(uv * 2.0 - 1.0, depth, 1.0);
 
     vec4 view = invProjMat * clip;
     view /= view.w;

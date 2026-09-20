@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\universe\clouds\Cloud.cpp" />
     <ClCompile Include="src\audio\SoundDevice.cpp" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\core\Log.cpp" />
@@ -170,6 +171,7 @@
     <ClCompile Include="vendor\include\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\universe\clouds\Cloud.h" />
     <ClInclude Include="src\audio\SoundDevice.h" />
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\core\Input.h" />
@@ -216,6 +218,8 @@
     <None Include="assets\shaders\default_unlit.frag" />
     <None Include="assets\shaders\default_unlit.vert" />
     <None Include="assets\shaders\universe\bakeOpticalDepth.comp" />
+    <None Include="assets\shaders\universe\cloud.frag" />
+    <None Include="assets\shaders\universe\cloud.vert" />
     <None Include="assets\shaders\universe\ocean.frag" />
     <None Include="assets\shaders\universe\ocean.vert" />
     <None Include="assets\shaders\universe\planet.frag" />

@@ -120,6 +120,9 @@
     <ClCompile Include="src\audio\SoundDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\universe\clouds\Cloud.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\Log.h">
@@ -221,6 +224,9 @@
     <ClInclude Include="src\audio\SoundDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\universe\clouds\Cloud.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\universe\atmosphere.frag">
@@ -265,6 +271,8 @@
     <None Include="assets\shaders\universe\bakeOpticalDepth.comp" />
     <None Include="assets\shaders\universe\skybox.vert" />
     <None Include="assets\shaders\universe\skybox.frag" />
+    <None Include="assets\shaders\universe\cloud.vert" />
+    <None Include="assets\shaders\universe\cloud.frag" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\Diary.txt" />

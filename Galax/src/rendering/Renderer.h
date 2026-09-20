@@ -11,6 +11,7 @@
 #include "universe/atmosphere/Atmosphere.h"
 #include "universe/ocean/Ocean.h"
 #include "universe/stars/StarSkybox.h"
+#include "universe/clouds/Cloud.h"
 
 class Renderer {
 public:
@@ -21,6 +22,7 @@ public:
 
 	std::unique_ptr<Universe::AtmosphereRenderer> atmosphereRenderer;
 	std::unique_ptr<Universe::OceanRenderer> oceanRenderer;
+	std::unique_ptr<Universe::CloudRenderer> cloudRenderer;
 	std::unique_ptr<Universe::StarSkybox> starSkybox;
 
 	struct GPUslice {

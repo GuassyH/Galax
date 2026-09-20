@@ -124,7 +124,7 @@ namespace GUI {
 		// Atmosphere Settings
 		Spacing();
 
-		ImGui::Checkbox(("HasAtmosphere" + id + "_has_atmosphere").c_str(), & planet->hasAtmosphere);
+		ImGui::Checkbox(("Has Atmosphere" + id + "_has_atmosphere").c_str(), & planet->hasAtmosphere);
 		if (planet->hasAtmosphere) {
 			ImGui::Indent();
 			if(ImGui::DragFloat(("Atmosphere Height" + id + "_atmos_height").c_str(), &planet->atmosphere_config.atmosphereHeight))
@@ -151,10 +151,11 @@ namespace GUI {
 		Spacing();
 
 		// Ocean Settings
-		ImGui::Checkbox(("HasOcean" + id + "_has_ocean").c_str(), & planet->hasOcean);
+		ImGui::Checkbox(("Has Ocean" + id + "_has_ocean").c_str(), & planet->hasOcean);
 		if (planet->hasOcean) {
 			ImGui::Indent();
 			ImGui::DragFloat(("Ocean Radius" + id + "_ocean_radius").c_str(), &planet->ocean_config.radius);
+			ImGui::DragFloat(("Density Falloff" + id + "_ocean_density_falloff").c_str(), &planet->ocean_config.densityFalloff);
 			ImGui::ColorEdit3(("Ocean Colour" + id + "_ocean_colour").c_str(), &planet->ocean_config.oceanColor.r);
 			ImGui::ColorEdit3(("Fresnel Colour" + id + "_fresnel_colour").c_str(), &planet->ocean_config.fresnelColor.r);
 			ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
@@ -165,5 +166,18 @@ namespace GUI {
 			ImGui::Unindent();
 		}
 
+		Spacing();
+
+		ImGui::Checkbox(("Has Clouds" + id + "_has_clouds").c_str(), &planet->hasClouds);
+		if (planet->hasClouds) {
+			ImGui::Indent();
+
+			if (ImGui::DragFloat(("Cloud Min" + id + "_cloud_min").c_str(), &planet->cloud_config.minHeight))
+				planet->cloud_config.minHeight = glm::clamp(planet->cloud_config.minHeight, planet->cloud_config.minHeight, planet->cloud_config.maxHeight);
+			if (ImGui::DragFloat(("Cloud Max" + id + "_cloud_max").c_str(), &planet->cloud_config.maxHeight))
+				planet->cloud_config.minHeight = glm::clamp(planet->cloud_config.minHeight, planet->cloud_config.minHeight, planet->cloud_config.maxHeight);
+
+			ImGui::Unindent();
+		}
 	}
 };
