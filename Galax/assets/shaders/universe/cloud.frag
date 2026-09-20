@@ -74,26 +74,44 @@ float PerlinNoise(vec3 x) {
 /// MAIN
 
 float densityAtPoint(vec3 point){
-    float val = 0.01;
+    float val = (PerlinNoise(point / 200) * 0.04) + (PerlinNoise(point / 100) * 0.02);
+
 
     return val;
 }
 
 /// KEEP IN MIND, THERE CAN BE A SPACE IN THE MIDDLE OF THE RAY THAT IS EMPTY
-vec3 calculateLight(float dstThrough, float dstTo, vec3 rayOrigin, vec3 rayDir, vec3 originalCol){
-    int numSteps = 20;
+vec3 calculateLight(float dstThrough, float dstTo, int numIntersections, vec3 rayOrigin, vec3 rayDir, vec3 originalCol){
+    int numSteps = 10 * 2; // needs to be multple of two
     vec3 entryPoint = rayOrigin + (rayDir * dstTo) + 0.0002; // epsilon
     vec3 stepSize = rayDir * (dstThrough / numSteps);
 
     vec3 inScatteredLight;
 
-    for (int i = 0; i < numSteps; i++) {
-        vec3 point = entryPoint + (stepSize * i);
+    if (numIntersections == 1){
+        for (int i = 0; i < numSteps; i++) {
+            vec3 point = entryPoint + (stepSize * i);
 
-        inScatteredLight += densityAtPoint(point);
+            inScatteredLight += densityAtPoint(point);
+        }
+    }
+
+    else if (numIntersections == 2){
+        for (int i = 0; i < numSteps / 2; i++) {
+            vec3 point = entryPoint + (stepSize * i);
+
+            inScatteredLight += densityAtPoint(point);
+        }
+
+        for (int i = 0; i < numSteps / 2; i++) {
+            vec3 point = entryPoint + (dstThrough / 2) + (stepSize * i);
+
+            inScatteredLight += densityAtPoint(point);
+        }
     }
     
-    vec3 finalCol = inScatteredLight;
+
+    vec3 finalCol = mix(originalCol, vec3(0.8), inScatteredLight);
 
     return finalCol;
 }
@@ -148,31 +166,38 @@ void main(){
 	vec3 rayOrigin = vec3(0.0);
 	vec3 localOrigin = centre - camPos;
 
-    vec2 maxIntersect = raySphere(centre, cloudMax, camPos, rayDir); 
-
+    vec2 maxIntersect = raySphere(localOrigin, cloudMax, rayOrigin, rayDir); 
     
     if (maxIntersect.y <= 0)
         return;
     
+    // Get depth
     float depth = texture(depthTexture, texCoord).r;
 	vec3 scenePos = ReconstructViewPos(texCoord, depth);
 	float sceneDepthLinear = length(scenePos);
 
-    vec2 minIntersect = raySphere(centre, cloudMin, camPos, rayDir); 
+    vec2 minIntersect = raySphere(localOrigin, cloudMin, rayOrigin, rayDir); 
+
+    float dstTo_Max = maxIntersect.x;
+    float dstTo_Min = minIntersect.x;
 
     // Get distance through the cloud "shell" 
-    float dstThrough_Max = min(maxIntersect.y, sceneDepthLinear - maxIntersect.x);
-    float dstThrough_Min = min(minIntersect.y, sceneDepthLinear - minIntersect.x);
+    float dstThrough_Max = min(maxIntersect.y, sceneDepthLinear - dstTo_Max);
+    float dstThrough_Min = min(minIntersect.y, sceneDepthLinear - dstTo_Min);
 
     float dstThrough = dstThrough_Max - max(dstThrough_Min, 0); 
-    vec3 entryPoint = rayOrigin + (rayDir * maxIntersect.x);
 
     if (dstThrough <= 0)
         return;
 
-    vec3 normal = normalize(entryPoint - centre);
-    float light = dot(normal, normalize(sunPos - centre));
-    
-    fragCol.rgb = calculateLight(dstThrough, min(maxIntersect.x, minIntersect.x), rayOrigin, rayDir, originalCol.rgb);
+
+    int numIntersections = 0;
+    if (minIntersect.y > sceneDepthLinear - minIntersect.x)
+        numIntersections = 1;
+    else
+        numIntersections = 2;
+
+    float closestDstTo = min(dstTo_Max, dstTo_Min);
+    fragCol.rgb = calculateLight(dstThrough, closestDstTo, numIntersections, -localOrigin, rayDir, originalCol.rgb);
 
 }

@@ -60,6 +60,10 @@ std::shared_ptr<Universe::Planet> SystemPresets::CreateFirstSystem(Renderer& ren
 	planet_char->shader.colorMaps.push_back(NewColorMap(glm::vec4(0.3f, 0.5f, 0.2f, 1.0), glm::vec4(0.25f, 0.25f, 0.25f, 1.0), 50.0f, 6.0f, 1.0f, 0.09f, 0.0f, 0.180f));
 	planet_char->shader.colorMaps.push_back(NewColorMap(glm::vec4(0.8f, 0.8f, 0.8f, 1.0), glm::vec4(0.25f, 0.25f, 0.25f, 1.0), 170.0f, 50.0f, 1.0f, 0.95f, 0.0f, 1.0f));
 
+	planet_char->hasClouds = true;
+	planet_char->cloud_config.minHeight = 370.0f;
+	planet_char->cloud_config.maxHeight = 385.0f;
+
 	// Moon
 	std::shared_ptr<Universe::Planet> moon = std::make_shared<Universe::Planet>();
 	moon->name = "Luna";
